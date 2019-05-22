@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+
+  db: # https://hub.docker.com/_/postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ad
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: pmt
+      # PGDATA: # define location of datafiles, default: /var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8080:8080

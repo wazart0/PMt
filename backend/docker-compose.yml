@@ -1,15 +1,11 @@
 version: "3"
 
-# services:
 
-#   db:
-#     image: postgres
-#     restart: always
-#     environment:
-#       POSTGRES_PASSWORD: pass
-
-  # adminer:
-  #   image: adminer
-  #   restart: always
-  #   ports:
-  #     - 8080:8080
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./dockerContainer/Dockerfile
+    # command: ["bash", "-c", "ls"]
+    ports:
+      - 8000:8000

@@ -3,9 +3,13 @@ version: "3"
 
 services:
   web:
+    image: 'pmt'
     build:
       context: .
       dockerfile: ./dockerContainer/Dockerfile
-    # command: ["bash", "-c", "ls"]
+    # command: [ "python", "./manage.py", "runserver" ]
+    restart: always
     ports:
       - 8000:8000
+    stdin_open: true
+    tty: true

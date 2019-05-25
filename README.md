@@ -10,15 +10,23 @@
 - Docker network, where host computer has IP address: 10.0.75.1
 
 - PowerShell with privileges to run scripts:
-  * eg. `Set-ExecutionPolicy -Scope CurrentUser Unrestricted`
-        
+    * eg. `Set-ExecutionPolicy -Scope CurrentUser Unrestricted`
+
+   
 ## Run
 
 - Windows:
-  * Database: `./runDB.ps1`
-  * Backend: `./runBackend.ps1`
-  
+    1. Database: `./runDB.ps1`
+    2. Backend: `./runBackend.ps1`
+    3. Frontend: `todo`
+
 - Linux (not tested yet):
-  * Database: `bash ./runDB.ps1`
-  * Backend: `bash ./runBackend.ps1`
-  
+    1. Database: `bash ./runDB.ps1`
+    2. Backend: `bash ./runBackend.ps1`
+    3. Frontend: `todo`
+
+
+## Server accesss
+- DB: http://localhost:54321/
+- Backend: http://localhost:8000/
+- Frontend: `todo`

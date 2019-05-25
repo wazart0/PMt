@@ -1,19 +1,13 @@
 FROM python:3
 WORKDIR /usr/src/app
 
-# FROM ubuntu
-# WORKDIR /root
-
-# RUN apt-get --assume-yes update
-# RUN apt-get --assume-yes install python3
-# RUN apt-get --assume-yes install python3-pip
 
 COPY ./dockerContainer/requirements.txt ./
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-COPY ./djangoRESTframework/ ./
-RUN ls -la
+COPY ./djangoREST_tutorial/ ./
 RUN python3 manage.py migrate
+RUN python3 ./manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('user1', 'user1@example.com', 'user1')"
 
 EXPOSE 8000
 CMD [ "python3", "./manage.py", "runserver", "0.0.0.0:8000" ]

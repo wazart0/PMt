@@ -10,5 +10,5 @@ services:
     restart: always
     ports:
       - 8000:8000
-    # stdin_open: true
-    # tty: true
+    stdin_open: true
+    tty: true

@@ -11,6 +11,6 @@ services:
       - '/app/node_modules'
     restart: always
     ports:
-      - '4201:4200'
+      - '4200:4200'
     stdin_open: true
     tty: true

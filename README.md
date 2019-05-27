@@ -27,6 +27,6 @@
 
 
 ## Server accesss
-- DB: http://localhost:54321/
+- DB: http://localhost:5432/
 - Backend: http://localhost:8000/
 - Frontend: `todo`

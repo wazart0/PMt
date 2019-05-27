@@ -32,6 +32,7 @@ from rest_framework_swagger.views import get_swagger_view
 from djangoREST_tutorial.quickstart import views
 from django.urls import include, path
 from rest_framework import routers
+from rest_framework.authtoken.views import obtain_auth_token
 
 schema_view = get_swagger_view(title='PMt API')
 
@@ -42,6 +43,7 @@ router.register(r'groups', views.GroupViewSet)
 
 urlpatterns = [
     url(r'^$', schema_view),
-    # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('', include(router.urls)),
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'), 
 ]

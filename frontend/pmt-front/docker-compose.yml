@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  web:
+    image: 'pmt-front'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/app'
+      - '/app/node_modules'
+    restart: always
+    ports:
+      - '4200:4200'
+    stdin_open: true
+    tty: true

@@ -17,8 +17,8 @@ class JobStatusGroupList(models.Model):
     jobStatus = models.ForeignKey(to = JobStatus, on_delete = models.CASCADE)
 
 
-class JobPrivileges(models.Model): # three user types per job (manager, normal, viewer) defined individually 
-    None
+# class JobPrivileges(models.Model): # three user types per job (manager, normal, viewer) defined individually 
+#     None
 
 class Job(models.Model):
     parent = models.ForeignKey(to = 'self', null = True, on_delete = models.CASCADE)

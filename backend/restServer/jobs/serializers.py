@@ -22,4 +22,5 @@ class JobStatusGroupSerializer(serializers.ModelSerializer):
 class JobStatusGroupListSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobStatusGroupList
-        fields = ('url', 'jobStatusGroup', 'jobStatus')
+        fields = ('url', 'id', 'jobStatusGroup', 'jobStatus')
+        

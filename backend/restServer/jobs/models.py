@@ -5,12 +5,12 @@ from ums.models import User
 
 class JobStatus(models.Model):
     name = models.CharField(max_length = 30)
-    description = models.TextField()
+    description = models.TextField(null = True)
     # some icons, etc
 
 class JobStatusGroup(models.Model):
     name = models.CharField(max_length = 30)
-    description = models.TextField()
+    description = models.TextField(null = True)
 
 class JobStatusGroupList(models.Model):
     jobStatusGroup = models.ForeignKey(to = JobStatusGroup, on_delete = models.CASCADE)

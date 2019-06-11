@@ -8,8 +8,8 @@ from rest_framework import routers
 from ums.views import UserViewSet
 from jobs.views import *
 
-schema_view = get_swagger_view(title='PMt API')
 
+schema_view = get_swagger_view(title='PMt API')
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)

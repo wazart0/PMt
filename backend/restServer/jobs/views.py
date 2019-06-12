@@ -23,8 +23,9 @@ class JobStatusGroupListViewSet(viewsets.ModelViewSet):
     queryset = JobStatusGroupList.objects.all()
     serializer_class = JobStatusGroupListSerializer
 
-jobRouter = routers.DefaultRouter()
-jobRouter.register(r'', JobViewSet)
-jobRouter.register(r'status', JobStatusViewSet)
-jobRouter.register(r'statusGroup', JobStatusGroupViewSet)
-jobRouter.register(r'statusGroupList', JobStatusGroupListViewSet)
+
+router = routers.DefaultRouter()
+router.register(r'', JobViewSet)
+router.register(r'status', JobStatusViewSet)
+router.register(r'statusGroup', JobStatusGroupViewSet)
+router.register(r'statusGroupList', JobStatusGroupListViewSet)

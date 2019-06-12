@@ -6,7 +6,8 @@ from jobs.models import *
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
-        fields = '__all__'
+        fields = ('url', 'creator', 'created', 'updated', 'closed', 'parent', 'status', 'childStatusGroup')
+        read_only_fields = ('url', 'creator', 'created', 'updated')
         depth = 1
 
 

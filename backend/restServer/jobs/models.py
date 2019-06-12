@@ -21,11 +21,12 @@ class JobStatusGroupList(models.Model):
 #     None
 
 class Job(models.Model):
-    parent = models.ForeignKey(to = 'self', null = True, on_delete = models.CASCADE)
     creator = models.ForeignKey(to = User, on_delete = models.CASCADE)
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)
+
     closed = models.DateTimeField(null = True)
+    parent = models.ForeignKey(to = 'self', null = True, on_delete = models.CASCADE)
     childStatusGroup = models.ForeignKey(to = JobStatusGroup, on_delete = models.PROTECT)
     status = models.ForeignKey(to = JobStatus, on_delete = models.PROTECT)
     # plannedStart = models.DateTimeField() # has to be extracted to baselines

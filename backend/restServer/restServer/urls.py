@@ -6,7 +6,7 @@ from django.urls import include, path
 from rest_framework import routers
 
 from ums.views import UserViewSet
-from jobs.views import jobRouter
+from jobs.views import router as jobRouter
 
 
 schema_view = get_swagger_view(title='PMt API')

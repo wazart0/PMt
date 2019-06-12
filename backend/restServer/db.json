@@ -52,7 +52,7 @@
         "pk": 1,
         "fields": {
             "name": "Issue",
-            "description": "Null"
+            "description": null
         }
     },
     {
@@ -60,7 +60,7 @@
         "pk": 2,
         "fields": {
             "name": "Project",
-            "description": "Null"
+            "description": null
         }
     },
     {

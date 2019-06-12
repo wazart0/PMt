@@ -1,2 +1,3 @@
-./restServer/__pycache__/
-./restServer/app/__pycache__/
+.vscode/
+__pycache__/
+*.py[cod]

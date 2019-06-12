@@ -4,12 +4,12 @@ from ums.models import User
 # Create your models here.
 
 class JobStatus(models.Model):
-    name = models.CharField(max_length = 30)
+    name = models.CharField(max_length = 50)
     description = models.TextField(null = True)
     # some icons, etc
 
 class JobStatusGroup(models.Model):
-    name = models.CharField(max_length = 30)
+    name = models.CharField(max_length = 50)
     description = models.TextField(null = True)
 
 class JobStatusGroupList(models.Model):
@@ -30,3 +30,4 @@ class Job(models.Model):
     status = models.ForeignKey(to = JobStatus, on_delete = models.PROTECT)
     # plannedStart = models.DateTimeField() # has to be extracted to baselines
     # plannedFinish = models.DateTimeField()
+

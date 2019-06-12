@@ -6,21 +6,21 @@ from jobs.models import *
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
-        fields = ('url', 'id', 'parent', 'creator', 'created', 'updated', 'closed', 'childStatusGroup', 'status')
+        fields = '__all__'
+        depth = 1
 
 
 class JobStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobStatus
-        fields = ('url', 'id', 'name', 'description')
+        fields = '__all__'
 
 class JobStatusGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobStatusGroup
-        fields = ('url', 'id', 'name', 'description')
+        fields = '__all__'
 
 class JobStatusGroupListSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobStatusGroupList
-        fields = ('url', 'id', 'jobStatusGroup', 'jobStatus')
-        
+        fields = '__all__'

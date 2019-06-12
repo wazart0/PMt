@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework import routers
 
 from jobs.serializers import *
 from jobs.models import *
@@ -21,3 +22,9 @@ class JobStatusGroupViewSet(viewsets.ModelViewSet):
 class JobStatusGroupListViewSet(viewsets.ModelViewSet):
     queryset = JobStatusGroupList.objects.all()
     serializer_class = JobStatusGroupListSerializer
+
+jobRouter = routers.DefaultRouter()
+jobRouter.register(r'', JobViewSet)
+jobRouter.register(r'status', JobStatusViewSet)
+jobRouter.register(r'statusGroup', JobStatusGroupViewSet)
+jobRouter.register(r'statusGroupList', JobStatusGroupListViewSet)

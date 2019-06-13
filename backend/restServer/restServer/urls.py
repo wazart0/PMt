@@ -13,10 +13,10 @@ schema_view = get_swagger_view(title='PMt API')
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
+router.registry.extend(jobRouter.registry)
 
 urlpatterns = [
     url(r'^$', schema_view),
     # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-    path('', include(router.urls)),
-    path('jobs/', include(jobRouter.urls)),
+    path('api/', include(router.urls)),
 ]

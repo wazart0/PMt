@@ -3,7 +3,6 @@ from rest_framework import viewsets
 from rest_framework import routers
 
 from jobs.serializers import *
-from jobs.models import *
 
 # Create your views here.
 
@@ -24,8 +23,8 @@ class JobStatusGroupListViewSet(viewsets.ModelViewSet):
     serializer_class = JobStatusGroupListSerializer
 
 
-router = routers.DefaultRouter()
-router.register(r'', JobViewSet)
-router.register(r'status', JobStatusViewSet)
-router.register(r'statusGroup', JobStatusGroupViewSet)
-router.register(r'statusGroupList', JobStatusGroupListViewSet)
+router = routers.SimpleRouter()
+router.register(r'jobs', JobViewSet)
+router.register(r'jobsStatus', JobStatusViewSet)
+router.register(r'jobsStatusGroup', JobStatusGroupViewSet)
+router.register(r'jobsStatusGroupList', JobStatusGroupListViewSet)

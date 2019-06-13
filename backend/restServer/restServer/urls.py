@@ -5,18 +5,18 @@ from rest_framework_swagger.views import get_swagger_view
 from django.urls import include, path
 from rest_framework import routers
 
-from ums.views import UserViewSet
+from ums.views import router as userRouter
 from jobs.views import router as jobRouter
 
 
 schema_view = get_swagger_view(title='PMt API')
 
 router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
+router.registry.extend(userRouter.registry)
 router.registry.extend(jobRouter.registry)
 
 urlpatterns = [
     url(r'^$', schema_view),
     # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-    path('api/', include(router.urls)),
+    path('raw/', include(router.urls)),
 ]

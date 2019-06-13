@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from ums.serializers import UserSerializer
-from ums.models import User
+from rest_framework import routers
+
+from ums.serializers import *
 
 # Create your views here.
 
@@ -10,3 +11,16 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
  
+class UserGroupViewSet(viewsets.ModelViewSet):
+    queryset = UserGroup.objects.all()
+    serializer_class = UserGroupSerializer
+
+ 
+class GroupMembersViewSet(viewsets.ModelViewSet):
+    queryset = GroupMembers.objects.all()
+    serializer_class = GroupMembersSerializer
+
+router = routers.SimpleRouter()
+router.register(r'users', UserViewSet)
+router.register(r'usersGroup', UserGroupViewSet)
+router.register(r'usersGroupMembers', GroupMembersViewSet)

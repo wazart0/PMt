@@ -4,22 +4,24 @@ from ums.models import User
 # Create your models here.
 
 class JobStatus(models.Model):
-    name = models.CharField(max_length = 50)
+    name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True)
     # some icons, etc
 
     objects = models.Manager()
 
-class JobStatusGroup(models.Model):
-    name = models.CharField(max_length = 50)
+class JobType(models.Model):
+    name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True)
 
     objects = models.Manager()
 
-class JobStatusGroupList(models.Model):
-    jobStatusGroup = models.ForeignKey(to = JobStatusGroup, on_delete = models.CASCADE)
-    jobStatus = models.ForeignKey(to = JobStatus, on_delete = models.CASCADE)
-
+class JobStatusType(models.Model):
+    jobType = models.ForeignKey(null = False, to = JobType, on_delete = models.CASCADE)
+    jobStatus = models.ForeignKey(null = False, to = JobStatus, on_delete = models.CASCADE)
+    class Meta:
+        unique_together = ('jobType', 'jobStatus')
+        
     objects = models.Manager()
 
 
@@ -27,14 +29,16 @@ class JobStatusGroupList(models.Model):
 #     None
 
 class Job(models.Model):
-    creator = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE)
+    creator = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT)
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)
 
+    name = models.CharField(null = False, max_length = 50)
+    description = models.TextField(null = True)
     closed = models.DateTimeField(null = True)
     parent = models.ForeignKey(to = 'self', null = True, on_delete = models.CASCADE)
-    childStatusGroup = models.ForeignKey(to = JobStatusGroup, on_delete = models.PROTECT)
-    status = models.ForeignKey(to = JobStatus, on_delete = models.PROTECT)
+    status = models.ForeignKey(null = True, to = JobStatus, on_delete = models.PROTECT)
+    childType = models.ForeignKey(to = JobType, on_delete = models.PROTECT)
     # plannedStart = models.DateTimeField() # has to be extracted to baselines
     # plannedFinish = models.DateTimeField()
 

@@ -4,11 +4,14 @@
         "pk": 1,
         "fields": {
             "last_login": null,
+            "created": "2019-06-10T19:42:41.616Z",
+            "updated": "2019-06-10T19:42:41.616Z",
+            "lastLogin": null,
             "email": "admin@ad.com",
             "password": "test1",
-            "createdDateTime": "2019-06-10T19:42:41.616Z",
-            "updateDateTime": "2019-06-10T19:42:41.616Z",
-            "isActive": true
+            "isActive": true,
+            "firstName": null,
+            "lastName": null
         }
     },
     {
@@ -16,11 +19,14 @@
         "pk": 2,
         "fields": {
             "last_login": null,
+            "created": "2019-06-10T19:42:42.652Z",
+            "updated": "2019-06-10T19:42:42.652Z",
+            "lastLogin": null,
             "email": "user@us.com",
             "password": "test1",
-            "createdDateTime": "2019-06-10T19:42:42.652Z",
-            "updateDateTime": "2019-06-10T19:42:42.652Z",
-            "isActive": true
+            "isActive": true,
+            "firstName": null,
+            "lastName": null
         }
     },
     {
@@ -48,7 +54,23 @@
         }
     },
     {
-        "model": "jobs.jobstatusgroup",
+        "model": "jobs.jobstatus",
+        "pk": 4,
+        "fields": {
+            "name": "Active",
+            "description": null
+        }
+    },
+    {
+        "model": "jobs.jobstatus",
+        "pk": 5,
+        "fields": {
+            "name": "Closed",
+            "description": null
+        }
+    },
+    {
+        "model": "jobs.jobtype",
         "pk": 1,
         "fields": {
             "name": "Issue",
@@ -56,7 +78,7 @@
         }
     },
     {
-        "model": "jobs.jobstatusgroup",
+        "model": "jobs.jobtype",
         "pk": 2,
         "fields": {
             "name": "Project",
@@ -64,50 +86,58 @@
         }
     },
     {
-        "model": "jobs.jobstatusgrouplist",
+        "model": "jobs.jobtype",
+        "pk": 3,
+        "fields": {
+            "name": "Organization",
+            "description": null
+        }
+    },
+    {
+        "model": "jobs.jobstatustype",
         "pk": 1,
         "fields": {
-            "jobStatusGroup": 1,
+            "jobType": 1,
             "jobStatus": 1
         }
     },
     {
-        "model": "jobs.jobstatusgrouplist",
+        "model": "jobs.jobstatustype",
         "pk": 2,
         "fields": {
-            "jobStatusGroup": 1,
+            "jobType": 1,
             "jobStatus": 2
         }
     },
     {
-        "model": "jobs.jobstatusgrouplist",
+        "model": "jobs.jobstatustype",
         "pk": 3,
         "fields": {
-            "jobStatusGroup": 1,
+            "jobType": 1,
             "jobStatus": 3
         }
     },
     {
-        "model": "jobs.jobstatusgrouplist",
+        "model": "jobs.jobstatustype",
         "pk": 4,
         "fields": {
-            "jobStatusGroup": 2,
+            "jobType": 2,
             "jobStatus": 1
         }
     },
     {
-        "model": "jobs.jobstatusgrouplist",
+        "model": "jobs.jobstatustype",
         "pk": 5,
         "fields": {
-            "jobStatusGroup": 2,
+            "jobType": 2,
             "jobStatus": 2
         }
     },
     {
-        "model": "jobs.jobstatusgrouplist",
+        "model": "jobs.jobstatustype",
         "pk": 6,
         "fields": {
-            "jobStatusGroup": 2,
+            "jobType": 2,
             "jobStatus": 3
         }
     },
@@ -115,52 +145,60 @@
         "model": "jobs.job",
         "pk": 1,
         "fields": {
-            "parent": null,
             "creator": 2,
             "created": "2019-06-10T20:29:52.901Z",
             "updated": "2019-06-10T20:29:52.901Z",
+            "name": "Test name",
+            "description": null,
             "closed": null,
-            "childStatusGroup": 1,
-            "status": 2
+            "parent": null,
+            "status": 2,
+            "childType": 1
         }
     },
     {
         "model": "jobs.job",
         "pk": 2,
         "fields": {
-            "parent": 1,
             "creator": 2,
             "created": "2019-06-10T20:29:52.901Z",
             "updated": "2019-06-10T20:29:52.901Z",
+            "name": "Test name",
+            "description": null,
             "closed": null,
-            "childStatusGroup": 1,
-            "status": 1
+            "parent": 1,
+            "status": 1,
+            "childType": 1
         }
     },
     {
         "model": "jobs.job",
         "pk": 3,
         "fields": {
-            "parent": 1,
             "creator": 2,
             "created": "2019-06-10T20:29:52.901Z",
             "updated": "2019-06-10T20:29:52.901Z",
+            "name": "Test name",
+            "description": null,
             "closed": null,
-            "childStatusGroup": 1,
-            "status": 1
+            "parent": 1,
+            "status": 1,
+            "childType": 1
         }
     },
     {
         "model": "jobs.job",
         "pk": 4,
         "fields": {
-            "parent": 1,
             "creator": 2,
             "created": "2019-06-10T20:29:52.901Z",
             "updated": "2019-06-10T20:29:52.901Z",
+            "name": "Test name",
+            "description": null,
             "closed": null,
-            "childStatusGroup": 1,
-            "status": 1
+            "parent": 1,
+            "status": 1,
+            "childType": 1
         }
     }
 ]

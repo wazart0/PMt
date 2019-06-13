@@ -7,24 +7,24 @@ from jobs.serializers import *
 # Create your views here.
 
 class JobViewSet(viewsets.ModelViewSet):
-    queryset = Job.objects.all()
+    queryset = Job.objects.all().order_by('id')
     serializer_class = JobSerializer
 
 class JobStatusViewSet(viewsets.ModelViewSet):
     queryset = JobStatus.objects.all()
     serializer_class = JobStatusSerializer
 
-class JobStatusGroupViewSet(viewsets.ModelViewSet):
-    queryset = JobStatusGroup.objects.all()
-    serializer_class = JobStatusGroupSerializer
+class JobTypeViewSet(viewsets.ModelViewSet):
+    queryset = JobType.objects.all()
+    serializer_class = JobTypeSerializer
 
-class JobStatusGroupListViewSet(viewsets.ModelViewSet):
-    queryset = JobStatusGroupList.objects.all()
-    serializer_class = JobStatusGroupListSerializer
+class JobStatusTypeViewSet(viewsets.ModelViewSet):
+    queryset = JobStatusType.objects.all()
+    serializer_class = JobStatusTypeSerializer
 
 
 router = routers.SimpleRouter()
 router.register(r'jobs', JobViewSet)
 router.register(r'jobsStatus', JobStatusViewSet)
-router.register(r'jobsStatusGroup', JobStatusGroupViewSet)
-router.register(r'jobsStatusGroupList', JobStatusGroupListViewSet)
+router.register(r'jobsType', JobTypeViewSet)
+router.register(r'jobsStatusType', JobStatusTypeViewSet)

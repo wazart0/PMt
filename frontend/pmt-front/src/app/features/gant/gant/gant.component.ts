@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-gant',
@@ -6,10 +8,12 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./gant.component.scss']
 })
 export class GantComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
+  constructor(private httpClient: HttpClient) {}
+  jobs$;
+  getJobs() {
+    return this.httpClient.get(`${environment.api}/jobs`);
   }
-
+  ngOnInit() {
+    this.jobs$ = this.getJobs();
+  }
 }

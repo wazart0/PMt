@@ -5,7 +5,7 @@ import { CoreRoutingModule } from './core-routing.module';
 
 @NgModule({
   declarations: [],
-  imports: [CommonModule, FormsModule],
-  exports: [FormsModule, CoreRoutingModule]
+  imports: [CommonModule],
+  exports: [CoreRoutingModule]
 })
 export class CoreModule {}

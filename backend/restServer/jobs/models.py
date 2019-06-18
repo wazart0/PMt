@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 from ums.models import User
 
 # Create your models here.
@@ -61,8 +60,8 @@ class Baseline(models.Model):
     number = models.SmallIntegerField(null = False, editable = False)
     job = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False)
 
-    begin = models.DateTimeField(null = False, default = timezone.now())
-    interval = models.DurationField(null = False, default = '8H')
+    begin = models.DateTimeField(null = False)
+    interval = models.DurationField(null = False)
     class Meta:
         unique_together = ('number', 'job')
         

@@ -28,4 +28,4 @@
 
 - DB: http://localhost:5432/
 - Backend: http://localhost:8000/
-- Frontend: http://localhost:8000/
+- Frontend: http://localhost:4200/

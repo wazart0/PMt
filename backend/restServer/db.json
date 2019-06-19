@@ -34,7 +34,8 @@
         "pk": 1,
         "fields": {
             "name": "To Do",
-            "description": null
+            "description": null,
+            "isClosing": false
         }
     },
     {
@@ -42,7 +43,8 @@
         "pk": 2,
         "fields": {
             "name": "In Progress",
-            "description": null
+            "description": null,
+            "isClosing": false
         }
     },
     {
@@ -50,7 +52,8 @@
         "pk": 3,
         "fields": {
             "name": "Done",
-            "description": null
+            "description": null,
+            "isClosing": false
         }
     },
     {
@@ -58,7 +61,8 @@
         "pk": 4,
         "fields": {
             "name": "Active",
-            "description": null
+            "description": null,
+            "isClosing": false
         }
     },
     {
@@ -66,7 +70,8 @@
         "pk": 5,
         "fields": {
             "name": "Closed",
-            "description": null
+            "description": null,
+            "isClosing": false
         }
     },
     {
@@ -74,7 +79,8 @@
         "pk": 1,
         "fields": {
             "name": "Issue",
-            "description": null
+            "description": null,
+            "color": ""
         }
     },
     {
@@ -82,7 +88,8 @@
         "pk": 2,
         "fields": {
             "name": "Project",
-            "description": null
+            "description": null,
+            "color": ""
         }
     },
     {
@@ -90,7 +97,8 @@
         "pk": 3,
         "fields": {
             "name": "Organization",
-            "description": null
+            "description": null,
+            "color": ""
         }
     },
     {
@@ -153,7 +161,9 @@
             "closed": null,
             "parent": null,
             "status": 2,
-            "childType": 1
+            "childType": 1,
+            "assignee": null,
+            "defaultBaseline": null
         }
     },
     {
@@ -162,13 +172,15 @@
         "fields": {
             "creator": 2,
             "created": "2019-06-10T20:29:52.901Z",
-            "updated": "2019-06-10T20:29:52.901Z",
+            "updated": "2019-06-19T06:29:23.447Z",
             "name": "Test name",
             "description": null,
             "closed": null,
             "parent": 1,
             "status": 1,
-            "childType": 1
+            "childType": 1,
+            "assignee": null,
+            "defaultBaseline": 1
         }
     },
     {
@@ -183,7 +195,9 @@
             "closed": null,
             "parent": 1,
             "status": 1,
-            "childType": 1
+            "childType": 1,
+            "assignee": null,
+            "defaultBaseline": null
         }
     },
     {
@@ -192,13 +206,35 @@
         "fields": {
             "creator": 2,
             "created": "2019-06-10T20:29:52.901Z",
-            "updated": "2019-06-10T20:29:52.901Z",
+            "updated": "2019-06-19T06:29:40.410Z",
             "name": "Test name",
             "description": null,
             "closed": null,
             "parent": 1,
             "status": 1,
-            "childType": 1
+            "childType": 1,
+            "assignee": null,
+            "defaultBaseline": 2
+        }
+    },
+    {
+        "model": "jobs.baseline",
+        "pk": 1,
+        "fields": {
+            "job": 2,
+            "number": 1,
+            "begin": "2019-06-19T19:42:41.616Z",
+            "interval": "20:00:00"
+        }
+    },
+    {
+        "model": "jobs.baseline",
+        "pk": 2,
+        "fields": {
+            "job": 4,
+            "number": 1,
+            "begin": "2019-06-22T10:27:00Z",
+            "interval": "7 00:00:00"
         }
     }
 ]

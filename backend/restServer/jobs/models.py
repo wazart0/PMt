@@ -39,6 +39,7 @@ class Job(models.Model):
     status = models.ForeignKey(null = True, to = JobStatus, on_delete = models.PROTECT)
     childType = models.ForeignKey(to = JobType, on_delete = models.PROTECT)
     assignee = models.ForeignKey(null = True, to = User, on_delete = models.SET_NULL, related_name = 'assignee')
+    defaultBaseline = models.ForeignKey(null = True, to = 'Baseline', on_delete = models.SET_NULL, related_name = 'defaultBaseline')
 
     objects = models.Manager()
 
@@ -57,8 +58,8 @@ class Milestone(models.Model):
 
 
 class Baseline(models.Model):
-    number = models.SmallIntegerField(null = False, editable = False)
     job = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False)
+    number = models.SmallIntegerField(null = False, editable = False)
 
     begin = models.DateTimeField(null = False)
     interval = models.DurationField(null = False)

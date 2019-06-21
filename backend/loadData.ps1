@@ -1,0 +1,1 @@
+py.exe .\manage.py loaddata "db.json"

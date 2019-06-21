@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework import routers
 
-from jobs.serializers import *
+from jobs.rawAPI.serializers import *
 
 # Create your views here.
 

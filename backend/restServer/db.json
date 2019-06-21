@@ -1,1 +1,240 @@
-[{"model": "ums.user", "pk": 1, "fields": {"last_login": null, "created": "2019-06-10T19:42:41.616Z", "updated": "2019-06-10T19:42:41.616Z", "lastLogin": null, "email": "admin@ad.com", "password": "test1", "isActive": true, "firstName": null, "lastName": null}}, {"model": "ums.user", "pk": 2, "fields": {"last_login": null, "created": "2019-06-10T19:42:42.652Z", "updated": "2019-06-10T19:42:42.652Z", "lastLogin": null, "email": "user@us.com", "password": "test1", "isActive": true, "firstName": null, "lastName": null}}, {"model": "jobs.jobstatus", "pk": 1, "fields": {"name": "To Do", "description": null, "isClosing": false}}, {"model": "jobs.jobstatus", "pk": 2, "fields": {"name": "In Progress", "description": null, "isClosing": false}}, {"model": "jobs.jobstatus", "pk": 3, "fields": {"name": "Done", "description": null, "isClosing": false}}, {"model": "jobs.jobstatus", "pk": 4, "fields": {"name": "Active", "description": null, "isClosing": false}}, {"model": "jobs.jobstatus", "pk": 5, "fields": {"name": "Closed", "description": null, "isClosing": false}}, {"model": "jobs.jobtype", "pk": 1, "fields": {"name": "Issue", "description": null, "color": ""}}, {"model": "jobs.jobtype", "pk": 2, "fields": {"name": "Project", "description": null, "color": ""}}, {"model": "jobs.jobtype", "pk": 3, "fields": {"name": "Organization", "description": null, "color": ""}}, {"model": "jobs.jobstatustype", "pk": 1, "fields": {"jobType": 1, "jobStatus": 1}}, {"model": "jobs.jobstatustype", "pk": 2, "fields": {"jobType": 1, "jobStatus": 2}}, {"model": "jobs.jobstatustype", "pk": 3, "fields": {"jobType": 1, "jobStatus": 3}}, {"model": "jobs.jobstatustype", "pk": 4, "fields": {"jobType": 2, "jobStatus": 1}}, {"model": "jobs.jobstatustype", "pk": 5, "fields": {"jobType": 2, "jobStatus": 2}}, {"model": "jobs.jobstatustype", "pk": 6, "fields": {"jobType": 2, "jobStatus": 3}}, {"model": "jobs.job", "pk": 1, "fields": {"creator": 2, "created": "2019-06-10T20:29:52.901Z", "updated": "2019-06-10T20:29:52.901Z", "name": "Test name", "description": null, "closed": null, "parent": null, "status": 2, "childType": 1, "assignee": null, "defaultBaseline": null}}, {"model": "jobs.job", "pk": 2, "fields": {"creator": 2, "created": "2019-06-10T20:29:52.901Z", "updated": "2019-06-19T06:29:23.447Z", "name": "Test name", "description": null, "closed": null, "parent": 1, "status": 1, "childType": 1, "assignee": null, "defaultBaseline": 1}}, {"model": "jobs.job", "pk": 3, "fields": {"creator": 2, "created": "2019-06-10T20:29:52.901Z", "updated": "2019-06-10T20:29:52.901Z", "name": "Test name", "description": null, "closed": null, "parent": 1, "status": 1, "childType": 1, "assignee": null, "defaultBaseline": null}}, {"model": "jobs.job", "pk": 4, "fields": {"creator": 2, "created": "2019-06-10T20:29:52.901Z", "updated": "2019-06-19T06:29:40.410Z", "name": "Test name", "description": null, "closed": null, "parent": 1, "status": 1, "childType": 1, "assignee": null, "defaultBaseline": 2}}, {"model": "jobs.baseline", "pk": 1, "fields": {"job": 2, "number": 1, "begin": "2019-06-19T19:42:41.616Z", "interval": "20:00:00"}}, {"model": "jobs.baseline", "pk": 2, "fields": {"job": 4, "number": 1, "begin": "2019-06-22T10:27:00Z", "interval": "7 00:00:00"}}]
+[
+    {
+        "model": "ums.user",
+        "pk": 1,
+        "fields": {
+            "last_login": null,
+            "created": "2019-06-10T19:42:41.616Z",
+            "updated": "2019-06-10T19:42:41.616Z",
+            "lastlogin": null,
+            "email": "admin@ad.com",
+            "password": "test1",
+            "isactive": true,
+            "firstname": null,
+            "lastname": null
+        }
+    },
+    {
+        "model": "ums.user",
+        "pk": 2,
+        "fields": {
+            "last_login": null,
+            "created": "2019-06-10T19:42:42.652Z",
+            "updated": "2019-06-10T19:42:42.652Z",
+            "lastlogin": null,
+            "email": "user@us.com",
+            "password": "test1",
+            "isactive": true,
+            "firstname": null,
+            "lastname": null
+        }
+    },
+    {
+        "model": "jobs.jobstatus",
+        "pk": 1,
+        "fields": {
+            "name": "To Do",
+            "description": null,
+            "isclosing": false
+        }
+    },
+    {
+        "model": "jobs.jobstatus",
+        "pk": 2,
+        "fields": {
+            "name": "In Progress",
+            "description": null,
+            "isclosing": false
+        }
+    },
+    {
+        "model": "jobs.jobstatus",
+        "pk": 3,
+        "fields": {
+            "name": "Done",
+            "description": null,
+            "isclosing": false
+        }
+    },
+    {
+        "model": "jobs.jobstatus",
+        "pk": 4,
+        "fields": {
+            "name": "Active",
+            "description": null,
+            "isclosing": false
+        }
+    },
+    {
+        "model": "jobs.jobstatus",
+        "pk": 5,
+        "fields": {
+            "name": "Closed",
+            "description": null,
+            "isclosing": false
+        }
+    },
+    {
+        "model": "jobs.jobtype",
+        "pk": 1,
+        "fields": {
+            "name": "Issue",
+            "description": null,
+            "color": ""
+        }
+    },
+    {
+        "model": "jobs.jobtype",
+        "pk": 2,
+        "fields": {
+            "name": "Project",
+            "description": null,
+            "color": ""
+        }
+    },
+    {
+        "model": "jobs.jobtype",
+        "pk": 3,
+        "fields": {
+            "name": "Organization",
+            "description": null,
+            "color": ""
+        }
+    },
+    {
+        "model": "jobs.jobstatustype",
+        "pk": 1,
+        "fields": {
+            "jobtype": 1,
+            "jobstatus": 1
+        }
+    },
+    {
+        "model": "jobs.jobstatustype",
+        "pk": 2,
+        "fields": {
+            "jobtype": 1,
+            "jobstatus": 2
+        }
+    },
+    {
+        "model": "jobs.jobstatustype",
+        "pk": 3,
+        "fields": {
+            "jobtype": 1,
+            "jobstatus": 3
+        }
+    },
+    {
+        "model": "jobs.jobstatustype",
+        "pk": 4,
+        "fields": {
+            "jobtype": 2,
+            "jobstatus": 1
+        }
+    },
+    {
+        "model": "jobs.jobstatustype",
+        "pk": 5,
+        "fields": {
+            "jobtype": 2,
+            "jobstatus": 2
+        }
+    },
+    {
+        "model": "jobs.jobstatustype",
+        "pk": 6,
+        "fields": {
+            "jobtype": 2,
+            "jobstatus": 3
+        }
+    },
+    {
+        "model": "jobs.job",
+        "pk": 1,
+        "fields": {
+            "creator": 2,
+            "created": "2019-06-10T20:29:52.901Z",
+            "updated": "2019-06-10T20:29:52.901Z",
+            "name": "Test name",
+            "description": null,
+            "closed": null,
+            "parent": null,
+            "status": 2,
+            "childtype": 1,
+            "assignee": null,
+            "defaultbaseline": null
+        }
+    },
+    {
+        "model": "jobs.job",
+        "pk": 2,
+        "fields": {
+            "creator": 2,
+            "created": "2019-06-10T20:29:52.901Z",
+            "updated": "2019-06-19T06:29:23.447Z",
+            "name": "Test name",
+            "description": null,
+            "closed": null,
+            "parent": 1,
+            "status": 1,
+            "childtype": 1,
+            "assignee": null,
+            "defaultbaseline": 1
+        }
+    },
+    {
+        "model": "jobs.job",
+        "pk": 3,
+        "fields": {
+            "creator": 2,
+            "created": "2019-06-10T20:29:52.901Z",
+            "updated": "2019-06-10T20:29:52.901Z",
+            "name": "Test name",
+            "description": null,
+            "closed": null,
+            "parent": 1,
+            "status": 1,
+            "childtype": 1,
+            "assignee": null,
+            "defaultbaseline": null
+        }
+    },
+    {
+        "model": "jobs.job",
+        "pk": 4,
+        "fields": {
+            "creator": 2,
+            "created": "2019-06-10T20:29:52.901Z",
+            "updated": "2019-06-19T06:29:40.410Z",
+            "name": "Test name",
+            "description": null,
+            "closed": null,
+            "parent": 1,
+            "status": 1,
+            "childtype": 1,
+            "assignee": null,
+            "defaultbaseline": 2
+        }
+    },
+    {
+        "model": "jobs.baseline",
+        "pk": 1,
+        "fields": {
+            "job": 2,
+            "number": 1,
+            "begin": "2019-06-19T19:42:41.616Z",
+            "interval": "20:00:00"
+        }
+    },
+    {
+        "model": "jobs.baseline",
+        "pk": 2,
+        "fields": {
+            "job": 4,
+            "number": 1,
+            "begin": "2019-06-22T10:27:00Z",
+            "interval": "7 00:00:00"
+        }
+    }
+]

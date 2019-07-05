@@ -18,14 +18,14 @@ def error404(request):
 
 
 class JobViewSet(viewsets.GenericViewSet):
-    queryset = Job.test.get_queryset(0).order_by('id')
     serializer_class = JobSerializer
     lookup_field = 'user_id'
+    queryset = Job.objects.all()
 
     def list(self, request, user_id):
-        if User.objects.get(id = user_id) == 0:
-            error404(request) # TODO check if the user exists
-        queryset = Job.test.get_queryset(user_id).order_by('id')
+        if not User.objects.all().filter(id = user_id).exists():
+            error404(request) 
+        queryset = Job.objects.all().filter(creator = user_id).order_by('id')
 
         page = self.paginate_queryset(queryset)
         if page is not None:

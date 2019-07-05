@@ -11,11 +11,13 @@ class JobStatus(models.Model):
     trigger = models.CharField(null = True, default = None, max_length = 1,
                             choices = (
                                 ('e', "execute"), # sets start execution while setting this status, sets stop execution while leaving
+                                ('t', "executeAndLogTime"), # as above + requires logging time while leaving status or change assignee
                                 ('c', "close") # sets close status
                             ))
     # some icons, etc
 
     objects = models.Manager()
+
 
 class JobType(models.Model):
     name = models.CharField(null = False, max_length = 50)
@@ -23,6 +25,7 @@ class JobType(models.Model):
     color = models.CharField(null = False, max_length = 7)
 
     objects = models.Manager()
+
 
 class JobStatusType(models.Model):
     jobtype = models.ForeignKey(null = False, to = JobType, on_delete = models.CASCADE)
@@ -41,32 +44,22 @@ class Job(models.Model):
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True)
     closed = models.DateTimeField(null = True)
-    parent = models.ForeignKey(to = 'self', null = True, on_delete = models.CASCADE)
-    status = models.ForeignKey(null = True, to = JobStatus, on_delete = models.PROTECT)
-    childtype = models.ForeignKey(to = JobType, on_delete = models.PROTECT)
+    parent = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE)
+    status = models.ForeignKey(null = False, to = JobStatus, on_delete = models.PROTECT)
+    childtype = models.ForeignKey(null = False, to = JobType, on_delete = models.PROTECT)
     assignee = models.ForeignKey(null = True, to = User, on_delete = models.SET_NULL, related_name = 'assignee')
     defaultbaseline = models.ForeignKey(null = True, to = 'Baseline', on_delete = models.SET_NULL, related_name = 'defaultBaseline')
 
-    @property
-    def test1(self):
-        return self.created
-    
-    class JobManager(models.Manager):
-        def all(self):
-            return super().get_queryset()
-        def get_queryset(self, user):
-            return super().get_queryset().filter(creator=user)
-
     objects = models.Manager()
-    test = JobManager()
 
     
 class Milestone(models.Model):
-    job = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE)
+    job = models.ForeignKey(null = False, to = Job, related_name = 'milestones', on_delete = models.CASCADE)
     creator = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT)
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)
 
+    timestamp = models.DateTimeField(null = False)
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True)
     color = models.CharField(null = False, max_length = 7)
@@ -79,11 +72,11 @@ class Baseline(models.Model):
     number = models.SmallIntegerField(null = False, editable = False)
 
     begin = models.DateTimeField(null = False)
-    interval = models.DurationField(null = False)
+    worktime = models.DurationField(null = False)
 
     @property
     def end(self):
-        return self.begin + self.interval
+        return self.begin + self.worktime
         
     class Meta:
         unique_together = ('number', 'job')
@@ -95,7 +88,16 @@ class JobExecution(models.Model):
     job = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False)
     user = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT)
     timestamp = models.DateTimeField(null = False, auto_now_add = True)
-    isStart = models.BooleanField(null = False) # if true job is started else job execution is stopped
+    isstart = models.BooleanField(null = False) # if true job is started, else job execution is stopped
+
+    objects = models.Manager()
+
+
+class JobReportedWorkTime(models.Model):
+    job = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False)
+    user = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT)
+    timestamp = models.DateTimeField(null = False, auto_now_add = True)
+    worktime = models.DurationField(null = False)
 
     objects = models.Manager()
 

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework import routers
 
-from ums.serializers import *
+from ums.rawAPI.serializers import *
 
 # Create your views here.
 

@@ -37,7 +37,7 @@ class JobStatusType(models.Model):
 
 
 class Job(models.Model):
-    creator = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'creator')
+    creator = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'jobcreator')
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)
 

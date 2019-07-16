@@ -1,31 +1,29 @@
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework import routers
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 
-
 from jobs.userPerspectiveAPI.serializers import *
 
 
-# Create your views here.
 
-# from rest_framework.decorators import api_view
-# from rest_framework.response import Response
+# def error404(request):
+#     raise NotFound(detail="Error 404, page not found", code=404)
 
-def error404(request):
-    raise NotFound(detail="Error 404, page not found", code=404)
+
+def userAuthorizedJobs(userID):
+    return Job.objects.all().filter(creator = userID)
+    # return Job.objects.all()
 
 
 class JobViewSet(viewsets.GenericViewSet):
     serializer_class = JobSerializer
+    queryset = Job.objects.all().filter(pk = 0)
     lookup_field = 'user_id'
-    queryset = Job.objects.all()
 
     def list(self, request, user_id):
-        if not User.objects.all().filter(id = user_id).exists():
-            error404(request) 
-        queryset = Job.objects.all().filter(creator = user_id).order_by('id')
+        queryset = self.filter_queryset(userAuthorizedJobs(user_id))
 
         page = self.paginate_queryset(queryset)
         if page is not None:

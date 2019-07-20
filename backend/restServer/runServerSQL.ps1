@@ -1,1 +1,0 @@
-py.exe manage.py runserver_plus --print-sql

@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  rest:
+    image: 'pmt-backend_develop'
+    build:
+      context: .
+      dockerfile: ./docker-build/develop/Dockerfile
+    restart: always
+    volumes:
+      - ./restServer/:/usr/src/app/
+    ports:
+      - 8000:8000
+    stdin_open: true
+    tty: true

@@ -1,4 +1,2 @@
-cd .\db
-docker-compose.exe down
-docker-compose.exe up -d
-cd ..
+docker-compose.exe -f ./db/docker-compose.yml -p pmt-db down
+docker-compose.exe -f ./db/docker-compose.yml -p pmt-db up -d

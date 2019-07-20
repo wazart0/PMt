@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  rest:
+    image: 'pmt-backend_release'
+    build:
+      context: .
+      dockerfile: ./docker-build/release/Dockerfile
+    restart: always
+    ports:
+      - 8000:8000
+    # stdin_open: true
+    # tty: true

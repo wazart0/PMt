@@ -1,0 +1,1 @@
+py.exe .\restServer\manage.py runserver_plus --print-sql

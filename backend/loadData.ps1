@@ -1,1 +1,1 @@
-py.exe .\manage.py loaddata "db.json"
+py.exe .\restServer\manage.py loaddata "db.json"

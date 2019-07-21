@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 printf '\n\nInitialize DB (migration):\n'
 python3 manage.py makemigrations

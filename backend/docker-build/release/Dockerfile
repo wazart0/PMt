@@ -6,4 +6,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY ./restServer/ ./
 
 EXPOSE 8000
-CMD [ "./run_release.sh" ]
+CMD [ "python3", "run_release.py" ]

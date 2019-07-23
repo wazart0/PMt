@@ -68,9 +68,9 @@ class GroupPrivileges(models.Model): # three user types per job (manager, normal
 class GroupAuthorization(models.Model):
     user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, editable = False, db_column = 'user_id', related_name = 'groupauthorization_user_id')
     group_privilege_id = models.ForeignKey(null = False, to = GroupPrivileges, on_delete = models.CASCADE, editable = False, db_column = 'group_privilege_id', related_name = 'groupauthorization_group_privilege_id')
-    user_group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False, db_column = 'user_group_id', related_name = 'groupauthorization_user_group_id')
+    group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False, db_column = 'group_id', related_name = 'groupauthorization_group_id')
     
     class Meta:
-        unique_together = ('user_id', 'group_privilege_id', 'user_group_id')
+        unique_together = ('user_id', 'group_privilege_id', 'group_id')
         
     objects = models.Manager()

@@ -7,32 +7,32 @@ class JobDepthSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = '__all__'
-        read_only_fields = ('id', 'creator', 'created', 'updated')
+        read_only_fields = ('id', 'creator_id', 'created', 'updated')
         depth = 1
 
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = '__all__'
-        read_only_fields = ('id', 'creator', 'created', 'updated')
+        read_only_fields = ('id', 'creator_id', 'created', 'updated')
         # depth = 1
 
 
-class JobStatusSerializer(serializers.ModelSerializer):
+class StatusSerializer(serializers.ModelSerializer):
     class Meta:
-        model = JobStatus
+        model = Status
         fields = '__all__'
 
 
-class JobTypeSerializer(serializers.ModelSerializer):
+class TypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = JobType
+        model = Type
         fields = '__all__'
 
 
-class JobStatusTypeSerializer(serializers.ModelSerializer):
+class TypeStatusesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = JobStatusType
+        model = TypeStatuses
         fields = '__all__'
         # depth = 1
 

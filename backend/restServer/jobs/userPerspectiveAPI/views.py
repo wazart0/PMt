@@ -13,7 +13,7 @@ from jobs.userPerspectiveAPI.serializers import *
 
 
 def userAuthorizedJobs(userID):
-    return Job.objects.all().filter(creator = userID)
+    return Job.objects.all().filter(creator_id = userID)
     # return Job.objects.all()
 
 

@@ -15,7 +15,8 @@ class MilestoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Milestone
         fields = '__all__'
-        read_only_fields = ('id', 'creator', 'created', 'updated')
+        read_only_fields = ('id', 'creator_id', 'created', 'updated')
+        
 
 
 class JobSerializer(serializers.ModelSerializer):
@@ -26,6 +27,6 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = '__all__'
-        read_only_fields = ('id', 'creator', 'created', 'updated')
+        read_only_fields = ('id', 'creator_id', 'created', 'updated')
         depth = 1
 

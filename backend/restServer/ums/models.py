@@ -5,16 +5,16 @@ from django.contrib.auth.base_user import AbstractBaseUser
 
 
 class User(AbstractBaseUser):
-    creator = models.ForeignKey(null = True, to = 'self', on_delete = models.SET_NULL, related_name = 'usercreator')
+    creator_id = models.ForeignKey(null = True, to = 'self', on_delete = models.SET_NULL, related_name = 'user_creator')
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)
-    lastlogin = models.DateTimeField(null = True)
+    last_login = models.DateTimeField(null = True)
 
     email = models.EmailField(null = True, max_length = 100, unique = True)
     password = models.CharField(null = False, max_length = 300)
-    isactive = models.BooleanField(null = False, default = True)
-    firstname = models.CharField(null = True, max_length = 50)
-    lastname = models.CharField(null = True, max_length = 50)
+    is_active = models.BooleanField(null = False, default = True)
+    first_name = models.CharField(null = True, max_length = 50)
+    last_name = models.CharField(null = True, max_length = 50)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['password']
@@ -28,49 +28,49 @@ class User(AbstractBaseUser):
             isCreated = True
         models.Model.save(self, force_insert, force_update, using, update_fields)
         if (isCreated == True and self.pk is not None) or force_insert == True:
-            ug = UserGroup.objects.create(creator_id = self.creator, name = str(self.pk), parent = None)
+            ug = Group.objects.create(creator = self.creator_id, name = str(self.pk), parent = None)
             GroupMembers.objects.create(inviter = self, user = self, usergroup = ug)
 
 
 
-class UserGroup(models.Model):
-    creator = models.ForeignKey(null = True, to = User, on_delete = models.PROTECT)
+class Group(models.Model):
+    creator_id = models.ForeignKey(null = True, to = User, on_delete = models.PROTECT)
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)
 
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True, default = None)
-    parent = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE)
-    isactive = models.BooleanField(null = False, default = True)
+    parent_id = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE)
+    is_active = models.BooleanField(null = False, default = True)
 
     objects = models.Manager()
 
 
 class GroupMembers(models.Model):
-    usergroup = models.ForeignKey(null = False, to = UserGroup, on_delete = models.CASCADE)
-    user = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE)
+    group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE)
+    user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE)
     created = models.DateTimeField(null = False, auto_now_add = True)
-    inviter = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'groupinviter')
+    inviter_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'group_inviter')
 
     class Meta:
-        unique_together = ('usergroup', 'user')
+        unique_together = ('group_id', 'user_id')
 
     objects = models.Manager()
 
 
 class GroupPrivileges(models.Model): # three user types per job (manager, normal, viewer) defined individually 
     name = models.CharField(null = False, max_length = 50)
-    codename = models.CharField(null = False, max_length = 50)
+    code_name = models.CharField(null = False, max_length = 50)
         
     objects = models.Manager()
 
 
-class GroupAuth(models.Model):
-    user = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, editable = False)
-    groupprivileges = models.ForeignKey(null = False, to = GroupPrivileges, on_delete = models.CASCADE, editable = False)
-    usergroup = models.ForeignKey(null = False, to = UserGroup, on_delete = models.CASCADE, editable = False)
+class GroupAuthorization(models.Model):
+    user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, editable = False)
+    group_privilege_id = models.ForeignKey(null = False, to = GroupPrivileges, on_delete = models.CASCADE, editable = False)
+    user_group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False)
     
     class Meta:
-        unique_together = ('user', 'groupprivileges', 'usergroup')
+        unique_together = ('user_id', 'group_privilege_id', 'user_group_id')
         
     objects = models.Manager()

@@ -6,18 +6,18 @@ from ums.models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'created', 'updated', 'lastlogin', 'email', 'password', 'isactive', 'firstname', 'lastname')
-        read_only_fields = ('id', 'created', 'updated', 'lastlogin')
+        fields = '__all__'
+        read_only_fields = ('id', 'created', 'updated', 'last_login')
         extra_kwargs = {
-            'password': {'write_only': True}
+            'password': {'write_only': True},
         }
 
 
-class UserGroupSerializer(serializers.ModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserGroup
+        model = Group
         fields = '__all__'
-        read_only_fields = ('id', 'creator', 'created', 'updated')
+        read_only_fields = ('id', 'creator_id', 'created', 'updated')
 
 
 class GroupMembersSerializer(serializers.ModelSerializer):

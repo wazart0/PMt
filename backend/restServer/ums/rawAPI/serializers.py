@@ -7,14 +7,14 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
-        read_only_fields = ('id', 'created', 'update', 'lastLogin')
+        read_only_fields = ('id', 'created', 'updated', 'last_login')
 
 
-class UserGroupSerializer(serializers.ModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserGroup
+        model = Group
         fields = '__all__'
-        read_only_fields = ('id', 'creator', 'created', 'updated')
+        read_only_fields = ('id', 'creator_id', 'created', 'updated')
 
 
 class GroupMembersSerializer(serializers.ModelSerializer):

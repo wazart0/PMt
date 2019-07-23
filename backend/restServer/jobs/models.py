@@ -1,11 +1,11 @@
 from django.db import models
-from ums.models import User, UserGroup
+from ums.models import User, Group
 
 # https://www.villanovau.com/resources/project-management/5-phases-project-management-lifecycle/
 # https://redbooth.com/hub/5-easy-steps-in-project-development/
 
 
-class JobStatus(models.Model):
+class Status(models.Model):
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True)
     trigger = models.CharField(null = True, default = None, max_length = 1,
@@ -19,7 +19,7 @@ class JobStatus(models.Model):
     objects = models.Manager()
 
 
-class JobType(models.Model):
+class Type(models.Model):
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True)
     color = models.CharField(null = False, max_length = 7)
@@ -27,35 +27,35 @@ class JobType(models.Model):
     objects = models.Manager()
 
 
-class JobStatusType(models.Model):
-    jobtype = models.ForeignKey(null = False, to = JobType, on_delete = models.CASCADE)
-    jobstatus = models.ForeignKey(null = False, to = JobStatus, on_delete = models.CASCADE)
+class TypeStatuses(models.Model):
+    type_id = models.ForeignKey(null = False, to = Type, on_delete = models.CASCADE)
+    status_id = models.ForeignKey(null = False, to = Status, on_delete = models.CASCADE)
     class Meta:
-        unique_together = ('jobtype', 'jobstatus')
+        unique_together = ('type_id', 'status_id')
         
     objects = models.Manager()
 
 
 class Job(models.Model):
-    creator = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'jobcreator')
+    creator_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'job_creator_id')
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)
 
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True)
     closed = models.DateTimeField(null = True)
-    parent = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE)
-    status = models.ForeignKey(null = False, to = JobStatus, on_delete = models.PROTECT)
-    childtype = models.ForeignKey(null = False, to = JobType, on_delete = models.PROTECT)
-    assignee = models.ForeignKey(null = True, to = User, on_delete = models.SET_NULL, related_name = 'assignee')
-    defaultbaseline = models.ForeignKey(null = True, to = 'Baseline', on_delete = models.SET_NULL, related_name = 'defaultBaseline')
+    parent_id = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE, related_name = 'job_parent_id')
+    status_id = models.ForeignKey(null = False, to = Status, on_delete = models.PROTECT, related_name = 'job_status_id')
+    child_type_id = models.ForeignKey(null = False, to = Type, on_delete = models.PROTECT, related_name = 'job_child_type_id')
+    assignee_id = models.ForeignKey(null = True, to = User, on_delete = models.SET_NULL, related_name = 'job_assignee_id')
+    default_baseline_id = models.ForeignKey(null = True, to = 'Baseline', on_delete = models.SET_NULL, related_name = 'job_default_baseline_id')
 
     objects = models.Manager()
 
     
 class Milestone(models.Model):
-    job = models.ForeignKey(null = False, to = Job, related_name = 'milestones', on_delete = models.CASCADE)
-    creator = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT)
+    job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, related_name = 'milestone_job_id')
+    creator_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'milestone_creator_id')
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)
 
@@ -68,7 +68,7 @@ class Milestone(models.Model):
 
 
 class Baseline(models.Model):
-    job = models.ForeignKey(null = False, to = Job, related_name = 'baselines', on_delete = models.CASCADE, editable = False)
+    job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False, related_name = 'baseline_job_id')
     number = models.SmallIntegerField(null = False, editable = False)
 
     begin = models.DateTimeField(null = False)
@@ -79,42 +79,42 @@ class Baseline(models.Model):
         return self.begin + self.worktime
         
     class Meta:
-        unique_together = ('number', 'job')
+        unique_together = ('number', 'job_id')
         
     objects = models.Manager()
 
 
-class JobExecution(models.Model):
-    job = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False)
-    user = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT)
+class Execution(models.Model):
+    job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False, related_name = 'execution_job_id')
+    user_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'execution_user_id')
     timestamp = models.DateTimeField(null = False, auto_now_add = True)
-    isstart = models.BooleanField(null = False) # if true job is started, else job execution is stopped
+    is_start = models.BooleanField(null = False) # if true job is started, else job execution is stopped
 
     objects = models.Manager()
 
 
-class JobReportedWorkTime(models.Model):
-    job = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False)
-    user = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT)
+class ReportedWorkTime(models.Model):
+    job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False, related_name = 'reportedworktime_job_id')
+    user_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'reportedworktime_user_id')
     timestamp = models.DateTimeField(null = False, auto_now_add = True)
     worktime = models.DurationField(null = False)
 
     objects = models.Manager()
 
 
-class JobPrivileges(models.Model): # three user types per job (manager, normal, viewer) defined individually 
+class Privileges(models.Model): # three user types per job (manager, normal, viewer) defined individually 
     name = models.CharField(null = False, max_length = 50)
     codename = models.CharField(null = False, max_length = 50)
         
     objects = models.Manager()
 
 
-class JobAuth(models.Model):
-    job = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False)
-    jobprivileges = models.ForeignKey(null = False, to = JobPrivileges, on_delete = models.CASCADE, editable = False)
-    usergroup = models.ForeignKey(null = False, to = UserGroup, on_delete = models.CASCADE, editable = False)
+class JobAuthorization(models.Model):
+    job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False, related_name = 'jobauthorization_job_id')
+    privilege_id = models.ForeignKey(null = False, to = Privileges, on_delete = models.CASCADE, editable = False, related_name = 'jobauthorization_privilege_id')
+    user_group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False, related_name = 'jobauthorization_user_group_id')
     
     class Meta:
-        unique_together = ('job', 'jobprivileges', 'usergroup')
+        unique_together = ('job_id', 'privilege_id', 'user_group_id')
         
     objects = models.Manager()

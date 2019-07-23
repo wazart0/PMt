@@ -16,19 +16,19 @@ class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
 
 
-class JobStatusViewSet(viewsets.ModelViewSet):
-    queryset = JobStatus.objects.all()
-    serializer_class = JobStatusSerializer
+class StatusViewSet(viewsets.ModelViewSet):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
 
 
-class JobTypeViewSet(viewsets.ModelViewSet):
-    queryset = JobType.objects.all()
-    serializer_class = JobTypeSerializer
+class TypeViewSet(viewsets.ModelViewSet):
+    queryset = Type.objects.all()
+    serializer_class = TypeSerializer
 
 
-class JobStatusTypeViewSet(viewsets.ModelViewSet):
-    queryset = JobStatusType.objects.all()
-    serializer_class = JobStatusTypeSerializer
+class TypeStatusesViewSet(viewsets.ModelViewSet):
+    queryset = TypeStatuses.objects.all()
+    serializer_class = TypeStatusesSerializer
 
 
 class MilestoneViewSet(viewsets.ModelViewSet):
@@ -44,8 +44,8 @@ class BaselineViewSet(viewsets.ModelViewSet):
 router = routers.SimpleRouter()
 router.register(r'jobs', JobViewSet)
 router.register(r'jobsDepth', JobDepthViewSet)
-router.register(r'jobsStatus', JobStatusViewSet)
-router.register(r'jobsType', JobTypeViewSet)
-router.register(r'jobsStatusType', JobStatusTypeViewSet)
+router.register(r'jobsStatus', StatusViewSet)
+router.register(r'jobsType', TypeViewSet)
+router.register(r'jobsTypeStatuses', TypeStatusesViewSet)
 router.register(r'jobsMilestone', MilestoneViewSet)
 router.register(r'jobsBaseline', BaselineViewSet)

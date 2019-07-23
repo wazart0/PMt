@@ -104,7 +104,7 @@ class ReportedWorkTime(models.Model):
 
 class Privileges(models.Model): # three user types per job (manager, normal, viewer) defined individually 
     name = models.CharField(null = False, max_length = 50)
-    codename = models.CharField(null = False, max_length = 50)
+    codename = models.CharField(null = False, max_length = 50, unique = True)
         
     objects = models.Manager()
 

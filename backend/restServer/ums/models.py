@@ -5,7 +5,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 
 
 class User(AbstractBaseUser):
-    creator_id = models.ForeignKey(null = True, to = 'self', on_delete = models.SET_NULL, related_name = 'user_creator')
+    creator_id = models.ForeignKey(null = True, to = 'self', on_delete = models.SET_NULL, related_name = 'user_creator_id')
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)
     last_login = models.DateTimeField(null = True)
@@ -34,23 +34,23 @@ class User(AbstractBaseUser):
 
 
 class Group(models.Model):
-    creator_id = models.ForeignKey(null = True, to = User, on_delete = models.PROTECT)
+    creator_id = models.ForeignKey(null = True, to = User, on_delete = models.PROTECT, related_name = 'group_creator_id')
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)
 
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True, default = None)
-    parent_id = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE)
+    parent_id = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE, related_name = 'group_parent_id')
     is_active = models.BooleanField(null = False, default = True)
 
     objects = models.Manager()
 
 
 class GroupMembers(models.Model):
-    group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE)
-    user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE)
+    group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, related_name = 'groupmembers_group_id')
+    user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, related_name = 'groupmembers_user_id')
     created = models.DateTimeField(null = False, auto_now_add = True)
-    inviter_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'group_inviter')
+    inviter_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, related_name = 'groupmembers_inviter_id')
 
     class Meta:
         unique_together = ('group_id', 'user_id')
@@ -60,15 +60,15 @@ class GroupMembers(models.Model):
 
 class GroupPrivileges(models.Model): # three user types per job (manager, normal, viewer) defined individually 
     name = models.CharField(null = False, max_length = 50)
-    code_name = models.CharField(null = False, max_length = 50)
+    code_name = models.CharField(null = False, max_length = 50, unique = True)
         
     objects = models.Manager()
 
 
 class GroupAuthorization(models.Model):
-    user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, editable = False)
-    group_privilege_id = models.ForeignKey(null = False, to = GroupPrivileges, on_delete = models.CASCADE, editable = False)
-    user_group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False)
+    user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, editable = False, related_name = 'groupauthorization_user_id')
+    group_privilege_id = models.ForeignKey(null = False, to = GroupPrivileges, on_delete = models.CASCADE, editable = False, related_name = 'groupauthorization_group_privilege_id')
+    user_group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False, related_name = 'groupauthorization_user_group_id')
     
     class Meta:
         unique_together = ('user_id', 'group_privilege_id', 'user_group_id')

@@ -5,8 +5,8 @@ subprocess.call(["python3", "manage.py", "makemigrations", "ums", "jobs"])
 subprocess.call(["python3", "manage.py", "makemigrations"])
 subprocess.call(["python3", "manage.py", "migrate"])
 
-print('\n\nInitialize DB (insert data):\n')
-subprocess.call(["python3", "./manage.py", "loaddata", "db.json"])
+# print('\n\nInitialize DB (insert data):\n')
+# subprocess.call(["python3", "./manage.py", "loaddata", "db.json"])
 
-print(printf '\n\nStart server:\n')
+print('\n\nStart server:\n')
 subprocess.call(["python3", "./manage.py", "runserver", "--noreload", "0.0.0.0:8000"])

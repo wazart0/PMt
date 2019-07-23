@@ -5,7 +5,9 @@ python3 manage.py makemigrations ums jobs
 python3 manage.py makemigrations
 python3 manage.py migrate
 
-# printf '\n\nInitialize DB (insert data):\n'
+printf '\n\nInitialize DB (insert data):\n'
+printf 'Inserting global admin...'
+python3 ./manage.py shell < ./insertAdmin.py
 # python3 ./manage.py loaddata 'db.json'
 
 printf '\n\nStart server:\n'

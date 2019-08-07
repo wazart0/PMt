@@ -1,6 +1,9 @@
 FROM python:3
 WORKDIR /usr/src/app
+
+COPY ./docker-build/baseRequirements.txt ./
 COPY ./docker-build/release/requirements.txt ./
+RUN pip3 install --no-cache-dir -r baseRequirements.txt
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY ./restServer/ ./

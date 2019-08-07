@@ -1,7 +1,1 @@
-psycopg2-binary
-django
-djangorestframework
-django-cors-headers
-django-rest-swagger
-django-extensions
-Werkzeug
+Werkzeug==0.15.5

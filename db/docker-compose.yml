@@ -3,7 +3,7 @@ version: "3"
 
 services:
 
-  db: # https://hub.docker.com/_/postgres
+  database: # https://hub.docker.com/_/postgres
     image: postgres
     restart: always
     environment:
@@ -13,5 +13,12 @@ services:
       # PGDATA: # define location of datafiles, default: /var/lib/postgresql/data
     ports:
       - 5432:5432
+
     # stdin_open: true
     # tty: true
+
+
+networks:
+  default:
+    external:
+      name: pmt_network

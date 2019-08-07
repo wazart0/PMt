@@ -1,0 +1,5 @@
+version: "3"
+
+networks:
+  pmt_network:
+    driver: bridge

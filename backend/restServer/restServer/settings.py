@@ -90,7 +90,7 @@ DATABASES = {
         'NAME': 'pmt',
         'USER': 'ad',
         'PASSWORD': 'pass',
-        'HOST': '10.0.75.2',
+        'HOST': 'database', # '10.0.75.2',
         'PORT': '5432',
     }
 }

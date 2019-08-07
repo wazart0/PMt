@@ -1,15 +1,21 @@
 version: "3"
 
 services:
-  rest:
+  backend:
     image: 'pmt-backend_develop'
     build:
       context: .
       dockerfile: ./docker-build/develop/Dockerfile
     restart: always
-    volumes:
-      - ./restServer/:/usr/src/app/
     ports:
       - 8000:8000
+    volumes:
+      - ./restServer/:/usr/src/app/
     stdin_open: true
     tty: true
+
+
+networks:
+  default:
+    external:
+      name: pmt_network

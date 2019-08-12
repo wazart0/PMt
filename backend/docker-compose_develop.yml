@@ -1,18 +1,6 @@
 version: "3"
 
 services:
-
-  pgAdmin:
-    image: 'dpage/pgadmin4'
-    restart: always
-    ports:
-      - 8001:80
-    environment: 
-      - PGADMIN_DEFAULT_EMAIL=art
-      - PGADMIN_DEFAULT_PASSWORD=art
-    stdin_open: false
-    tty: false
-
   backend:
     image: 'pmt-backend_develop'
     build:

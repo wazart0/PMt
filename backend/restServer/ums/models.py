@@ -15,6 +15,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(null = False, default = True)
     first_name = models.CharField(null = True, max_length = 50)
     last_name = models.CharField(null = True, max_length = 50)
+    
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['password']
@@ -28,8 +29,8 @@ class User(AbstractBaseUser):
             isCreated = True
         models.Model.save(self, force_insert, force_update, using, update_fields)
         if (isCreated == True and self.pk is not None) or force_insert == True:
-            ug = Group.objects.create(creator = self.creator_id, name = str(self.pk), parent = None)
-            GroupMembers.objects.create(inviter = self, user = self, usergroup = ug)
+            ug = Group.objects.create(creator_id = self.creator_id, name = str(self.pk), parent_id = None)
+            GroupMembers.objects.create(inviter_id = self, user_id = self, group_id = ug)
 
 
 

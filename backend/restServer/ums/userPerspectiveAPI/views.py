@@ -8,21 +8,49 @@ from itertools import chain
 from ums.userPerspectiveAPI.serializers import *
 
 
+def modifyRequest(request, field, value):
+    queryDict = request.data.copy()
+    if isinstance(field, list) and isinstance(value, list):
+        if len(field) == len(value):
+            for i in range(len(field)):
+                queryDict[field[i]] = str(value[i])
+        else:
+            raise ValueError('modifyRequest: some error in querry')
+    else:
+        queryDict[field] = str(value) 
+    return queryDict
+
+def buildQueryTree(tableName, parentColumnName, rootID):
+    return \
+        "WITH RECURSIVE nodes AS (" + \
+        "SELECT s1.* " + \
+        "FROM " + tableName + " s1 WHERE " + parentColumnName + " = " + str(rootID) + \
+        "    UNION " + \
+        "SELECT s2.*" + \
+        "FROM " + tableName + " s2, nodes s1 WHERE s2." + parentColumnName + " = s1.id" + \
+        ")" + \
+        "SELECT * FROM nodes " + \
+        "    UNION " + \
+        "SELECT * FROM " + tableName + " WHERE ID = " + str(rootID) + ";"
+    
+
+
 def userAuthorizedUMS(userID):
-    queryset = User.objects.all().filter(Q(pk = userID) | Q(creator_id = userID)).order_by('pk')
+    # queryset = User.objects.all().filter(Q(pk = userID) | Q(creator_id = userID)).order_by('pk')
+    queryset = User.objects.raw(buildQueryTree('ums_user', 'creator_id', userID))
     # resultlist = list(chain(queryset, GroupMembers.objects.all()))
     # print(resultlist)
     # print(queryset)
     return queryset
 
 
-class UserViewSet(viewsets.GenericViewSet):
+class UserViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
     queryset = User.objects.all().filter(pk = 0)
     serializer_class = UserSerializer
-    lookup_field = 'user_id'
+    lookup_field = 'userID'
 
-    def list(self, request, user_id):
-        queryset = self.filter_queryset(userAuthorizedUMS(user_id))
+    def list(self, request, userID):
+        queryset = self.filter_queryset(userAuthorizedUMS(userID))
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -32,22 +60,10 @@ class UserViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(queryset, many = True)
         return Response(serializer.data)
 
-    def create(self, request, user_id, *args, **kwargs):
-        queryDict = request.data.copy()
-        queryDict['creator_id'] = str(user_id)
-        serializer = self.get_serializer(data = queryDict)
-        serializer.is_valid(raise_exception = True)
-        serializer.save()
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status = status.HTTP_201_CREATED, headers = headers)
-
-    def get_success_headers(self, data):
-        try:
-            return {'Location': str(data[api_settings.URL_FIELD_NAME])}
-        except (TypeError, KeyError):
-            return {}
+    def create(self, request, userID, *args, **kwargs):
+        return super().create(modifyRequest(request, 'creator_id', userID), *args, **kwargs)
 
 
 
 router = routers.SimpleRouter()
-router.register(r'(?P<user_id>.+)/user', UserViewSet)
+router.register(r'(?P<userID>.+)/user', UserViewSet)

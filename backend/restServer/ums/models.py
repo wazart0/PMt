@@ -24,10 +24,14 @@ class User(AbstractBaseUser):
     objects = models.Manager()
 
     def save(self, force_insert = False, force_update = False, using = None, update_fields = None):
+        if self.creator_id == None:
+            raise ValueError('Cannot create User, no creator_id field given.')
         isCreated = False
         if self.pk is None:
             isCreated = True
+        print("User id: " + str(self.pk))  # TODO remove later
         models.Model.save(self, force_insert, force_update, using, update_fields)
+        print("User id: " + str(self.pk))  # TODO remove later
         if (isCreated == True and self.pk is not None) or force_insert == True:
             ug = Group.objects.create(creator_id = self.creator_id, name = str(self.pk), parent_id = None)
             GroupMembers.objects.create(inviter_id = self, user_id = self, group_id = ug)

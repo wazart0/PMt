@@ -63,7 +63,7 @@ class GroupMembers(models.Model):
     objects = models.Manager()
 
 
-class GroupPrivileges(models.Model): # three user types per job (manager, normal, viewer) defined individually 
+class GroupPrivileges(models.Model): # view, edit: name, add user, remove user, description, active/inactive, change childs parent, manage user privilege
     name = models.CharField(null = False, max_length = 50)
     code_name = models.CharField(null = False, max_length = 50, unique = True)
         

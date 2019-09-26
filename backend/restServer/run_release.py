@@ -7,7 +7,7 @@ subprocess.call(["python3", "manage.py", "migrate"])
 
 print('\n\nInitialize DB (insert data):\n')
 print('Inserting global admin...')
-subprocess.call(["python3", "./manage.py", "shell", "<", "./insertAdmin.py"])
+subprocess.call(["python3", "./manage.py", "shell", "<", "./initialize/insertAdmin.py"])
 # subprocess.call(["python3", "./manage.py", "loaddata", "db.json"])
 
 print('\n\nStart server:\n')

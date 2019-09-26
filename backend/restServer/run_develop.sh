@@ -6,8 +6,10 @@ python3 manage.py makemigrations
 python3 manage.py migrate
 
 printf '\n\nInitialize DB (insert data):\n'
-printf 'Inserting global admin...'
-python3 ./manage.py shell < ./insertAdmin.py
+printf 'Inserting global admin...\n'
+python3 ./manage.py shell < ./initialize/insertAdmin.py
+printf 'Inserting group privileges...\n'
+python3 ./manage.py shell < ./initialize/insertGroupPrivileges.py
 # python3 ./manage.py loaddata 'db.json'
 
 printf '\n\nStart server:\n'

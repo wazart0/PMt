@@ -20,6 +20,7 @@ def modifyRequest(request, field, value):
         queryDict[field] = str(value) 
     return queryDict
 
+
 def buildQueryTree(tableName, parentColumnName, rootID):
     return \
         "WITH RECURSIVE nodes AS (" + \
@@ -34,14 +35,13 @@ def buildQueryTree(tableName, parentColumnName, rootID):
         "SELECT * FROM " + tableName + " WHERE ID = " + str(rootID) + ";"
     
 
-
 def userAuthorizedUMS(userID):
-    # queryset = User.objects.all().filter(Q(pk = userID) | Q(creator_id = userID)).order_by('pk')
-    queryset = User.objects.raw(buildQueryTree('ums_user', 'creator_id', userID))
-    # resultlist = list(chain(queryset, GroupMembers.objects.all()))
-    # print(resultlist)
-    # print(queryset)
-    return queryset
+    return User.objects.raw(buildQueryTree('ums_user', 'creator_id', userID))
+
+
+def userAuthorizedGroup(userID):
+    return Group.objects.raw(buildQueryTree('ums_groupprivileges', 'creator_id', userID))
+
 
 
 class UserViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
@@ -64,6 +64,26 @@ class UserViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
         return super().create(modifyRequest(request, 'creator_id', userID), *args, **kwargs)
 
 
+class GroupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
+    queryset = Group.objects.all().filter(pk = 0)
+    serializer_class = GroupSerializer
+    lookup_field = 'userID'
+
+    def list(self, request, userID):
+        queryset = self.filter_queryset(userAuthorizedGroup(userID))
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many = True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many = True)
+        return Response(serializer.data)
+
+    # def create(self, request, userID, *args, **kwargs):
+    #     return super().create(modifyRequest(request, 'creator_id', userID), *args, **kwargs)
+
 
 router = routers.SimpleRouter()
 router.register(r'(?P<userID>.+)/user', UserViewSet)
+router.register(r'(?P<userID>.+)/group', GroupViewSet)

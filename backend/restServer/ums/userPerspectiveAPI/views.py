@@ -9,16 +9,19 @@ from ums.userPerspectiveAPI.serializers import *
 
 
 def modifyRequest(request, field, value):
-    queryDict = request.data.copy()
+    # queryDict = request.data.copy()
+    mutable = request.POST._mutable
+    request.POST._mutable = True
     if isinstance(field, list) and isinstance(value, list):
         if len(field) == len(value):
             for i in range(len(field)):
-                queryDict[field[i]] = str(value[i])
+                request.data[field[i]] = str(value[i])
         else:
             raise ValueError('modifyRequest: some error in querry')
     else:
-        queryDict[field] = str(value) 
-    return queryDict
+        request.data[field] = str(value) 
+    request.POST._mutable = mutable
+    return request
 
 
 def buildQueryTree(tableName, parentColumnName, rootID):

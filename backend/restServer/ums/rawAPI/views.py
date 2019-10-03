@@ -16,11 +16,8 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
 
  
-class GroupMembersViewSet(viewsets.ModelViewSet):
-    queryset = GroupMembers.objects.all()
-    serializer_class = GroupMembersSerializer
+
 
 router = routers.SimpleRouter()
 router.register(r'users', UserViewSet)
 router.register(r'usersGroup', GroupViewSet)
-router.register(r'usersGroupMembers', GroupMembersViewSet)

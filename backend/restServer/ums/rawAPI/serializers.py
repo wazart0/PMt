@@ -17,7 +17,3 @@ class GroupSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'creator_id', 'created', 'updated')
 
 
-class GroupMembersSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GroupMembers
-        fields = '__all__'

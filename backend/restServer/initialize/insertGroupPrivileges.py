@@ -1,12 +1,13 @@
 from django.db import connection
 
-privileges = {  'view': 'View',
+privileges = {  'member': 'Member', # view only privilege
                 'add_user': 'Add new user',
                 'remove_user': 'Remove user',
                 'description': 'Modify description',
                 'active': 'Active/Non-active group',
-                'give_child': 'Change childs parent',
-                'manage_privilege': 'Manage user privilege' }
+                'give_up_child': 'Change childs parent',
+                'manage_privilege': 'Manage user privilege',
+                'adopt_child': 'Add child group' }
 
 cursor = connection.cursor()
 cursor.execute("select count(*) from ums_groupprivileges;")

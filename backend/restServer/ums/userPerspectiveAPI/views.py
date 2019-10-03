@@ -9,7 +9,6 @@ from ums.userPerspectiveAPI.serializers import *
 
 
 def modifyRequest(request, field, value):
-    # queryDict = request.data.copy()
     mutable = request.POST._mutable
     request.POST._mutable = True
     if isinstance(field, list) and isinstance(value, list):
@@ -17,25 +16,25 @@ def modifyRequest(request, field, value):
             for i in range(len(field)):
                 request.data[field[i]] = str(value[i])
         else:
-            raise ValueError('modifyRequest: some error in querry')
+            raise ValueError('modifyRequest(): some error in querry')
     else:
         request.data[field] = str(value) 
     request.POST._mutable = mutable
     return request
 
 
-def buildQueryTree(tableName, parentColumnName, rootID):
+def buildQueryTree(tableName, parentColumnName, rootID, columns='*'):
     return \
         "WITH RECURSIVE nodes AS (" + \
-        "SELECT s1.* " + \
+        "SELECT s1." + columns + " " + \
         "FROM " + tableName + " s1 WHERE " + parentColumnName + " = " + str(rootID) + \
         "    UNION " + \
-        "SELECT s2.*" + \
+        "SELECT s2." + columns + "" + \
         "FROM " + tableName + " s2, nodes s1 WHERE s2." + parentColumnName + " = s1.id" + \
         ")" + \
-        "SELECT * FROM nodes " + \
+        "SELECT " + columns + " FROM nodes " + \
         "    UNION " + \
-        "SELECT * FROM " + tableName + " WHERE ID = " + str(rootID) + ";"
+        "SELECT " + columns + " FROM " + tableName + " WHERE ID = " + str(rootID) + ";"
     
 
 def userAuthorizedUMS(userID):

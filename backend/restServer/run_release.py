@@ -1,7 +1,7 @@
 import subprocess
 
 print('\n\nInitialize DB (migration):\n')
-subprocess.call(["python3", "manage.py", "makemigrations", "ums", "jobs"])
+# subprocess.call(["python3", "manage.py", "makemigrations", "ums", "jobs"])
 subprocess.call(["python3", "manage.py", "makemigrations"])
 subprocess.call(["python3", "manage.py", "migrate"])
 

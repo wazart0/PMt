@@ -1,7 +1,7 @@
 #!/bin/sh
 
 printf '\n\nInitialize DB (migration):\n'
-python3 manage.py makemigrations ums jobs
+# python3 manage.py makemigrations ums jobs
 python3 manage.py makemigrations
 python3 manage.py migrate
 

@@ -45,7 +45,6 @@ class Group(models.Model):
     parent_id = models.ForeignKey(null = False, to = 'self', on_delete = models.CASCADE, db_column = 'parent_id', related_name = 'group_parent_id')
     is_active = models.BooleanField(null = False, default = True)
 
-    is_active1 = models.BooleanField(null = False, default = True)
     objects = models.Manager()
 
     def save(self, force_insert = False, force_update = False, using = None, update_fields = None):

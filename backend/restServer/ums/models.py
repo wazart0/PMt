@@ -42,16 +42,17 @@ class Group(models.Model):
 
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True, default = None)
-    parent_id = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE, db_column = 'parent_id', related_name = 'group_parent_id')
+    parent_id = models.ForeignKey(null = False, to = 'self', on_delete = models.CASCADE, db_column = 'parent_id', related_name = 'group_parent_id')
     is_active = models.BooleanField(null = False, default = True)
 
+    is_active1 = models.BooleanField(null = False, default = True)
     objects = models.Manager()
 
     def save(self, force_insert = False, force_update = False, using = None, update_fields = None):
-        if self.creator_id == None:
-            raise ValueError('Cannot create Group, no creator_id field given.')
         isCreated = False
-        if self.pk is None:
+        if self.pk is None:        
+            if self.creator_id == None:
+                raise ValueError('Cannot create Group, no creator_id field given.')
             isCreated = True
         print("Group id: " + str(self.pk))  # TODO remove later
         models.Model.save(self, force_insert, force_update, using, update_fields)

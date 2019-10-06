@@ -1,4 +1,4 @@
 .vscode/
 __pycache__/
 *.py[cod]
-migrations/
+migrations/!__init__.py!

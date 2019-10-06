@@ -42,7 +42,7 @@ class Group(models.Model):
 
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True, default = None)
-    parent_id = models.ForeignKey(null = False, to = 'self', on_delete = models.CASCADE, db_column = 'parent_id', related_name = 'group_parent_id')
+    parent_id = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE, db_column = 'parent_id', related_name = 'group_parent_id')
     is_active = models.BooleanField(null = False, default = True)
 
     objects = models.Manager()

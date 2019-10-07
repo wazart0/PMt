@@ -35,14 +35,16 @@ def buildQueryTree(tableName, parentColumnName, rootID, columns='*'):
         "SELECT " + columns + " FROM nodes " + \
         "    UNION " + \
         "SELECT " + columns + " FROM " + tableName + " WHERE ID = " + str(rootID) + ";"
+
+
     
 
 def userAuthorizedUMS(userID):
     return User.objects.raw(buildQueryTree('ums_user', 'creator_id', userID))
 
 
-def userAuthorizedGroup(userID):
-    return Group.objects.raw(buildQueryTree('ums_groupprivileges', 'creator_id', userID))
+def userAuthorizedGroup(userID, privilege = 'member'): # tree view has to be added in here
+    return Group.objects.raw('''select ums_group.* from ums_group inner join (select * from ums_groupauthorization where group_privilege_id = (select id from ums_groupprivileges where code_name = %s) and user_id = %s) as tmp on ums_group.id = tmp.group_id;''', [privilege, userID])
 
 
 

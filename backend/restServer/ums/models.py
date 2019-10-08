@@ -22,21 +22,16 @@ class User(AbstractBaseUser):
     objects = models.Manager()
 
     def save(self, force_insert = False, force_update = False, using = None, update_fields = None):
-        if self.creator_id == None:
-            raise ValueError('Cannot create User, no creator_id field given.')
-        isCreated = False
-        if self.pk is None:
-            isCreated = True
         print("User id: " + str(self.pk))  # TODO remove later
+        if self.pk == None and self.creator_id == None:
+                raise ValueError('Cannot create User, no creator_id field given.')
         models.Model.save(self, force_insert, force_update, using, update_fields)
         print("User id: " + str(self.pk))  # TODO remove later
-        if (isCreated == True and self.pk is not None) or force_insert == True:
-            Group.objects.create(creator_id = self, name = str(self.pk), parent_id = None)
 
 
 
 class Group(models.Model):
-    creator_id = models.ForeignKey(null = True, to = User, on_delete = models.PROTECT, editable = False, db_column = 'creator_id', related_name = 'group_creator_id')
+    creator_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, editable = False, db_column = 'creator_id', related_name = 'group_creator_id')
     created = models.DateTimeField(null = False, auto_now_add = True, editable = False)
     updated = models.DateTimeField(null = False, auto_now = True)
 
@@ -49,9 +44,7 @@ class Group(models.Model):
 
     def save(self, force_insert = False, force_update = False, using = None, update_fields = None):
         isCreated = False
-        if self.pk is None:        
-            if self.creator_id == None:
-                raise ValueError('Cannot create Group, no creator_id field given.')
+        if self.pk is None:
             isCreated = True
         print("Group id: " + str(self.pk))  # TODO remove later
         models.Model.save(self, force_insert, force_update, using, update_fields)

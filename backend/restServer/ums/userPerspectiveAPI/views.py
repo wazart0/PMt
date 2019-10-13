@@ -1,9 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, mixins, routers, status
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from django.db.models import Q
 from itertools import chain
+from django.db.models.query import QuerySet
+from django.db.models.expressions import RawSQL
 
 from ums.userPerspectiveAPI.serializers import *
 
@@ -23,71 +25,53 @@ def modifyRequest(request, field, value):
     return request
 
 
-def buildQueryTree(tableName, parentColumnName, rootID, columns='*'):
+def buildQueryTree(tableName, parentColumnName, columns = '*'):
     return \
         "WITH RECURSIVE nodes AS (" + \
         "SELECT s1." + columns + " " + \
-        "FROM " + tableName + " s1 WHERE " + parentColumnName + " = " + str(rootID) + \
+        " FROM " + tableName + " s1 WHERE " + parentColumnName + " = %s" \
         "    UNION " + \
         "SELECT s2." + columns + "" + \
-        "FROM " + tableName + " s2, nodes s1 WHERE s2." + parentColumnName + " = s1.id" + \
+        " FROM " + tableName + " s2, nodes s1 WHERE s2." + parentColumnName + " = s1.id" + \
         ")" + \
-        "SELECT " + columns + " FROM nodes " + \
+        " SELECT " + columns + " FROM nodes " + \
         "    UNION " + \
-        "SELECT " + columns + " FROM " + tableName + " WHERE ID = " + str(rootID) + ";"
+        " SELECT " + columns + " FROM " + tableName + " WHERE ID = %s"
 
 
     
 
 def userAuthorizedUMS(userID):
-    return User.objects.raw(buildQueryTree('ums_user', 'creator_id', userID))
+    return User.objects.filter(id__in = RawSQL(buildQueryTree('ums_user', 'creator_id', 'id'), [userID, userID]))
 
 
 def userAuthorizedGroup(userID, privilege = 'member'): # tree view has to be added in here
-    return Group.objects.raw('''select ums_group.* from ums_group inner join (select * from ums_groupauthorization where group_privilege_id = (select id from ums_groupprivileges where code_name = %s) and user_id = %s) as tmp on ums_group.id = tmp.group_id;''', [privilege, userID])
+    return Group.objects.filter(id__in = RawSQL('''select ums_group.id from ums_group inner join (select * from ums_groupauthorization where group_privilege_id = (select id from ums_groupprivileges where code_name = %s) and user_id = %s) as tmp on ums_group.id = tmp.group_id''', [privilege, userID]))
 
 
 
-class UserViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
-    queryset = User.objects.all().filter(pk = 0)
+class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
-    lookup_field = 'userID'
+    queryset = User.objects.all()
 
-    def list(self, request, userID):
-        queryset = self.filter_queryset(userAuthorizedUMS(userID))
+    def get_queryset(self):
+        return userAuthorizedUMS(self.kwargs['requesting_user_id']).order_by('id')
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many = True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many = True)
-        return Response(serializer.data)
-
-    def create(self, request, userID, *args, **kwargs):
-        return super().create(modifyRequest(request, 'creator_id', userID), *args, **kwargs)
+    def create(self, request, *args, **kwargs):
+        return super().create(modifyRequest(request, 'creator_id', kwargs['requesting_user_id']), *args, **kwargs)
 
 
-class GroupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
-    queryset = Group.objects.all().filter(pk = 0)
+class GroupViewSet(viewsets.ModelViewSet):
+    queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    lookup_field = 'userID'
 
-    def list(self, request, userID):
-        queryset = self.filter_queryset(userAuthorizedGroup(userID))
+    def get_queryset(self):
+        return userAuthorizedGroup(self.kwargs['requesting_user_id']).order_by('id')
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many = True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many = True)
-        return Response(serializer.data)
-
-    # def create(self, request, userID, *args, **kwargs):
-    #     return super().create(modifyRequest(request, 'creator_id', userID), *args, **kwargs)
+    def create(self, request, *args, **kwargs):
+        return super().create(modifyRequest(request, 'creator_id', kwargs['requesting_user_id']), *args, **kwargs)
 
 
 router = routers.SimpleRouter()
-router.register(r'(?P<userID>.+)/user', UserViewSet)
-router.register(r'(?P<userID>.+)/group', GroupViewSet)
+router.register(r'(?P<requesting_user_id>.+)/user', UserViewSet)
+router.register(r'(?P<requesting_user_id>.+)/group', GroupViewSet)

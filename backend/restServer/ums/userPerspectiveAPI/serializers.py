@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import copy
 
 from ums.models import *
 
@@ -17,5 +18,11 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = '__all__'
-        read_only_fields = ('id', 'creator_id', 'created', 'updated')
+        read_only_fields = ('id', 'created', 'updated')
+    
 
+class GroupAuthorizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GroupAuthorization
+        fields = '__all__'
+        read_only_fields = ('id', 'created')

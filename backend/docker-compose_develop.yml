@@ -4,13 +4,13 @@ services:
   backend:
     image: 'pmt-backend_develop'
     build:
-      context: .
-      dockerfile: ./docker-build/develop/Dockerfile
+      context: ./../
+      dockerfile: ./backend/docker-build/develop/Dockerfile
     restart: always
     ports:
       - 8000:8000
     volumes:
-      - ./restServer/:/usr/src/app/
+      - ./../:/usr/src/app/
     stdin_open: true
     tty: true
 

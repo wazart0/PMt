@@ -1,4 +1,7 @@
 #!/bin/sh
+set -e
+
+cd ./backend/restServer/
 
 printf '\n\nInitialize DB (migration):\n'
 # python3 manage.py makemigrations ums jobs

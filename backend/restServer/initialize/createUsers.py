@@ -11,10 +11,8 @@ if r.status_code != 200:
 data = r.json()
 
 if data['count'] > 1:
-    print('\nUsers are already initialized.\n')
+    print('\nUsers are already exist.\n')
     exit()
-
-URL = 'http://localhost:8000/up/' + '1' + '/user/'
 
 users = [
         {

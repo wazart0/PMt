@@ -6,8 +6,8 @@ from django.contrib.auth.base_user import AbstractBaseUser
 
 class User(AbstractBaseUser):
     creator_id = models.ForeignKey(null = True, to = 'self', on_delete = models.SET_NULL, db_column = 'creator_id', related_name = 'user_creator_id')
-    created = models.DateTimeField(null = False, auto_now_add = True, editable = False)
-    updated = models.DateTimeField(null = False, auto_now = True)
+    created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
+    updated = models.DateTimeField(null = False, editable = False, auto_now = True)
     last_login = models.DateTimeField(null = True)
 
     email = models.EmailField(null = True, max_length = 100, unique = True)
@@ -31,9 +31,9 @@ class User(AbstractBaseUser):
 
 
 class Group(models.Model):
-    creator_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, editable = False, db_column = 'creator_id', related_name = 'group_creator_id')
-    created = models.DateTimeField(null = False, auto_now_add = True, editable = False)
-    updated = models.DateTimeField(null = False, auto_now = True)
+    creator_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, db_column = 'creator_id', related_name = 'group_creator_id')
+    created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
+    updated = models.DateTimeField(null = False, editable = False, auto_now = True)
 
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True, default = None)
@@ -42,10 +42,12 @@ class Group(models.Model):
 
     objects = models.Manager()
 
-    def save(self, force_insert = False, force_update = False, using = None, update_fields = None):
-        isCreated = False
-        if self.pk is None:
-            isCreated = True
+    # TODO improve protection against creator_id modification (editable = False - prevents possibility of instance creation)
+    def save(self, force_insert = False, force_update = False, using = None, update_fields = None): 
+        isCreated = True
+        if self.pk is not None:
+            isCreated = False
+
         print("Group id: " + str(self.pk))  # TODO remove later
         models.Model.save(self, force_insert, force_update, using, update_fields)
         print("Group id: " + str(self.pk))  # TODO remove later
@@ -73,11 +75,11 @@ class GroupPrivileges(models.Model): # view, edit: name, add user, remove user, 
 
 
 class GroupAuthorization(models.Model):
-    user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, editable = False, db_column = 'user_id', related_name = 'groupauthorization_user_id')
-    group_privilege_id = models.ForeignKey(null = False, to = GroupPrivileges, on_delete = models.CASCADE, editable = False, db_column = 'group_privilege_id', related_name = 'groupauthorization_group_privilege_id')
-    group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False, db_column = 'group_id', related_name = 'groupauthorization_group_id')
+    user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, db_column = 'user_id', related_name = 'groupauthorization_user_id')
+    group_privilege_id = models.ForeignKey(null = False, to = GroupPrivileges, on_delete = models.CASCADE, db_column = 'group_privilege_id', related_name = 'groupauthorization_group_privilege_id')
+    group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, db_column = 'group_id', related_name = 'groupauthorization_group_id')
     created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
-    authorizer_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, editable = False, db_column = 'authorizer_id', related_name = 'groupauthorization_authorizer_id')
+    authorizer_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, db_column = 'authorizer_id', related_name = 'groupauthorization_authorizer_id')
     
     class Meta:
         unique_together = ('user_id', 'group_privilege_id', 'group_id')

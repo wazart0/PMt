@@ -20,7 +20,7 @@ def modifyRequest(request, field, value):
         else:
             raise ValueError('modifyRequest(): some error in querry')
     else:
-        request.data[field] = str(value) 
+        request.data[field] = str(value)
     request.POST._mutable = mutable
     return request
 
@@ -39,39 +39,57 @@ def buildQueryTree(tableName, parentColumnName, columns = '*'):
         " SELECT " + columns + " FROM " + tableName + " WHERE ID = %s"
 
 
-    
-
-def userAuthorizedUMS(userID):
-    return User.objects.filter(id__in = RawSQL(buildQueryTree('ums_user', 'creator_id', 'id'), [userID, userID]))
-
-
-def userAuthorizedGroup(userID, privilege = 'member'): # tree view has to be added in here
-    return Group.objects.filter(id__in = RawSQL('''select ums_group.id from ums_group inner join (select * from ums_groupauthorization where group_privilege_id = (select id from ums_groupprivileges where code_name = %s) and user_id = %s) as tmp on ums_group.id = tmp.group_id''', [privilege, userID]))
-
-
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+    @staticmethod
+    def userAuthorizedUMS(userID):
+        return User.objects.filter(id__in = RawSQL(buildQueryTree('ums_user', 'creator_id', 'id'), [userID, userID]))
+
     def get_queryset(self):
-        return userAuthorizedUMS(self.kwargs['requesting_user_id']).order_by('id')
+        return self.userAuthorizedUMS(self.kwargs['requesting_user_id']).order_by('id')
 
     def create(self, request, *args, **kwargs):
         return super().create(modifyRequest(request, 'creator_id', kwargs['requesting_user_id']), *args, **kwargs)
+
 
 
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
+    @staticmethod
+    def userAuthorizedGroup(userID, privilege = 'member'): # show groups in which user has member privilege
+        # return Group.objects.filter(id__in = RawSQL('''select ums_group.id from ums_group inner join (select * from ums_groupauthorization where group_privilege_id = (select id from ums_groupprivileges where code_name = %s) and user_id = %s) as tmp on ums_group.id = tmp.group_id''', [privilege, userID]))
+        return Group.objects.filter(id__in = RawSQL('''select group_id from ums_groupauthorization where group_privilege_id = (select id from ums_groupprivileges where code_name = %s) and user_id = %s''', [privilege, userID]))
+
     def get_queryset(self):
-        return userAuthorizedGroup(self.kwargs['requesting_user_id']).order_by('id')
+        return self.userAuthorizedGroup(self.kwargs['requesting_user_id']).order_by('id')
 
     def create(self, request, *args, **kwargs):
         return super().create(modifyRequest(request, 'creator_id', kwargs['requesting_user_id']), *args, **kwargs)
 
 
+
+class GroupAuthorizationViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin):
+    queryset = GroupAuthorization.objects.all()
+    serializer_class = GroupAuthorizationSerializer
+
+    @staticmethod
+    def buildQuery(userID, groupID, privilege = 'member'): # only for current user permission in current group
+        return GroupAuthorization.objects.filter(id__in = RawSQL('''select id from ums_groupauthorization where group_privilege_id = (select id from ums_groupprivileges where code_name = %s) and user_id = %s and group_id = %s''', [privilege, userID, groupID]))
+
+    def get_queryset(self):
+        return self.buildQuery(self.kwargs['requesting_user_id'], self.kwargs['group_id']).order_by('id')
+
+    def create(self, request, *args, **kwargs):
+        return super().create(modifyRequest(request, ['authorizer_id', 'group_id'], [kwargs['requesting_user_id'], kwargs['group_id']]), *args, **kwargs)
+
+
+
 router = routers.SimpleRouter()
 router.register(r'(?P<requesting_user_id>.+)/user', UserViewSet)
 router.register(r'(?P<requesting_user_id>.+)/group', GroupViewSet)
+router.register(r'(?P<requesting_user_id>.+)/group/(?P<group_id>.+)/authorization', GroupAuthorizationViewSet)

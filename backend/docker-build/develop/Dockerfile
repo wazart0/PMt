@@ -1,12 +1,13 @@
 FROM python:3
 WORKDIR /usr/src/app
 
-COPY ./docker-build/baseRequirements.txt ./
-COPY ./docker-build/develop/requirements.txt ./
+COPY ./backend/docker-build/baseRequirements.txt ./
 RUN pip3 install --no-cache-dir -r baseRequirements.txt
+
+COPY ./backend/docker-build/develop/requirements.txt ./
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-COPY ./restServer/ ./
+COPY . .
 
 EXPOSE 8000
-CMD [ "./run_develop.sh" ]
+CMD [ "./backend/restServer/run_develop.sh" ]

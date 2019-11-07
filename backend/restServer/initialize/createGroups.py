@@ -133,4 +133,17 @@ for userID in range(1,10): # iterate through users
                 if r.status_code != 201:
                     print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, data])
 
+            if group['parent_id'] == 2:
+                data = {"group_privilege_id": 1, "user_id": 6}
+                r = requests.post(url = groupAuthorizationAPIurl(group['creator_id'], group['id']), data = data)
+                if r.status_code != 201:
+                    print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, data])
+
+            if group['parent_id'] == 12:
+                data = {"group_privilege_id": 1, "user_id": 7}
+                r = requests.post(url = groupAuthorizationAPIurl(group['creator_id'], group['id']), data = data)
+                if r.status_code != 201:
+                    print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, data])
+
+
 print('Privileges initialized properly.\n')

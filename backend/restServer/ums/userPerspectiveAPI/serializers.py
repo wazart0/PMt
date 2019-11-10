@@ -36,4 +36,4 @@ class GroupPrivilegesSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupPrivileges
         fields = '__all__'
-        # read_only_fields = ('id', 'name', 'code_name')
+        read_only_fields = ('id', 'name', 'code_name')

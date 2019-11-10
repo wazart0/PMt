@@ -50,7 +50,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Group.objects.filter(id__in = RawSQL(
-                self.userAuthorizedGroup(), 
+                self.userAuthorizedQuery(), 
                 ['member', self.kwargs['context_user_id'], 'member', self.kwargs['context_user_id']])
             ).order_by('id')
 

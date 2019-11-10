@@ -8,88 +8,81 @@ from django.db.models.query import QuerySet
 from django.db.models.expressions import RawSQL
 
 from ums.userPerspectiveAPI.serializers import *
-
-
-def modifyRequest(request, field, value):
-    mutable = request.POST._mutable
-    request.POST._mutable = True
-    if isinstance(field, list) and isinstance(value, list):
-        if len(field) == len(value):
-            for i in range(len(field)):
-                request.data[field[i]] = str(value[i])
-        else:
-            raise ValueError('modifyRequest(): some error in querry')
-    else:
-        request.data[field] = str(value)
-    request.POST._mutable = mutable
-    return request
-
-
-def buildQueryTree(tableName, parentColumnName, columns = '*'):
-    return \
-        "WITH RECURSIVE nodes AS (" + \
-        "SELECT s1." + columns + " " + \
-        " FROM " + tableName + " s1 WHERE " + parentColumnName + " = %s" \
-        "    UNION " + \
-        "SELECT s2." + columns + "" + \
-        " FROM " + tableName + " s2, nodes s1 WHERE s2." + parentColumnName + " = s1.id" + \
-        ")" + \
-        " SELECT " + columns + " FROM nodes " + \
-        "    UNION " + \
-        " SELECT " + columns + " FROM " + tableName + " WHERE ID = %s"
+from libs.universalFunctions import *
 
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.none()
     serializer_class = UserSerializer
-    queryset = User.objects.all()
 
     @staticmethod
-    def userAuthorizedUMS(userID):
-        return User.objects.filter(id__in = RawSQL(buildQueryTree('ums_user', 'creator_id', 'id'), [userID, userID]))
+    def userAuthorizedQuery():
+        return buildUniversalQueryTree(
+            tableName = 'ums_user', 
+            parentPrimaryKey = 'creator_id', 
+            subQuery = 'SELECT id FROM ums_group WHERE id = %s')
 
     def get_queryset(self):
-        return self.userAuthorizedUMS(self.kwargs['requesting_user_id']).order_by('id')
+        return User.objects.filter(id__in = RawSQL(self.userAuthorizedQuery(), [contextUserID, contextUserID])).order_by('id')
 
     def create(self, request, *args, **kwargs):
-        return super().create(modifyRequest(request, 'creator_id', kwargs['requesting_user_id']), *args, **kwargs)
+        return super().create(modifyRequest(request, 'creator_id', kwargs['context_user_id']), *args, **kwargs)
 
 
 
 class GroupViewSet(viewsets.ModelViewSet):
-    queryset = Group.objects.all()
+    queryset = Group.objects.none()
     serializer_class = GroupSerializer
 
     @staticmethod
-    def userAuthorizedGroup(userID, privilege = 'member'): # show groups in which user has member privilege
-        # return Group.objects.filter(id__in = RawSQL('''select ums_group.id from ums_group inner join (select * from ums_groupauthorization where group_privilege_id = (select id from ums_groupprivileges where code_name = %s) and user_id = %s) as tmp on ums_group.id = tmp.group_id''', [privilege, userID]))
-        return Group.objects.filter(id__in = RawSQL('''select group_id from ums_groupauthorization where group_privilege_id = (select id from ums_groupprivileges where code_name = %s) and user_id = %s''', [privilege, userID]))
+    def userAuthorizedQuery(): # show groups in which user has chosen privilege
+        return buildUniversalQueryTree(
+            tableName = 'ums_group', 
+            parentPrimaryKey = 'parent_id', 
+            subQuery = '''
+                    SELECT group_id FROM ums_groupauthorization WHERE group_privilege_id = (
+                        SELECT id FROM ums_groupprivileges WHERE code_name = %s) AND user_id = %s
+                ''')
 
     def get_queryset(self):
-        return self.userAuthorizedGroup(self.kwargs['requesting_user_id']).order_by('id')
+        return Group.objects.filter(
+            id__in = RawSQL(
+                self.userAuthorizedGroup(), 
+                ['member', self.kwargs['context_user_id'], 'member', self.kwargs['context_user_id']])).order_by('id')
 
     def create(self, request, *args, **kwargs):
-        return super().create(modifyRequest(request, 'creator_id', kwargs['requesting_user_id']), *args, **kwargs)
+        return super().create(modifyRequest(request, 'creator_id', kwargs['context_user_id']), *args, **kwargs)
 
 
 
 class GroupAuthorizationViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin):
-    queryset = GroupAuthorization.objects.all()
+    queryset = GroupAuthorization.objects.none()
     serializer_class = GroupAuthorizationSerializer
 
     @staticmethod
-    def buildQuery(userID, groupID, privilege = 'member'): # only for current user permission in current group
-        return GroupAuthorization.objects.filter(id__in = RawSQL('''select id from ums_groupauthorization where group_privilege_id = (select id from ums_groupprivileges where code_name = %s) and user_id = %s and group_id = %s''', [privilege, userID, groupID]))
+    def userAuthorizedQuery():
+        return '''
+            SELECT id FROM ums_groupauthorization WHERE group_id = (
+                SELECT group_id FROM ums_groupauthorization WHERE group_privilege_id = (
+                    SELECT id FROM ums_groupprivileges WHERE code_name = %s)
+                AND user_id = %s AND group_id = %s)
+        '''
 
     def get_queryset(self):
-        return self.buildQuery(self.kwargs['requesting_user_id'], self.kwargs['group_id']).order_by('id')
+        return GroupAuthorization.objects.filter(id__in = RawSQL(
+            self.userAuthorizedQuery(), 
+            ['member', self.kwargs['context_user_id'], self.kwargs['group_id']])).order_by('id')
 
     def create(self, request, *args, **kwargs):
-        return super().create(modifyRequest(request, ['authorizer_id', 'group_id'], [kwargs['requesting_user_id'], kwargs['group_id']]), *args, **kwargs)
+        return super().create(
+            modifyRequest(request, ['authorizer_id', 'group_id'], [kwargs['context_user_id'], kwargs['group_id']]),
+            *args, 
+            **kwargs)
 
 
 
 router = routers.SimpleRouter()
-router.register(r'(?P<requesting_user_id>.+)/user', UserViewSet)
-router.register(r'(?P<requesting_user_id>.+)/group', GroupViewSet)
-router.register(r'(?P<requesting_user_id>.+)/group/(?P<group_id>.+)/authorization', GroupAuthorizationViewSet)
+router.register(r'(?P<context_user_id>.+)/user', UserViewSet)
+router.register(r'(?P<context_user_id>.+)/group', GroupViewSet)
+router.register(r'(?P<context_user_id>.+)/group/(?P<group_id>.+)/authorization', GroupAuthorizationViewSet)

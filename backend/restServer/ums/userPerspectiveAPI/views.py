@@ -21,7 +21,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return buildUniversalQueryTree(
             tableName = 'ums_user', 
             parentPrimaryKey = 'creator_id', 
-            subQuery = 'SELECT id FROM ums_group WHERE id = %s')
+            subQuery = '''SELECT id FROM ums_group WHERE id = %s''')
 
     def get_queryset(self):
         return User.objects.filter(id__in = RawSQL(

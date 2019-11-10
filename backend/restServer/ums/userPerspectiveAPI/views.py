@@ -86,7 +86,14 @@ class GroupAuthorizationViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin
 
 
 
+class GroupPrivilegesViewSet(viewsets.ReadOnlyModelViewSet, mixins.ListModelMixin):
+    queryset = GroupPrivileges.objects.all()
+    serializer_class = GroupPrivilegesSerializer
+    
+
+
 router = routers.SimpleRouter()
 router.register(r'(?P<context_user_id>.+)/user', UserViewSet)
 router.register(r'(?P<context_user_id>.+)/group', GroupViewSet)
 router.register(r'(?P<context_user_id>.+)/group/(?P<group_id>.+)/authorization', GroupAuthorizationViewSet)
+router.register(r'(?P<context_user_id>.+)/group/privileges/', GroupPrivilegesViewSet)

@@ -4,6 +4,7 @@ import copy
 from ums.models import *
 
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -14,15 +15,25 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
+
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = '__all__'
         read_only_fields = ('id', 'created', 'updated')
-    
+
+
 
 class GroupAuthorizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupAuthorization
         fields = '__all__'
         read_only_fields = ('id', 'created')
+    
+
+
+class GroupPrivilegesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GroupPrivileges
+        fields = '__all__'
+        # read_only_fields = ('id', 'name', 'code_name')

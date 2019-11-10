@@ -24,7 +24,10 @@ class UserViewSet(viewsets.ModelViewSet):
             subQuery = 'SELECT id FROM ums_group WHERE id = %s')
 
     def get_queryset(self):
-        return User.objects.filter(id__in = RawSQL(self.userAuthorizedQuery(), [contextUserID, contextUserID])).order_by('id')
+        return User.objects.filter(id__in = RawSQL(
+                self.userAuthorizedQuery(), 
+                [self.kwargs['context_user_id'], self.kwargs['context_user_id']])
+            ).order_by('id')
 
     def create(self, request, *args, **kwargs):
         return super().create(modifyRequest(request, 'creator_id', kwargs['context_user_id']), *args, **kwargs)
@@ -46,10 +49,10 @@ class GroupViewSet(viewsets.ModelViewSet):
                 ''')
 
     def get_queryset(self):
-        return Group.objects.filter(
-            id__in = RawSQL(
+        return Group.objects.filter(id__in = RawSQL(
                 self.userAuthorizedGroup(), 
-                ['member', self.kwargs['context_user_id'], 'member', self.kwargs['context_user_id']])).order_by('id')
+                ['member', self.kwargs['context_user_id'], 'member', self.kwargs['context_user_id']])
+            ).order_by('id')
 
     def create(self, request, *args, **kwargs):
         return super().create(modifyRequest(request, 'creator_id', kwargs['context_user_id']), *args, **kwargs)
@@ -71,8 +74,9 @@ class GroupAuthorizationViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin
 
     def get_queryset(self):
         return GroupAuthorization.objects.filter(id__in = RawSQL(
-            self.userAuthorizedQuery(), 
-            ['member', self.kwargs['context_user_id'], self.kwargs['group_id']])).order_by('id')
+                self.userAuthorizedQuery(), 
+                ['member', self.kwargs['context_user_id'], self.kwargs['group_id']])
+            ).order_by('id')
 
     def create(self, request, *args, **kwargs):
         return super().create(

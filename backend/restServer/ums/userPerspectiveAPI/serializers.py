@@ -21,6 +21,9 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = '__all__'
         read_only_fields = ('id', 'created', 'updated')
+        # extra_kwargs = {
+        #     'is_hidden': {'write_only': True},
+        # }
 
 
 

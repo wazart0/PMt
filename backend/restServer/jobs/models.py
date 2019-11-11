@@ -5,6 +5,7 @@ from ums.models import User, Group
 # https://redbooth.com/hub/5-easy-steps-in-project-development/
 
 
+
 class Status(models.Model):
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True)
@@ -14,9 +15,10 @@ class Status(models.Model):
                                 ('t', "executeAndLogTime"), # as above + requires logging time while leaving status or change assignee
                                 ('c', "close") # sets close status
                             ))
-    # some icons, etc
+    # TODO some icons, etc
 
     objects = models.Manager()
+
 
 
 class Type(models.Model):
@@ -27,6 +29,7 @@ class Type(models.Model):
     objects = models.Manager()
 
 
+
 class TypeStatuses(models.Model):
     type_id = models.ForeignKey(null = False, to = Type, on_delete = models.CASCADE, db_column = 'type_id')
     status_id = models.ForeignKey(null = False, to = Status, on_delete = models.CASCADE, db_column = 'status_id')
@@ -34,6 +37,7 @@ class TypeStatuses(models.Model):
         unique_together = ('type_id', 'status_id')
         
     objects = models.Manager()
+
 
 
 class Job(models.Model):
@@ -52,6 +56,7 @@ class Job(models.Model):
 
     objects = models.Manager()
 
+
     
 class Milestone(models.Model):
     job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, db_column = 'job_id', related_name = 'milestone_job_id')
@@ -65,6 +70,7 @@ class Milestone(models.Model):
     color = models.CharField(null = False, max_length = 7)
         
     objects = models.Manager()
+
 
 
 class Baseline(models.Model):
@@ -84,6 +90,7 @@ class Baseline(models.Model):
     objects = models.Manager()
 
 
+
 class Execution(models.Model):
     job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False, db_column = 'job_id', related_name = 'execution_job_id')
     user_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, db_column = 'user_id', related_name = 'execution_user_id')
@@ -91,6 +98,7 @@ class Execution(models.Model):
     is_start = models.BooleanField(null = False) # if true job is started, else job execution is stopped
 
     objects = models.Manager()
+
 
 
 class ReportedWorkTime(models.Model):
@@ -102,19 +110,21 @@ class ReportedWorkTime(models.Model):
     objects = models.Manager()
 
 
+
 class Privileges(models.Model): # three user types per job (manager, normal, viewer) defined individually 
     name = models.CharField(null = False, max_length = 50)
-    codename = models.CharField(null = False, max_length = 50, unique = True)
+    code_name = models.CharField(null = False, max_length = 50, unique = True)
         
     objects = models.Manager()
+
 
 
 class JobAuthorization(models.Model):
     job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False, db_column = 'job_id', related_name = 'jobauthorization_job_id')
     privilege_id = models.ForeignKey(null = False, to = Privileges, on_delete = models.CASCADE, editable = False, db_column = 'privilege_id', related_name = 'jobauthorization_privilege_id')
-    user_group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False, db_column = 'user_group_id', related_name = 'jobauthorization_user_group_id')
+    group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False, db_column = 'group_id', related_name = 'jobauthorization_group_id')
     
     class Meta:
-        unique_together = ('job_id', 'privilege_id', 'user_group_id')
+        unique_together = ('job_id', 'privilege_id', 'group_id')
         
     objects = models.Manager()

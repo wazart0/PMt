@@ -7,7 +7,7 @@ privileges = {  'member': 'Member', # view only privilege
                 'active': 'Active/Non-active group',
                 'give_up_child': 'Change childs parent',
                 'manage_privilege': 'Manage user privilege',
-                'adopt_child': 'Add child group' }
+                'adopt_child': 'Add child group'}
 
 cursor = connection.cursor()
 cursor.execute("select count(*) from ums_groupprivileges;")

@@ -20,104 +20,106 @@ if data['count'] > 1:
     exit()
 
 groups = [
-        {
+        { # group number: 0
             "name": "group 1",
-            "creator_id": "1",
-            # "parent_id": "1"
+            "creator_id": 1,
+            "parent_id": None
         },
-        {
+        { # group number: 1
             "name": "group 2",
-            "creator_id": "2",
-            # "parent_id": "1"
+            "creator_id": 2,
+            "parent_id": None
         },
-        {
+        { # group number: 2
             "name": "group 3",
-            "creator_id": "3",
-            # "parent_id": "1"
+            "creator_id": 3,
+            "parent_id": None
         },
-        {
+        { # group number: 3
             "name": "group 4",
-            "creator_id": "2",
-            # "parent_id": "1"
+            "creator_id": 2,
+            "parent_id": None
         },
-        {
+        { # group number: 4
             "name": "group 5",
-            "creator_id": "2",
-            # "parent_id": "1"
+            "creator_id": 2,
+            "parent_id": None
         },
-        {
+        { # group number: 5
             "name": "group 6",
-            "creator_id": "2",
-            # "parent_id": "1"
+            "creator_id": 2,
+            "parent_id": None
         },
-        {
+        { # group number: 6
             "name": "group 7",
-            "creator_id": "2",
-            # "parent_id": "1"
+            "creator_id": 2,
+            "parent_id": None
         },
 
         
-        {
+        { # group number: 7
             "name": "group 10",
-            "creator_id": "2",
-            "parent_id": "2"
+            "creator_id": 2,
+            "parent_id": 1
         },
-        {
+        { # group number: 8
             "name": "group 11",
-            "creator_id": "2",
-            "parent_id": "2"
+            "creator_id": 2,
+            "parent_id": 1
         },
-        {
+        { # group number: 9
             "name": "group 12",
-            "creator_id": "2",
-            "parent_id": "2"
+            "creator_id": 2,
+            "parent_id": 1
         },
-        {
+        { # group number: 10
             "name": "group 13",
-            "creator_id": "3",
-            "parent_id": "3"
+            "creator_id": 3,
+            "parent_id": 2
         },
         
-        {
+        { # group number: 11
             "name": "group 20",
-            "creator_id": "2",
-            "parent_id": "8"
+            "creator_id": 2,
+            "parent_id": 7
         },
-        {
+        { # group number: 12
             "name": "group 21",
-            "creator_id": "2",
-            "parent_id": "8"
+            "creator_id": 2,
+            "parent_id": 7
         },
-        {
+        { # group number: 13
             "name": "group 22",
-            "creator_id": "2",
-            "parent_id": "9"
+            "creator_id": 2,
+            "parent_id": 8
         },
 
-        {
+        { # group number: 14
             "name": "group 30",
-            "creator_id": "2",
-            "parent_id": "12"
+            "creator_id": 2,
+            "parent_id": 11
         },
     ]
 
 for group in groups:
+    if group["parent_id"] is not None:
+        if groups[group["parent_id"]]["id"] is None:
+            continue
+        group["parent_id"] = groups[group["parent_id"]]["id"]
     r = requests.post(url = groupAPIurl(group['creator_id']), data = group)
     if r.status_code != 201:
-        raise([groupAPIurl(group['creator_id']), r.status_code, data])
+        print([groupAPIurl(group['creator_id']), r.status_code, data])
+    else:
+        group['id'] = r.json()['id']
+
 
 print('Groups initialized properly.\n')
 
 
 
 for userID in range(1,10): # iterate through users
-    r = requests.get(url = groupAPIurl(userID))
-    if r.status_code != 200:
-        print([groupAPIurl(userID), r.status_code])
-        exit()
-    groups = r.json()
-    for group in groups['results']:
-        if group['creator_id'] == userID: ## "privilege" check
+    for group in groups:
+        if group['creator_id'] == userID and 'id' in group: ## "privilege" check
 
             ## Add member privilege for admin to every group
             if group['creator_id'] != 1:
@@ -133,13 +135,13 @@ for userID in range(1,10): # iterate through users
                 if r.status_code != 201:
                     print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, data])
 
-            if group['parent_id'] == 2:
+            if group['parent_id'] == groups[1]["id"]:
                 data = {"group_privilege_id": 1, "user_id": 6}
                 r = requests.post(url = groupAuthorizationAPIurl(group['creator_id'], group['id']), data = data)
                 if r.status_code != 201:
                     print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, data])
 
-            if group['parent_id'] == 12:
+            if group['parent_id'] == groups[11]["id"]:
                 data = {"group_privilege_id": 1, "user_id": 7}
                 r = requests.post(url = groupAuthorizationAPIurl(group['creator_id'], group['id']), data = data)
                 if r.status_code != 201:

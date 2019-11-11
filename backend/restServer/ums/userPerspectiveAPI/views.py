@@ -64,7 +64,7 @@ class GroupAuthorizationViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin
     serializer_class = GroupAuthorizationSerializer
 
     @staticmethod
-    def userAuthorizedQuery():
+    def userAuthorizedQuery(): # TODO remove special groups (hidden)
         return '''
             SELECT id FROM ums_groupauthorization WHERE group_id = (
                 SELECT group_id FROM ums_groupauthorization WHERE group_privilege_id = (
@@ -78,7 +78,7 @@ class GroupAuthorizationViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin
                 ['member', self.kwargs['context_user_id'], self.kwargs['group_id']])
             ).order_by('id')
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs): # TODO check permision (now every member can add)
         return super().create(
             modifyRequest(request, ['authorizer_id', 'group_id'], [kwargs['context_user_id'], kwargs['group_id']]),
             *args, 

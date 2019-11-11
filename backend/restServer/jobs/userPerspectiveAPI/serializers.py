@@ -23,7 +23,6 @@ class JobSerializer(serializers.ModelSerializer):
     defaultbaseline = BaselineSerializer()
     baselines = BaselineSerializer(many = True)
     milestones = MilestoneSerializer(many = True)
-
     class Meta:
         model = Job
         fields = '__all__'

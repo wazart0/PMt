@@ -1,4 +1,5 @@
-from django.db import models
+from django.db import models, connection
+from django.utils import timezone
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
 
@@ -23,9 +24,33 @@ class User(AbstractBaseUser):
 
     def save(self, force_insert = False, force_update = False, using = None, update_fields = None):
         print("User id: " + str(self.pk))  # TODO remove later
-        if self.pk == None and self.creator_id == None:
+        if self.pk == None:
+            if self.creator_id == None:
                 raise ValueError('Cannot create User, no creator_id field given.')
-        models.Model.save(self, force_insert, force_update, using, update_fields)
+            insert_user_query = '''
+                WITH 
+                    tmp_user(id) AS (
+                        INSERT INTO ums_user (creator_id, created, updated, last_login, email, password, is_active, name)
+                            VALUES (%s, %s, %s, NULL, %s, %s, %s, %s) RETURNING id)
+                    ,
+                    tmp_group(id) AS (
+                        INSERT INTO ums_group (creator_id, created, updated, name, description, parent_id, is_active, is_hidden)
+                            VALUES ((SELECT id FROM tmp_user), %s, %s, (SELECT id FROM tmp_user), NULL, NULL, true, true) RETURNING id)
+                INSERT INTO ums_groupauthorization (user_id, group_privilege_id, group_id, created, authorizer_id)
+                    VALUES ((SELECT id FROM tmp_user), (SELECT id FROM ums_groupprivileges WHERE code_name = 'member'), (SELECT id FROM tmp_group), %s, (SELECT id FROM tmp_user)) 
+                RETURNING user_id;
+                '''
+            ts = timezone.now()
+            cursor = connection.cursor()
+            cursor.execute(insert_user_query,[
+                self.creator_id.pk, ts, ts, self.email, self.password, self.is_active, self.name,
+                ts, ts,
+                ts])
+            row = cursor.fetchall()
+            self.pk = row[0][0]
+            self.refresh_from_db()
+        else:
+            models.Model.save(self, force_insert, force_update, using, update_fields)
         print("User id: " + str(self.pk))  # TODO remove later
 
 
@@ -39,6 +64,7 @@ class Group(models.Model):
     description = models.TextField(null = True, default = None)
     parent_id = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE, db_column = 'parent_id', related_name = 'group_parent_id')
     is_active = models.BooleanField(null = False, default = True)
+    is_hidden = models.BooleanField(null = False, editable = False, default = False)
 
     objects = models.Manager()
 
@@ -48,9 +74,7 @@ class Group(models.Model):
         if self.pk is not None:
             isCreated = False
 
-        print("Group id: " + str(self.pk))  # TODO remove later
         models.Model.save(self, force_insert, force_update, using, update_fields)
-        print("Group id: " + str(self.pk))  # TODO remove later
         if (isCreated == True and self.pk is not None) or force_insert == True:
             groupPrivileges = GroupPrivileges.objects.all()
             for privilege in groupPrivileges:

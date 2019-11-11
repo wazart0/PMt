@@ -1,4 +1,5 @@
-from django.db import models
+from django.db import models, connection
+from django.utils import timezone
 from ums.models import User, Group
 
 # https://www.villanovau.com/resources/project-management/5-phases-project-management-lifecycle/
@@ -49,12 +50,39 @@ class Job(models.Model):
     description = models.TextField(null = True)
     closed = models.DateTimeField(null = True)
     parent_id = models.ForeignKey(null = True, to = 'self', on_delete = models.CASCADE, db_column = 'parent_id', related_name = 'job_parent_id')
+    type_id = models.ForeignKey(null = False, to = Type, on_delete = models.PROTECT, db_column = 'type_id', related_name = 'job_type_id')
     status_id = models.ForeignKey(null = False, to = Status, on_delete = models.PROTECT, db_column = 'status_id', related_name = 'job_status_id')
-    child_type_id = models.ForeignKey(null = False, to = Type, on_delete = models.PROTECT, db_column = 'child_type_id', related_name = 'job_child_type_id')
     assignee_id = models.ForeignKey(null = True, to = User, on_delete = models.SET_NULL, db_column = 'assignee_id', related_name = 'job_assignee_id')
-    default_baseline_id = models.ForeignKey(null = True, to = 'Baseline', on_delete = models.SET_NULL, db_column = 'default_baseline_id', related_name = 'job_default_baseline_id')
 
-    objects = models.Manager()
+    default_baseline_id = models.ForeignKey(null = True, to = 'Baseline', on_delete = models.SET_NULL, db_column = 'default_baseline_id', related_name = 'job_default_baseline_id')
+    default_child_type_id = models.ForeignKey(null = False, to = Type, on_delete = models.PROTECT, db_column = 'child_type_id', related_name = 'job_child_type_id')
+
+    objects = models.Manager()    
+    
+    def save(self, force_insert = False, force_update = False, using = None, update_fields = None):
+        print("Job id: " + str(self.pk))  # TODO remove later
+        if self.pk == None:
+            insert_user_query = '''
+WITH 
+	tmp_job(id) AS (
+		INSERT INTO jobs_job (creator_id, created, updated, name, closed, parent_id, type_id, status_id, assignee_id, default_baseline_id, default_child_type_id)
+			VALUES ('2', NOW(), NOW(), 'somename', NULL, NULL, (SELECT id FROM jobs_type WHERE name = 'default'), (SELECT id FROM jobs_status WHERE name = 'Created'), NULL, NULL, (SELECT id FROM jobs_type WHERE name = 'default'))  RETURNING id)
+INSERT INTO jobs_jobauthorization (job_id, privilege_id, group_id, created, authorizer_id)
+	VALUES ((SELECT id FROM tmp_job), (SELECT id FROM jobs_jobprivileges), (SELECT id FROM ums_group WHERE is_hidden = True AND creator_id = '2' AND name = '2'), NOW(), '2') 
+RETURNING job_id;
+                '''
+            ts = timezone.now()
+            cursor = connection.cursor()
+            # cursor.execute(insert_user_query,[
+            #     self.creator_id.pk, ts, ts, self.email, self.password, self.is_active, self.name,
+            #     ts, ts,
+            #     ts])
+            # row = cursor.fetchall()
+            # self.pk = row[0][0]
+            # self.refresh_from_db()
+        else:
+            models.Model.save(self, force_insert, force_update, using, update_fields)
+        print("Job id: " + str(self.pk))  # TODO remove later
 
 
     
@@ -123,6 +151,8 @@ class JobAuthorization(models.Model):
     job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False, db_column = 'job_id', related_name = 'jobauthorization_job_id')
     privilege_id = models.ForeignKey(null = False, to = Privileges, on_delete = models.CASCADE, editable = False, db_column = 'privilege_id', related_name = 'jobauthorization_privilege_id')
     group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False, db_column = 'group_id', related_name = 'jobauthorization_group_id')
+    created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
+    authorizer_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, db_column = 'authorizer_id', related_name = 'jobauthorization_authorizer_id')
     
     class Meta:
         unique_together = ('job_id', 'privilege_id', 'group_id')

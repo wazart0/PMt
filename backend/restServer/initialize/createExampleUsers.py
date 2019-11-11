@@ -1,5 +1,7 @@
 import requests
 
+print('Creating example users...')
+
 def userAPIurl(userID):
     return 'http://localhost:8000/up/' + str(userID) + '/user/'
 

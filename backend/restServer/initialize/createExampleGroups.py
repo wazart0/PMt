@@ -1,5 +1,6 @@
 import requests
 
+print('Creating example groups...')
 
 def groupAPIurl(userID):
     return 'http://localhost:8000/up/' + str(userID) + '/group/'
@@ -16,7 +17,7 @@ if r.status_code != 200:
 data = r.json()
 
 if data['count'] > 1:
-    print('\nGroups are already exist.\n')
+    print('Groups are already exist.\n')
     exit()
 
 groups = [
@@ -113,7 +114,7 @@ for group in groups:
         group['id'] = r.json()['id']
 
 
-print('Groups initialized properly.\n')
+print('Groups initialized properly.')
 
 
 
@@ -148,4 +149,5 @@ for userID in range(1,10): # iterate through users
                     print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, data])
 
 
-print('Privileges initialized properly.\n')
+print('Privileges initialized properly.')
+print('')

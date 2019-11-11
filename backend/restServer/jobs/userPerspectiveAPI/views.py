@@ -42,7 +42,7 @@ class JobViewSet(viewsets.GenericViewSet):
     @staticmethod
     def userAuthorizedQuery():
         return buildUniversalQueryTree(
-            tableName = 'ums_group', 
+            tableName = 'ums_job', 
             parentPrimaryKey = 'parent_id', 
             subQuery = '''
                     SELECT job_id FROM jobs_jobauthorization WHERE privilege_id = (

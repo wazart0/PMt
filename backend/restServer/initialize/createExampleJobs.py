@@ -1,29 +1,29 @@
 import requests
 
-print('Creating example jobs...')
+print('Creating example jobs and privileges...')
 
 def jobAPIurl(userID):
-    return 'http://localhost:8000/up/' + str(userID) + '/job/'
+    return 'http://localhost:8000/up/' + str(userID) + '/jobs/'
     
 def jobAuthorizationAPIurl(userID, jobID):
-    return 'http://localhost:8000/up/' + str(userID) + '/job/' + str(jobID) + '/authorization/'
+    return 'http://localhost:8000/up/' + str(userID) + '/jobs/' + str(jobID) + '/authorization/'
 
 r = requests.get(url = jobAPIurl(2))
 
 if r.status_code != 200:
-    print(str(r.status_code))
+    print([str(r.status_code), r.json()])
     exit()
 
 data = r.json()
 
 if data['count'] > 0:
-    print('Jobs are already exist.\n')
+    print('Example jobs and privileges are already exist.\n')
     exit()
 
 jobs = [
         { # job number: 0
             "name": "job 1",
-            "creator_id": 1,
+            "creator_id": 4,
             "parent_id": None
         },
         { # job number: 1
@@ -103,18 +103,23 @@ jobs = [
     ]
 
 for job in jobs:
+
+    job['type_id'] = 1
+    job['status_id'] = 1
+    job['default_child_type_id'] = 1
+
     if job["parent_id"] is not None:
-        if jobs[job["parent_id"]]["id"] is None:
+        if not 'id' in jobs[job["parent_id"]]:
             continue
         job["parent_id"] = jobs[job["parent_id"]]["id"]
     r = requests.post(url = jobAPIurl(job['creator_id']), data = job)
     if r.status_code != 201:
-        print([jobAPIurl(job['creator_id']), r.status_code, data])
+        print([jobAPIurl(job['creator_id']), r.status_code, r.json(), data])
     else:
         job['id'] = r.json()['id']
 
 
-print('Jobs initialized properly.')
+print('Jobs created.')
 
 
 
@@ -123,31 +128,31 @@ for userID in range(1,10): # iterate through users
         if job['creator_id'] == userID and 'id' in job: ## "privilege" check
 
             ## Add member privilege for admin to every job
-            if job['creator_id'] != 1:
-                data = {"job_privilege_id": 1, "user_id": 1}
+            if job['creator_id'] != 4:
+                data = {"privilege_id": 1, "user_id": 4}
                 r = requests.post(url = jobAuthorizationAPIurl(job['creator_id'], job['id']), data = data)
                 if r.status_code != 201:
-                    print([jobAuthorizationAPIurl(job['creator_id'], job['id']), r.status_code, data])
+                    print([jobAuthorizationAPIurl(job['creator_id'], job['id']), r.status_code, r.json(), data])
 
             ## Add memeber privilege to user 5 only where job parent id is NULL
             if job['parent_id'] == None:
-                data = {"job_privilege_id": 1, "user_id": 5}
+                data = {"privilege_id": 1, "user_id": 5}
                 r = requests.post(url = jobAuthorizationAPIurl(job['creator_id'], job['id']), data = data)
                 if r.status_code != 201:
-                    print([jobAuthorizationAPIurl(job['creator_id'], job['id']), r.status_code, data])
+                    print([jobAuthorizationAPIurl(job['creator_id'], job['id']), r.status_code, r.json(), data])
 
             if job['parent_id'] == jobs[1]["id"]:
-                data = {"job_privilege_id": 1, "user_id": 6}
+                data = {"privilege_id": 1, "user_id": 6}
                 r = requests.post(url = jobAuthorizationAPIurl(job['creator_id'], job['id']), data = data)
                 if r.status_code != 201:
-                    print([jobAuthorizationAPIurl(job['creator_id'], job['id']), r.status_code, data])
+                    print([jobAuthorizationAPIurl(job['creator_id'], job['id']), r.status_code, r.json(), data])
 
             if job['parent_id'] == jobs[11]["id"]:
-                data = {"job_privilege_id": 1, "user_id": 7}
+                data = {"privilege_id": 1, "user_id": 7}
                 r = requests.post(url = jobAuthorizationAPIurl(job['creator_id'], job['id']), data = data)
                 if r.status_code != 201:
-                    print([jobAuthorizationAPIurl(job['creator_id'], job['id']), r.status_code, data])
+                    print([jobAuthorizationAPIurl(job['creator_id'], job['id']), r.status_code, r.json(), data])
 
 
-print('Privileges initialized properly.')
+print('Privileges created.')
 print('')

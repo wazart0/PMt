@@ -11,7 +11,7 @@ def groupAuthorizationAPIurl(userID, groupID):
 r = requests.get(url = groupAPIurl(1))
 
 if r.status_code != 200:
-    print(str(r.status_code))
+    print(str(r.status_code), r.json())
     exit()
 
 data = r.json()
@@ -23,7 +23,7 @@ if data['count'] > 1:
 groups = [
         { # group number: 0
             "name": "group 1",
-            "creator_id": 1,
+            "creator_id": 4,
             "parent_id": None
         },
         { # group number: 1
@@ -104,12 +104,12 @@ groups = [
 
 for group in groups:
     if group["parent_id"] is not None:
-        if groups[group["parent_id"]]["id"] is None:
+        if not 'id' in groups[group["parent_id"]]:
             continue
         group["parent_id"] = groups[group["parent_id"]]["id"]
     r = requests.post(url = groupAPIurl(group['creator_id']), data = group)
     if r.status_code != 201:
-        print([groupAPIurl(group['creator_id']), r.status_code, data])
+        print([groupAPIurl(group['creator_id']), r.status_code, r.json(), data])
     else:
         group['id'] = r.json()['id']
 
@@ -123,30 +123,30 @@ for userID in range(1,10): # iterate through users
         if group['creator_id'] == userID and 'id' in group: ## "privilege" check
 
             ## Add member privilege for admin to every group
-            if group['creator_id'] != 1:
+            if group['creator_id'] != 4:
                 data = {"group_privilege_id": 1, "user_id": 1}
                 r = requests.post(url = groupAuthorizationAPIurl(group['creator_id'], group['id']), data = data)
                 if r.status_code != 201:
-                    print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, data])
+                    print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, r.json(), data])
 
             ## Add memeber privilege to user 5 only where group parent id is NULL
             if group['parent_id'] == None:
                 data = {"group_privilege_id": 1, "user_id": 5}
                 r = requests.post(url = groupAuthorizationAPIurl(group['creator_id'], group['id']), data = data)
                 if r.status_code != 201:
-                    print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, data])
+                    print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, r.json(), data])
 
             if group['parent_id'] == groups[1]["id"]:
                 data = {"group_privilege_id": 1, "user_id": 6}
                 r = requests.post(url = groupAuthorizationAPIurl(group['creator_id'], group['id']), data = data)
                 if r.status_code != 201:
-                    print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, data])
+                    print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, r.json(), data])
 
             if group['parent_id'] == groups[11]["id"]:
                 data = {"group_privilege_id": 1, "user_id": 7}
                 r = requests.post(url = groupAuthorizationAPIurl(group['creator_id'], group['id']), data = data)
                 if r.status_code != 201:
-                    print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, data])
+                    print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, r.json(), data])
 
 
 print('Privileges initialized properly.')

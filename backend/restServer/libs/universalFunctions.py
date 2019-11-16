@@ -1,16 +1,18 @@
 
 
-def modifyRequest(request, field, value):
+def modifyRequest(request, add_fields, values, remove_fields = []):
     mutable = request.POST._mutable
     request.POST._mutable = True
-    if isinstance(field, list) and isinstance(value, list):
-        if len(field) == len(value):
-            for i in range(len(field)):
-                request.data[field[i]] = str(value[i])
+    if isinstance(add_fields, list) and isinstance(values, list):
+        if len(add_fields) == len(values):
+            for i in range(len(add_fields)):
+                request.data[add_fields[i]] = str(values[i])
         else:
-            raise ValueError('modifyRequest(): some error in querry')
+            raise valuesError('modifyRequest(): some error in querry')
     else:
-        request.data[field] = str(value)
+        request.data[add_fields] = str(values)
+    for field in remove_fields:
+        del request.data[field]
     request.POST._mutable = mutable
     return request
 

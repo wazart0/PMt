@@ -12,7 +12,7 @@ from libs.universalFunctions import *
 
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin, mixins.UpdateModelMixin):
     queryset = User.objects.none()
     serializer_class = UserSerializer
 

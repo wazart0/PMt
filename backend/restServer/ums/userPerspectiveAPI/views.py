@@ -52,7 +52,7 @@ class GroupViewSet(viewsets.ModelViewSet):
         return Group.objects.filter(id__in = RawSQL(
                 self.userAuthorizedQuery(), 
                 ['member', self.kwargs['context_user_id'], 'member', self.kwargs['context_user_id']])
-            ).order_by('id')
+            ).filter(is_hidden = False).order_by('id')
 
     def create(self, request, *args, **kwargs):
         return super().create(modifyRequest(request, 'creator_id', kwargs['context_user_id']), *args, **kwargs)

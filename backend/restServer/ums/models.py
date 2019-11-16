@@ -40,10 +40,12 @@ class User(AbstractBaseUser):
                     VALUES ((SELECT id FROM tmp_user), (SELECT id FROM ums_groupprivileges WHERE code_name = 'member'), (SELECT id FROM tmp_group), %s, (SELECT id FROM tmp_user)) 
                 RETURNING user_id;
                 '''
+            def check(field):
+                return None if field is None else field.pk
             ts = timezone.now()
             cursor = connection.cursor()
             cursor.execute(insert_user_query,[
-                self.creator_id.pk, ts, ts, self.email, self.password, self.is_active, self.name,
+                check(self.creator_id), ts, ts, self.email, self.password, self.is_active, self.name,
                 ts, ts,
                 ts])
             row = cursor.fetchall()

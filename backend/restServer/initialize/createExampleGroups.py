@@ -1,6 +1,6 @@
 import requests
 
-print('Creating example groups...')
+print('Creating example groups and privileges...')
 
 def groupAPIurl(userID):
     return 'http://localhost:8000/up/' + str(userID) + '/group/'
@@ -8,7 +8,7 @@ def groupAPIurl(userID):
 def groupAuthorizationAPIurl(userID, groupID):
     return 'http://localhost:8000/up/' + str(userID) + '/group/' + str(groupID) + '/authorization/'
 
-r = requests.get(url = groupAPIurl(1))
+r = requests.get(url = groupAPIurl(2))
 
 if r.status_code != 200:
     print(str(r.status_code), r.json())
@@ -114,7 +114,7 @@ for group in groups:
         group['id'] = r.json()['id']
 
 
-print('Groups initialized properly.')
+print('Groups created.')
 
 
 
@@ -122,9 +122,9 @@ for userID in range(1,10): # iterate through users
     for group in groups:
         if group['creator_id'] == userID and 'id' in group: ## "privilege" check
 
-            ## Add member privilege for admin to every group
+            ## Add member privilege to every group
             if group['creator_id'] != 4:
-                data = {"group_privilege_id": 1, "user_id": 1}
+                data = {"group_privilege_id": 1, "user_id": 4}
                 r = requests.post(url = groupAuthorizationAPIurl(group['creator_id'], group['id']), data = data)
                 if r.status_code != 201:
                     print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, r.json(), data])
@@ -149,5 +149,5 @@ for userID in range(1,10): # iterate through users
                     print([groupAuthorizationAPIurl(group['creator_id'], group['id']), r.status_code, r.json(), data])
 
 
-print('Privileges initialized properly.')
+print('Privileges created.')
 print('')

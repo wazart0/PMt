@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from rest_framework import viewsets, mixins, routers, status
+from rest_framework import viewsets, mixins, routers, status, generics
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from django.db.models import Q
@@ -23,10 +23,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin, mixins
             parentPrimaryKey = 'creator_id', 
             subQuery = '''SELECT id FROM ums_group WHERE id = %s''')
 
+    @staticmethod
+    def userAuthorizedQueryArgs(contextUserID):
+        return duplicateArgs(contextUserID)
+
     def get_queryset(self):
         return User.objects.filter(id__in = RawSQL(
                 self.userAuthorizedQuery(), 
-                [self.kwargs['context_user_id'], self.kwargs['context_user_id']])
+                self.userAuthorizedQueryArgs(self.kwargs['context_user_id']))
             ).order_by('id')
 
     def create(self, request, *args, **kwargs):
@@ -48,34 +52,39 @@ class GroupViewSet(viewsets.ModelViewSet):
                         SELECT id FROM ums_groupprivileges WHERE code_name = %s) AND user_id = %s
                 ''')
 
+    @staticmethod
+    def userAuthorizedQueryArgs(contextUserID, privilege):
+        return duplicateArgs(privilege, contextUserID)
+
     def get_queryset(self):
         return Group.objects.filter(id__in = RawSQL(
                 self.userAuthorizedQuery(), 
-                ['member', self.kwargs['context_user_id'], 'member', self.kwargs['context_user_id']])
+                self.userAuthorizedQueryArgs(self.kwargs['context_user_id'], 'member'))
             ).filter(is_hidden = False).order_by('id')
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs): # TODO check permision (now every member can add) - only for parent ID
         return super().create(modifyRequest(request, 'creator_id', kwargs['context_user_id']), *args, **kwargs)
 
 
 
-class GroupAuthorizationViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin):
+class GroupAuthorizationViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin):
     queryset = GroupAuthorization.objects.none()
     serializer_class = GroupAuthorizationSerializer
 
     @staticmethod
-    def userAuthorizedQuery(): # TODO remove special groups (hidden)
+    def userAuthorizedQuery():
         return '''
-            SELECT id FROM ums_groupauthorization WHERE group_id = (
-                SELECT group_id FROM ums_groupauthorization WHERE group_privilege_id = (
-                    SELECT id FROM ums_groupprivileges WHERE code_name = %s)
-                AND user_id = %s AND group_id = %s)
-        '''
+            SELECT id FROM ums_groupauthorization WHERE group_id = %s AND group_id IN ({userGroups})
+        '''.format(userGroups = GroupViewSet.userAuthorizedQuery())
+
+    @staticmethod
+    def userAuthorizedQueryArgs(contextUserID, groupID, privilege):
+        return [groupID] + GroupViewSet.userAuthorizedQueryArgs(contextUserID, privilege)
 
     def get_queryset(self):
         return GroupAuthorization.objects.filter(id__in = RawSQL(
-                self.userAuthorizedQuery(), 
-                ['member', self.kwargs['context_user_id'], self.kwargs['group_id']])
+                self.userAuthorizedQuery(),
+                self.userAuthorizedQueryArgs(self.kwargs['context_user_id'], self.kwargs['group_id'], 'member'))
             ).order_by('id')
 
     def create(self, request, *args, **kwargs): # TODO check permision (now every member can add)

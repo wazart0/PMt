@@ -1,6 +1,6 @@
 import requests
 
-print('Creating example users...')
+print('\nCreating example users...')
 
 def userAPIurl(userID):
     return 'http://localhost:8000/up/' + str(userID) + '/user/'
@@ -13,7 +13,7 @@ if r.status_code != 200:
 data = r.json()
 
 if data['count'] > 1:
-    print('\nUsers are already exist.\n')
+    print('Users are already exist.\n')
     exit()
 
 users = [
@@ -69,4 +69,4 @@ for i in users:
     if r.status_code != 201:
         raise('\nERROR: User init failed, cannot create user: ' + i['email'] + '.\n')
 
-print('\nUsers initialized properly.\n')
+print('Users created.\n')

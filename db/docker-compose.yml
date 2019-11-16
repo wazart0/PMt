@@ -3,8 +3,11 @@ version: "3"
 
 services:
 
-  database: # https://hub.docker.com/_/postgres
-    image: postgres
+  database: 
+    image: 'pmt-database'
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
     restart: always
     environment:
       POSTGRES_USER: ad

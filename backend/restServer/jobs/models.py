@@ -43,8 +43,8 @@ class TypeStatuses(models.Model):
 
 class Job(models.Model):
     creator_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, db_column = 'creator_id', related_name = 'job_creator_id')
-    created = models.DateTimeField(null = False, auto_now_add = True)
-    updated = models.DateTimeField(null = False, auto_now = True)
+    created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
+    updated = models.DateTimeField(null = False, editable = False, auto_now = True)
 
     name = models.CharField(null = False, max_length = 50)
     description = models.TextField(null = True)
@@ -55,7 +55,7 @@ class Job(models.Model):
     assignee_id = models.ForeignKey(null = True, to = User, on_delete = models.SET_NULL, db_column = 'assignee_id', related_name = 'job_assignee_id')
 
     default_baseline_id = models.ForeignKey(null = True, to = 'Baseline', on_delete = models.SET_NULL, db_column = 'default_baseline_id', related_name = 'job_default_baseline_id')
-    default_child_type_id = models.ForeignKey(null = False, to = Type, on_delete = models.PROTECT, db_column = 'child_type_id', related_name = 'job_child_type_id')
+    default_child_type_id = models.ForeignKey(null = False, to = Type, on_delete = models.PROTECT, db_column = 'default_child_type_id', related_name = 'job_child_type_id')
 
     objects = models.Manager()    
     
@@ -63,23 +63,35 @@ class Job(models.Model):
         print("Job id: " + str(self.pk))  # TODO remove later
         if self.pk == None:
             insert_user_query = '''
-WITH 
-	tmp_job(id) AS (
-		INSERT INTO jobs_job (creator_id, created, updated, name, closed, parent_id, type_id, status_id, assignee_id, default_baseline_id, default_child_type_id)
-			VALUES ('2', NOW(), NOW(), 'somename', NULL, NULL, (SELECT id FROM jobs_type WHERE name = 'default'), (SELECT id FROM jobs_status WHERE name = 'Created'), NULL, NULL, (SELECT id FROM jobs_type WHERE name = 'default'))  RETURNING id)
-INSERT INTO jobs_jobauthorization (job_id, privilege_id, group_id, created, authorizer_id)
-	VALUES ((SELECT id FROM tmp_job), (SELECT id FROM jobs_jobprivileges), (SELECT id FROM ums_group WHERE is_hidden = True AND creator_id = '2' AND name = '2'), NOW(), '2') 
-RETURNING job_id;
+                WITH 
+                    tmp_job(id) AS (
+                        INSERT INTO jobs_job (creator_id, created, updated, name, closed, parent_id, type_id, status_id, assignee_id, default_baseline_id, default_child_type_id)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)  RETURNING id)
+                INSERT INTO jobs_jobauthorization (job_id, privilege_id, group_id, created, authorizer_id)
+                    SELECT (SELECT id FROM tmp_job), id, (SELECT id FROM ums_group WHERE is_hidden = True AND creator_id = %s AND name = %s), %s, %s
+                        FROM jobs_privileges
+                RETURNING job_id;
                 '''
+            def check(field):
+                return None if field is None else field.pk
             ts = timezone.now()
             cursor = connection.cursor()
-            # cursor.execute(insert_user_query,[
-            #     self.creator_id.pk, ts, ts, self.email, self.password, self.is_active, self.name,
-            #     ts, ts,
-            #     ts])
-            # row = cursor.fetchall()
-            # self.pk = row[0][0]
-            # self.refresh_from_db()
+            cursor.execute(insert_user_query, [
+                check(self.creator_id), 
+                ts, 
+                ts, 
+                self.name, 
+                self.closed, 
+                check(self.parent_id), 
+                check(self.type_id), 
+                check(self.status_id), 
+                check(self.assignee_id), 
+                check(self.default_baseline_id), 
+                check(self.default_child_type_id),
+                check(self.creator_id), str(check(self.creator_id)), ts, check(self.creator_id)])
+            row = cursor.fetchall()
+            self.pk = row[0][0]
+            self.refresh_from_db()
         else:
             models.Model.save(self, force_insert, force_update, using, update_fields)
         print("Job id: " + str(self.pk))  # TODO remove later
@@ -148,9 +160,9 @@ class Privileges(models.Model): # three user types per job (manager, normal, vie
 
 
 class JobAuthorization(models.Model):
-    job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False, db_column = 'job_id', related_name = 'jobauthorization_job_id')
-    privilege_id = models.ForeignKey(null = False, to = Privileges, on_delete = models.CASCADE, editable = False, db_column = 'privilege_id', related_name = 'jobauthorization_privilege_id')
-    group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, editable = False, db_column = 'group_id', related_name = 'jobauthorization_group_id')
+    job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, db_column = 'job_id', related_name = 'jobauthorization_job_id')
+    privilege_id = models.ForeignKey(null = False, to = Privileges, on_delete = models.CASCADE, db_column = 'privilege_id', related_name = 'jobauthorization_privilege_id')
+    group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, db_column = 'group_id', related_name = 'jobauthorization_group_id')
     created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
     authorizer_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, db_column = 'authorizer_id', related_name = 'jobauthorization_authorizer_id')
     

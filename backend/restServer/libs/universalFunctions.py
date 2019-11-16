@@ -18,17 +18,25 @@ def modifyRequest(request, add_fields, values, remove_fields = []):
 
     
 
-def buildUniversalQueryTree(tableName, parentPrimaryKey, subQuery, primaryKey = 'id'):
+def buildUniversalQueryTree(tableName, parentPrimaryKey, subQuery, primaryKey = 'id', level = 0):
     return '''
         WITH RECURSIVE nodes AS (
-            SELECT s1.* FROM {table} s1 WHERE s1.{parentPK} IN (
+            SELECT s{level1}.{PK} FROM {table} s{level1} WHERE s{level1}.{parentPK} IN (
                 {subQuery})
             UNION 
-            SELECT s2.* FROM {table} s2, nodes s1 WHERE s2.{parentPK} = s1.{PK})
-        SELECT id FROM nodes
+            SELECT s{level2}.{PK} FROM {table} s{level2}, nodes s{level1} WHERE s{level2}.{parentPK} = s{level1}.{PK})
+        SELECT {PK} FROM nodes
         UNION
         {subQuery}
-    '''.format(table = tableName, parentPK = parentPrimaryKey, subQuery = subQuery, PK = primaryKey)
+    '''.format(table = tableName, parentPK = parentPrimaryKey, subQuery = subQuery, PK = primaryKey, level1 = level*2, level2 = level*2+1)
+
+
+
+def duplicateArgs(*args):
+    out = []
+    for i in args:
+        out.extend(i) if isinstance(i, list) else out.append(i)
+    return out + out
 
 
 # def checkAuthorization(authTable, privTable, privCodeName, userColumnName, userID):

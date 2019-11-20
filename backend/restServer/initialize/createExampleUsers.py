@@ -67,6 +67,6 @@ users = [
 for i in users:
     r = requests.post(url = userAPIurl(i['creator_id']), data = i)
     if r.status_code != 201:
-        raise('\nERROR: User init failed, cannot create user: ' + i['email'] + '.\n')
+        print([userAPIurl(i['creator_id']), r.status_code, r.json(), data])
 
 print('Users created.\n')

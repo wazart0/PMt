@@ -4,3 +4,4 @@ djangorestframework==3.9.4
 django-cors-headers==3.0.2
 django-rest-swagger==2.2.0
 django-extensions==2.2.1
+graphene_django==2.8.0

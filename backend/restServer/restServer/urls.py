@@ -4,6 +4,7 @@ from rest_framework_swagger.views import get_swagger_view
 # from djangoREST_tutorial.quickstart import views
 from django.urls import include, path
 from rest_framework import routers
+from graphene_django.views import GraphQLView
 
 
 schema_view = get_swagger_view(title='PMt API')
@@ -23,9 +24,16 @@ upRouter.registry.extend(perspectiveUMSRouter.registry)
 upRouter.registry.extend(perspectiveJobRouter.registry)
 
 
+
+from django.shortcuts import render
+def voyager(request):
+    return render( request, "voyager.html")
+
 urlpatterns = [
     url(r'^$', schema_view),
     # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
     path('raw/', include(rawRouter.urls)),
-    path('up/', include(upRouter.urls))
+    path('up/', include(upRouter.urls)),
+    path('graphql/', GraphQLView.as_view(graphiql=True)),
+    path('graphql/docs/', voyager),
 ]

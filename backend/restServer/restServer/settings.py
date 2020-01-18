@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_swagger',
     'django_extensions',
+    'graphene_django',
 
     'ums.apps.UMSConfig',
     'jobs.apps.JobsConfig',
@@ -75,7 +76,16 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
         },
+        'DIRS': [
+            os.path.join(BASE_DIR, "docs/voyager")
+        ]
     },
+    # {
+    #     'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    #     'DIRS': [
+    #         os.path.join(BASE_DIR, "docs/voyager")
+    #     ]
+    # }
 ]
 
 WSGI_APPLICATION = 'restServer.wsgi.application'
@@ -135,6 +145,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    # os.path.join(BASE_DIR, "docs/voyager"),
+    os.path.join(BASE_DIR, "docs/voyager/css"),
+    os.path.join(BASE_DIR, "docs/voyager/js"),
+    # '/var/www/static/',
+]
+
 
 
 AUTH_USER_MODEL = 'ums.User'
@@ -154,4 +171,9 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     )
+}
+
+
+GRAPHENE = {
+    'SCHEMA': 'restServer.schema.schema'
 }

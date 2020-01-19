@@ -10,4 +10,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY . .
 
 EXPOSE 8000
-CMD [ "./backend/restServer/run_develop.sh" ]
+CMD [ "./backend/app/run_develop.sh" ]

@@ -6,7 +6,7 @@ COPY ./docker-build/release/requirements.txt ./
 RUN pip3 install --no-cache-dir -r baseRequirements.txt
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-COPY ./restServer/ ./
+COPY ./app/ ./
 
 EXPOSE 8000
 CMD [ "python3", "run_release.py" ]

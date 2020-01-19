@@ -1,57 +1,57 @@
 import graphene
 from graphene_django.types import DjangoObjectType, ObjectType
-import jobs.models as jobs
+import jobs.models as jobsM
 
 
 
 class Job(DjangoObjectType):
     class Meta:
-        model = jobs.Job
+        model = jobsM.Job
 
 
 class Milestone(DjangoObjectType):
     class Meta:
-        model = jobs.Milestone
+        model = jobsM.Milestone
 
 
 class JobAuthorization(DjangoObjectType):
     class Meta:
-        model = jobs.JobAuthorization
+        model = jobsM.JobAuthorization
 
 
 class Privileges(DjangoObjectType):
     class Meta:
-        model = jobs.Privileges
+        model = jobsM.Privileges
 
 
 class Status(DjangoObjectType):
     class Meta:
-        model = jobs.Status
+        model = jobsM.Status
 
 
 class Type(DjangoObjectType):
     class Meta:
-        model = jobs.Type
+        model = jobsM.Type
 
 
 class TypeStatuses(DjangoObjectType):
     class Meta:
-        model = jobs.TypeStatuses
+        model = jobsM.TypeStatuses
 
 
 class Baseline(DjangoObjectType):
     class Meta:
-        model = jobs.Baseline
+        model = jobsM.Baseline
 
 
 class Execution(DjangoObjectType):
     class Meta:
-        model = jobs.Execution
+        model = jobsM.Execution
 
 
 class ReportedWorkTime(DjangoObjectType):
     class Meta:
-        model = jobs.ReportedWorkTime
+        model = jobsM.ReportedWorkTime
 
 
 
@@ -61,27 +61,27 @@ class Query(ObjectType):
     jobs = graphene.List(Job)
     milestones = graphene.List(Milestone)
 
-    def resolve_actor(self, info, **kwargs):
+    def resolve_job(self, info, **kwargs):
         id = kwargs.get('id')
 
         if id is not None:
-            return Actor.objects.get(pk=id)
+            return jobsM.Job.objects.get(pk=id)
 
         return None
 
-    def resolve_movie(self, info, **kwargs):
+    def resolve_milestone(self, info, **kwargs):
         id = kwargs.get('id')
 
         if id is not None:
-            return Movie.objects.get(pk=id)
+            return jobsM.Milestone.objects.get(pk=id)
 
         return None
 
-    def resolve_actors(self, info, **kwargs):
-        return Actor.objects.all()
+    def resolve_jobs(self, info, **kwargs):
+        return jobsM.Job.objects.all()
 
-    def resolve_movies(self, info, **kwargs):
-        return Movie.objects.all()
+    def resolve_milestones(self, info, **kwargs):
+        return jobsM.Milestone.objects.all()
 
 
 

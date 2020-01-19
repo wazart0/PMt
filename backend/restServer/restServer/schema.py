@@ -1,7 +1,12 @@
 import graphene
 import ums.userPerspectiveAPI.schema
+import jobs.userPerspectiveAPI.schema
 
-class Query(ums.userPerspectiveAPI.schema.Query, graphene.ObjectType):
+class Query(
+    ums.userPerspectiveAPI.schema.Query, 
+    jobs.userPerspectiveAPI.schema.Query,
+    graphene.ObjectType
+    ):
     # This class will inherit from multiple Queries
     # as we begin to add more apps to our project
     pass

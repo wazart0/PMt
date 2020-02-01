@@ -1,12 +1,15 @@
-from django.db import models, connection
-from django.utils import timezone
-from django.contrib.auth.models import PermissionsMixin
+from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.core.exceptions import FieldError
 
+from graph_engine.models import Node, NodeType
 
 
 class User(AbstractBaseUser):
-    creator_id = models.ForeignKey(null = True, to = 'self', on_delete = models.SET_NULL, db_column = 'creator_id', related_name = 'user_creator_id')
+    node_type = 'user'
+    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='user_id', on_delete=models.PROTECT)
+    # node_type = models.ForeignKey(null=False, to=NodeType, editable=False, db_column='node_type', related_name='user_node_type', on_delete=models.PROTECT)
+    # creator_id = models.ForeignKey(null = True, to = 'self', on_delete = models.SET_NULL, db_column = 'creator_id', related_name = 'user_creator_id')
     created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, editable = False, auto_now = True)
     last_login = models.DateTimeField(null = True)
@@ -22,38 +25,27 @@ class User(AbstractBaseUser):
 
     objects = models.Manager()
 
+    def __init__(self, *args, **kwargs):
+        self.creator_id = None
+        super().__init__(*args, **kwargs)
+
     def save(self, force_insert = False, force_update = False, using = None, update_fields = None):
-        print("User id: " + str(self.pk))  # TODO remove later
+        print("User pk: " + str(self.pk))  # TODO remove later
+        # print("User id: " + str(self.id))  # TODO remove later --> now it doesn't exists !!!
+        self.creator_id = Node.objects.get(id=3) # TODO refactor to get from access/refresh tokens
         if self.pk == None:
-            if self.creator_id == None:
-                raise ValueError('Cannot create User, no creator_id field given.')
-            insert_user_query = '''
-                WITH 
-                    tmp_user(id) AS (
-                        INSERT INTO ums_user (creator_id, created, updated, last_login, email, password, is_active, name)
-                            VALUES (%s, %s, %s, NULL, %s, %s, %s, %s) RETURNING id)
-                    ,
-                    tmp_group(id) AS (
-                        INSERT INTO ums_group (creator_id, created, updated, name, description, parent_id, is_active, is_hidden)
-                            VALUES ((SELECT id FROM tmp_user), %s, %s, (SELECT id FROM tmp_user), NULL, NULL, true, true) RETURNING id)
-                INSERT INTO ums_groupauthorization (user_id, group_privilege_id, group_id, created, authorizer_id)
-                    VALUES ((SELECT id FROM tmp_user), (SELECT id FROM ums_groupprivileges WHERE code_name = 'member'), (SELECT id FROM tmp_group), %s, (SELECT id FROM tmp_user)) 
-                RETURNING user_id;
-                '''
-            def check(field):
-                return None if field is None else field.pk
-            ts = timezone.now()
-            cursor = connection.cursor()
-            cursor.execute(insert_user_query,[
-                check(self.creator_id), ts, ts, self.email, self.password, self.is_active, self.name,
-                ts, ts,
-                ts])
-            row = cursor.fetchall()
-            self.pk = row[0][0]
-            self.refresh_from_db()
+            # create node
+            self.id = Node.objects.create(node_type=NodeType.objects.get(id=self.node_type))
+            super().save(force_insert, force_update, using, update_fields)
+            print('creator id: ' + str(self.creator_id))
+            if self.creator_id != None:
+                Node.objects.connect_nodes(self.creator_id, self.id, creator='True')
         else:
-            models.Model.save(self, force_insert, force_update, using, update_fields)
-        print("User id: " + str(self.pk))  # TODO remove later
+            super().save(force_insert, force_update, using, update_fields)
+        print("User pk: " + str(self.pk))  # TODO remove later
+        print("User id: " + str(self.id))  # TODO remove later
+        return self
+    
 
 
 

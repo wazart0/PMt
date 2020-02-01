@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 
     'ums.apps.UMSConfig',
     'jobs.apps.JobsConfig',
+    'graph_engine.apps.GraphEngineConfig',
 ]
 
 MIDDLEWARE = [

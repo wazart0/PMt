@@ -17,11 +17,11 @@ rawRouter.registry.extend(rawUMSRouter.registry)
 rawRouter.registry.extend(rawJobRouter.registry)
 
 
-from ums.userPerspectiveAPI.views import router as perspectiveUMSRouter
-from jobs.userPerspectiveAPI.views import router as perspectiveJobRouter
-upRouter = routers.DefaultRouter()
-upRouter.registry.extend(perspectiveUMSRouter.registry)
-upRouter.registry.extend(perspectiveJobRouter.registry)
+# from ums.userPerspectiveAPI.views import router as perspectiveUMSRouter
+# from jobs.userPerspectiveAPI.views import router as perspectiveJobRouter
+# upRouter = routers.DefaultRouter()
+# upRouter.registry.extend(perspectiveUMSRouter.registry)
+# upRouter.registry.extend(perspectiveJobRouter.registry)
 
 
 
@@ -33,7 +33,7 @@ urlpatterns = [
     url(r'^$', schema_view),
     # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
     path('raw/', include(rawRouter.urls)),
-    path('up/', include(upRouter.urls)),
+    # path('up/', include(upRouter.urls)),
     path('graphql/', GraphQLView.as_view(graphiql=True)),
     path('graphql/docs/', voyager),
 ]

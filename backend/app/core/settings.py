@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'ums.apps.UMSConfig',
     'jobs.apps.JobsConfig',
     'graph_engine.apps.GraphEngineConfig',
+    'project.apps.ProjectConfig',
+    'operation.apps.OperationConfig',
 ]
 
 MIDDLEWARE = [

@@ -67,37 +67,37 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 
-class GroupAuthorizationViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin):
-    queryset = GroupAuthorization.objects.none()
-    serializer_class = GroupAuthorizationSerializer
+# class GroupAuthorizationViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin, mixins.DestroyModelMixin):
+#     queryset = GroupAuthorization.objects.none()
+#     serializer_class = GroupAuthorizationSerializer
 
-    @staticmethod
-    def userAuthorizedQuery():
-        return '''
-            SELECT id FROM ums_groupauthorization WHERE group_id = %s AND group_id IN ({userGroups})
-        '''.format(userGroups = GroupViewSet.userAuthorizedQuery())
+#     @staticmethod
+#     def userAuthorizedQuery():
+#         return '''
+#             SELECT id FROM ums_groupauthorization WHERE group_id = %s AND group_id IN ({userGroups})
+#         '''.format(userGroups = GroupViewSet.userAuthorizedQuery())
 
-    @staticmethod
-    def userAuthorizedQueryArgs(contextUserID, groupID, privilege):
-        return [groupID] + GroupViewSet.userAuthorizedQueryArgs(contextUserID, privilege)
+#     @staticmethod
+#     def userAuthorizedQueryArgs(contextUserID, groupID, privilege):
+#         return [groupID] + GroupViewSet.userAuthorizedQueryArgs(contextUserID, privilege)
 
-    def get_queryset(self):
-        return GroupAuthorization.objects.filter(id__in = RawSQL(
-                self.userAuthorizedQuery(),
-                self.userAuthorizedQueryArgs(self.kwargs['context_user_id'], self.kwargs['group_id'], 'member'))
-            ).order_by('id')
+#     def get_queryset(self):
+#         return GroupAuthorization.objects.filter(id__in = RawSQL(
+#                 self.userAuthorizedQuery(),
+#                 self.userAuthorizedQueryArgs(self.kwargs['context_user_id'], self.kwargs['group_id'], 'member'))
+#             ).order_by('id')
 
-    def create(self, request, *args, **kwargs): # TODO check permision (now every member can add)
-        return super().create(
-            modifyRequest(request, ['authorizer_id', 'group_id'], [kwargs['context_user_id'], kwargs['group_id']]),
-            *args, 
-            **kwargs)
+#     def create(self, request, *args, **kwargs): # TODO check permision (now every member can add)
+#         return super().create(
+#             modifyRequest(request, ['authorizer_id', 'group_id'], [kwargs['context_user_id'], kwargs['group_id']]),
+#             *args, 
+#             **kwargs)
 
 
 
-class GroupPrivilegesViewSet(viewsets.ReadOnlyModelViewSet, mixins.ListModelMixin):
-    queryset = GroupPrivileges.objects.all()
-    serializer_class = GroupPrivilegesSerializer
+# class GroupPrivilegesViewSet(viewsets.ReadOnlyModelViewSet, mixins.ListModelMixin):
+#     queryset = GroupPrivileges.objects.all()
+#     serializer_class = GroupPrivilegesSerializer
     
 
 

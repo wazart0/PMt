@@ -33,6 +33,49 @@
 
 from django.db import models, connection
 from django.core.exceptions import FieldError
+from django.db.models.expressions import RawSQL
+
+
+
+class NodeModelManager(models.Manager):    
+
+    def create(self, creator_id, *args, **kwargs):
+        # print("Object creation ( type ): \t\t\t( " + str(self.model.node_type) + ' )')
+        if creator_id != None:
+            requester = Node.objects.get(id=creator_id)
+            if requester.node_type.pk != 'user':
+                raise FieldError("Creator doesn't exists: " + str(creator_id))
+        node = Node.objects.create(node_type=NodeType.objects.get(id=self.model.node_type))
+        if creator_id != None:
+            Node.objects.connect_nodes(requester, node, creator='True')
+        obj = super().create(id=node, *args, **kwargs)
+        # print("Object created ( type | pk | object ): \t\t( " + str(obj.node_type) + " | " + str(obj.pk) + " | " + str(obj.id) + ' )')
+        return obj
+
+    def get_predecessors(self, node_id, edge_column=None, edge_column_value=None):
+        if edge_column == 'timeline_dependancy':
+            return self.filter(id__in=RawSQL(
+                '''
+                    SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.target_node_id WHERE e.source_node_id = %s AND n.node_type = %s AND e.timeline_dependancy IS NOT NULL
+                ''', [node_id, self.model.node_type])).order_by('id')
+        return self.filter(id__in=RawSQL(
+            '''
+                SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.target_node_id WHERE e.source_node_id = %s AND n.node_type = %s
+            ''', [id, self.model.node_type])).order_by('id')
+
+    def get_successors(self, node_id, edge_column=None, edge_column_value=None):
+        if edge_column == 'timeline_dependancy':
+            return self.filter(id__in=RawSQL(
+                '''
+                    SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.source_node_id WHERE e.target_node_id = %s AND n.node_type = %s AND e.timeline_dependancy IS NOT NULL
+                ''', [node_id, self.model.node_type])).order_by('id')
+        return self.filter(id__in=RawSQL(
+            '''
+                SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.source_node_id WHERE e.target_node_id = %s AND n.node_type = %s
+            ''', [id, self.model.node_type])).order_by('id')
+
+
+
 
 
 
@@ -43,49 +86,26 @@ class NodeType(models.Model): # if this required?
 
     objects = models.Manager()
 
-# class TimeDependency(models.Model): # if this required?
-#     pass
 
 
 class GraphModelManager(models.Manager):
-    class QuerySet(models.QuerySet):
-        def get_closest_nodes(self):
-            return self.filter(id__in=RawSQL(
-                '''
-                    SELECT id FROM node n LEFT JOIN edge e ON n.id = e.b WHERE e.a = %s
-                ''', id)).order_by('id')
-        
-    def get_queryset(self):
-        return self.QuerySet(self.model, using=self.db)
 
     @staticmethod
     def connect_nodes(source, target, **kwargs):
         if source is None or target is None or kwargs is None:
             raise FieldError('MISSING PARAMETERS: Cannot connect nodes (' + str(source) + ' -> ' + str(target) + '): ' + str(kwargs))
         return Edge.objects.create(source_node_id=source, target_node_id=target, **kwargs)
-        # cursor = connection.cursor()
-        # string = ''
-        # for i in list(kwargs.keys()):
-        #     string += i
-        # cursor.execute(
-        #     '''
-        #         INSERT INTO graph_engine_edge (source_node_id, target_node_id, {fields}) 
-        #         VALUES (%s, %s, %s)
-        #     ''')
-        # print(str(source) + ' -> ' + str(target))
-        # print(kwargs)
-        # print(bool(kwargs))
-        # print('\n')
+
 
 
 
 class Node(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False, db_column = 'id')
 
+    # creator = models.ForeignKey('self', models.SET_NULL, null=True, editable=False, db_column='creator', related_name='node_creator')
     node_type = models.ForeignKey(null=False, to=NodeType, editable=False, db_column='node_type', related_name='node_node_type', on_delete=models.PROTECT)
 
     objects = GraphModelManager()
-
 
 
 class Edge(models.Model): # probably this should be hidden in Node class
@@ -95,14 +115,17 @@ class Edge(models.Model): # probably this should be hidden in Node class
     source_node_id = models.ForeignKey(to=Node, null=False, editable=False, db_column='source_node_id', related_name='edge_source_node_id', on_delete=models.PROTECT)
     target_node_id = models.ForeignKey(to=Node, null=False, editable=False, db_column='target_node_id', related_name='edge_target_node_id', on_delete=models.PROTECT)
 
-    timeline_dependency = models.CharField(null=True, max_length=2, choices=(
-        ('ss', 'Start-Start'),
-        ('sf', 'Start-Finish'),
-        ('fs', 'Finish-Start'),
-        ('ff', 'Finish-Finish')
+    timeline_dependancy = models.CharField(null=True, max_length=2, choices=(
+        ('SS', 'Start-Start'),
+        ('SF', 'Start-Finish'),
+        ('FS', 'Finish-Start'),
+        ('FF', 'Finish-Finish')
     )) # None | start-start | start-finish | finish-start | finish-finish
     cost_dependency = models.BooleanField(null=True)
     resource_dependency = models.BooleanField(null=True)
     creator = models.BooleanField(null=True)
+    assignee = models.BooleanField(null=True)
+    belongs_to = models.BooleanField(null=True)
+    member = models.BooleanField(null=True) # TODO has to be moved to permission level probably
 
     objects = models.Manager()

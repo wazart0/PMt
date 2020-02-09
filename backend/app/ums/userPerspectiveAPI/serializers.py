@@ -27,16 +27,16 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 
-class GroupAuthorizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GroupAuthorization
-        fields = '__all__'
-        read_only_fields = ('id', 'created')
+# class GroupAuthorizationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = GroupAuthorization
+#         fields = '__all__'
+#         read_only_fields = ('id', 'created')
     
 
 
-class GroupPrivilegesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GroupPrivileges
-        fields = '__all__'
-        read_only_fields = ('id', 'name', 'code_name')
+# class GroupPrivilegesSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = GroupPrivileges
+#         fields = '__all__'
+#         read_only_fields = ('id', 'name', 'code_name')

@@ -1,6 +1,7 @@
 from django.db import models
 
 from graph_engine.models import Node, NodeModelManager
+import graph_engine.models as ge
 
 
 
@@ -11,18 +12,25 @@ class Project(models.Model):
     objects = NodeModelManager()
     id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='project_id', on_delete=models.PROTECT)
 
-    created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
-    updated = models.DateTimeField(null = False, editable = False, auto_now = True) # TODO special logger has to be implemented - later remove
+    created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
+    updated = models.DateTimeField(null=False, editable=False, auto_now=True) # TODO special logger has to be implemented - later remove
 
-    name = models.CharField(null = False, max_length = 100)
-    description = models.TextField(null = True, default = None)
-    closed = models.DateTimeField(null = True)
+    name = models.CharField(null=False, max_length=100)
+    description = models.TextField(null=True, default=None)
+    closed = models.DateTimeField(null=True)
+    worktime_planned = models.DurationField(null=False) # worktime required -> if none then calulate based on subprojects and operations
     # project_type -> project/task/user story/epic/other
 
-    def add_assignee(self, user_id):
+    # responsible user -> it is just a supervisor of given project - not assignee
+    def add_assignee(self, user_id): #  TODO assignee should be managed on resource level
         pass
-    
 
+
+    # @property
+    # def has_belonger_(self):
+    #     return True
+    #     return len(ge.Edge.objects.filter(target_node_id=self.pk, belongs_to=True)) != 0
+    
 
 
 

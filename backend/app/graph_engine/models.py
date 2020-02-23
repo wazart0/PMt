@@ -37,6 +37,8 @@ from django.db.models.expressions import RawSQL
 
 
 
+
+
 class NodeModelManager(models.Manager):    
 
     def create(self, creator_id, *args, **kwargs):
@@ -56,35 +58,23 @@ class NodeModelManager(models.Manager):
         if edge_column == 'timeline_dependancy':
             return self.filter(id__in=RawSQL(
                 '''
-                    SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.target_node_id WHERE e.source_node_id = %s AND n.node_type = %s AND e.timeline_dependancy IS NOT NULL
-                ''', [node_id, self.model.node_type])).order_by('id')
-        return self.filter(id__in=RawSQL(
-            '''
-                SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.target_node_id WHERE e.source_node_id = %s AND n.node_type = %s
-            ''', [id, self.model.node_type])).order_by('id')
-
-    def get_successors(self, node_id, edge_column=None, edge_column_value=None):
-        if edge_column == 'timeline_dependancy':
-            return self.filter(id__in=RawSQL(
-                '''
                     SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.source_node_id WHERE e.target_node_id = %s AND n.node_type = %s AND e.timeline_dependancy IS NOT NULL
                 ''', [node_id, self.model.node_type])).order_by('id')
         return self.filter(id__in=RawSQL(
             '''
                 SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.source_node_id WHERE e.target_node_id = %s AND n.node_type = %s
             ''', [id, self.model.node_type])).order_by('id')
-
-
-
-
-
-
-class NodeType(models.Model): # if this required?
-    id = models.CharField(primary_key=True, max_length=20, editable=False, db_column='id')
-    display_name = models.TextField(null=False)
-    description = models.TextField(null=True)
-
-    objects = models.Manager()
+            
+    def get_successors(self, node_id, edge_column=None, edge_column_value=None):
+        if edge_column == 'timeline_dependancy':
+            return self.filter(id__in=RawSQL(
+                '''
+                    SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.target_node_id WHERE e.source_node_id = %s AND n.node_type = %s AND e.timeline_dependancy IS NOT NULL
+                ''', [node_id, self.model.node_type])).order_by('id')
+        return self.filter(id__in=RawSQL(
+            '''
+                SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.target_node_id WHERE e.source_node_id = %s AND n.node_type = %s
+            ''', [id, self.model.node_type])).order_by('id')
 
 
 
@@ -97,6 +87,16 @@ class GraphModelManager(models.Manager):
         return Edge.objects.create(source_node_id=source, target_node_id=target, **kwargs)
 
 
+
+
+
+
+class NodeType(models.Model): # if this required?
+    id = models.CharField(primary_key=True, max_length=20, editable=False, db_column='id')
+    display_name = models.TextField(null=False)
+    description = models.TextField(null=True)
+
+    objects = models.Manager()
 
 
 class Node(models.Model):

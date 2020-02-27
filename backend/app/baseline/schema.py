@@ -230,22 +230,20 @@ lowest_level_projects as (
 		id not in (select project_id from owns)
 )
 
--- select 
--- 	*
--- from lowest_level_projects
-
-select 
-	lowest_level_dependancy.*,
-	project.name as project_name,
-	predecessor.name as predecessor_name
+select
+	lowest_level_dependancy.project_id,
+	max(predecessor.timestamp_begin + predecessor.worktime_planned) as predecessor_timestamp_end,
+	min(project.timestamp_begin) as project_timestamp_begin
 from
 	lowest_level_dependancy
-
-left join project_project as project on project_id = project.id
-left join project_project as predecessor on predecessor_id = predecessor.id
-order by
-	project_id,
-	predecessor_id
+join lowest_level_projects as predecessor on lowest_level_dependancy.predecessor_id = predecessor.project_id
+join lowest_level_projects as project on lowest_level_dependancy.project_id = project.project_id
+where
+	lowest_level_dependancy.dependance = 'FS'
+group by 
+	lowest_level_dependancy.project_id
+having
+	min(project.timestamp_begin) < max(predecessor.timestamp_begin + predecessor.worktime_planned)
 '''
 
 

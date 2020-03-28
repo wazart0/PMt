@@ -92,7 +92,7 @@ class GraphModelManager(models.Manager):
 
 
 class NodeType(models.Model): # if this required?
-    id = models.CharField(primary_key=True, max_length=20, editable=False, db_column='id')
+    id = models.CharField(primary_key=True, max_length=30, editable=False, db_column='id')
     display_name = models.TextField(null=False)
     description = models.TextField(null=True)
 

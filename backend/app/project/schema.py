@@ -48,6 +48,7 @@ class Project(DjangoObjectType):
         return len(ge.Edge.objects.filter(target_node_id=self.pk, belongs_to=True)) != 0
 
 
+
 class Query(ObjectType):
     project = graphene.Field(Project, id=graphene.Int())
     projects = graphene.List(Project)

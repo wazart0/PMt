@@ -89,7 +89,7 @@ create temp table lowest_level_dependancy as (
 );
 
 create temp table lowest_level_projects as (
-		with
+	with
 	project_edges as (
 		select
 			graph_engine_edge.*
@@ -115,14 +115,15 @@ create temp table lowest_level_projects as (
 	)
 	select
 		id as project_id,
-		worktime_planned,
-		cast ('2019-12-30 00:00:00-00' as timestamptz) as timestamp_begin
+		worktime_planned
 	from
 		project_project
 	where
 		id not in (select project_id from owns)
 );
 
+alter table lowest_level_projects 
+	add column timestamp_begin timestamptz default cast('2019-12-30 00:00:00-00' as timestamptz);
 
 -- select
 -- 	lowest_level_dependancy.project_id,

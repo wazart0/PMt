@@ -16,3 +16,4 @@ printf '\n\nInitialize DB (insert data):\n'
 
 printf '\n\nStart server:\n'
 python3 ./manage.py runserver_plus --print-sql 0.0.0.0:8000
+

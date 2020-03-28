@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'graph_engine.apps.GraphEngineConfig',
     'project.apps.ProjectConfig',
     'operation.apps.OperationConfig',
+    'pmt_calendar.apps.PmtCalendarConfig',
 ]
 
 MIDDLEWARE = [

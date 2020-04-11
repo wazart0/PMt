@@ -2,8 +2,8 @@ with
 availability as (
 	select 
 		id,
-		generate_series(pmt_calendar_availability.start, timestamptz '2020-12-30', pmt_calendar_availability.repeat_interval) as start,
-		generate_series(pmt_calendar_availability.end, timestamptz '2020-12-30', pmt_calendar_availability.repeat_interval) as end
+		generate_series(pmt_calendar_availability.start, timestamptz '2022-12-30', pmt_calendar_availability.repeat_interval) as start,
+		generate_series(pmt_calendar_availability.end, timestamptz '2022-12-30', pmt_calendar_availability.repeat_interval) as end
 	from
 		pmt_calendar_availability
 )

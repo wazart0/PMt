@@ -17,7 +17,7 @@ CREATE TABLE edges (
     PRIMARY KEY (source_node, target_node),
     -- Custom fields:
     -- hierarchy BOOLEAN, -- if this required?
-    -- dependancy_type INTEGER, -- cannot remind why
+    -- dependency_type INTEGER, -- cannot remind why
     -- privileges_dependency BOOLEAN, -- can't remind why
     cost_dependency BOOLEAN,
     time_dependency BOOLEAN

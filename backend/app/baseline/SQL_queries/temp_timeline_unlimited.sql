@@ -10,17 +10,17 @@ begin
 	while row_counter > 0 loop
 		create temp table updated_timestamp as (
 			select
-				lowest_level_dependancy.project_id as project_id,
+				lowest_level_dependency.project_id as project_id,
 				max(predecessor.timestamp_begin + predecessor.worktime_planned) as predecessor_timestamp_end,
 				min(project.timestamp_begin) as project_timestamp_begin
 			from
-				lowest_level_dependancy
-			join lowest_level_projects as predecessor on lowest_level_dependancy.predecessor_id = predecessor.project_id
-			join lowest_level_projects as project on lowest_level_dependancy.project_id = project.project_id
+				lowest_level_dependency
+			join lowest_level_projects as predecessor on lowest_level_dependency.predecessor_id = predecessor.project_id
+			join lowest_level_projects as project on lowest_level_dependency.project_id = project.project_id
 			where
-				lowest_level_dependancy.dependance = 'FS'
+				lowest_level_dependency.dependence = 'FS'
 			group by 
-				lowest_level_dependancy.project_id
+				lowest_level_dependency.project_id
 			having
 				min(project.timestamp_begin) < max(predecessor.timestamp_begin + predecessor.worktime_planned)
 		);

@@ -18,7 +18,7 @@ class Project(models.Model):
     name = models.CharField(null=False, max_length=100)
     description = models.TextField(null=True, default=None)
     closed = models.DateTimeField(null=True)
-    worktime_planned = models.DurationField(null=False) # worktime required -> if none then calulate based on subprojects and operations
+    worktime_planned = models.DurationField(null=True) # worktime required -> if none then calulate based on subprojects and operations
     # project_type -> project/task/user story/epic/other
 
     # responsible user -> it is just a supervisor of given project - not assignee

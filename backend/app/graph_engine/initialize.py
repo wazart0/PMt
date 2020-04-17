@@ -22,7 +22,8 @@ def node_type_init(sender, **kwargs):
         ['group', 'Group', None, 'group'],
         ['project', 'Project', '“A project is a temporary organization that is created for the purpose of delivering one or more business products according to an agreed Business Case.”', 'project'],
         ['operation', 'Operation', 'Operations are the ongoing execution of activities and they follow an organization’s procedures to produce the same result or a repetitive service. Operations are permanent in nature.', 'operation'],
-        ['availability', 'Availability', None, 'availability']
+        ['availability', 'Availability', None, 'availability'],
+        ['baseline', 'Baseline', None, 'baseline']
     ]
 
     print('Initializing node types...')

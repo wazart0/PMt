@@ -17,7 +17,7 @@
 #     PRIMARY KEY (source_node, target_node),
 #     -- Custom fields:
 #     -- hierarchy BOOLEAN, -- if this required?
-#     -- dependancy_type INTEGER, -- cannot remind why
+#     -- dependency_type INTEGER, -- cannot remind why
 #     -- privileges_dependency BOOLEAN, -- can't remind why
 #     cost_dependency BOOLEAN,
 #     time_dependency BOOLEAN,
@@ -55,10 +55,10 @@ class NodeModelManager(models.Manager):
         return obj
 
     def get_predecessors(self, node_id, edge_column=None, edge_column_value=None):
-        if edge_column == 'timeline_dependancy':
+        if edge_column == 'timeline_dependency':
             return self.filter(id__in=RawSQL(
                 '''
-                    SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.source_node_id WHERE e.target_node_id = %s AND n.node_type = %s AND e.timeline_dependancy IS NOT NULL
+                    SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.source_node_id WHERE e.target_node_id = %s AND n.node_type = %s AND e.timeline_dependency IS NOT NULL
                 ''', [node_id, self.model.node_type])).order_by('id')
         return self.filter(id__in=RawSQL(
             '''
@@ -66,10 +66,10 @@ class NodeModelManager(models.Manager):
             ''', [id, self.model.node_type])).order_by('id')
             
     def get_successors(self, node_id, edge_column=None, edge_column_value=None):
-        if edge_column == 'timeline_dependancy':
+        if edge_column == 'timeline_dependency':
             return self.filter(id__in=RawSQL(
                 '''
-                    SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.target_node_id WHERE e.source_node_id = %s AND n.node_type = %s AND e.timeline_dependancy IS NOT NULL
+                    SELECT n.id FROM graph_engine_node n LEFT JOIN graph_engine_edge e ON n.id = e.target_node_id WHERE e.source_node_id = %s AND n.node_type = %s AND e.timeline_dependency IS NOT NULL
                 ''', [node_id, self.model.node_type])).order_by('id')
         return self.filter(id__in=RawSQL(
             '''
@@ -84,7 +84,11 @@ class GraphModelManager(models.Manager):
     def connect_nodes(source, target, **kwargs):
         if source is None or target is None or kwargs is None:
             raise FieldError('MISSING PARAMETERS: Cannot connect nodes (' + str(source) + ' -> ' + str(target) + '): ' + str(kwargs))
-        return Edge.objects.create(source_node_id=source, target_node_id=target, **kwargs)
+        edge = Edge.objects.filter(source_node_id=source, target_node_id=target)
+        if len(edge) == 0:
+            return Edge.objects.create(source_node_id=source, target_node_id=target, **kwargs)
+        edge.update(**kwargs)
+        return edge[0]
 
 
 
@@ -108,6 +112,7 @@ class Node(models.Model):
     objects = GraphModelManager()
 
 
+# TODO make it generic and add materialized views
 class Edge(models.Model): # probably this should be hidden in Node class
     class Meta:
         unique_together = ('source_node_id', 'target_node_id')
@@ -115,7 +120,7 @@ class Edge(models.Model): # probably this should be hidden in Node class
     source_node_id = models.ForeignKey(to=Node, null=False, editable=False, db_column='source_node_id', related_name='edge_source_node_id', on_delete=models.PROTECT)
     target_node_id = models.ForeignKey(to=Node, null=False, editable=False, db_column='target_node_id', related_name='edge_target_node_id', on_delete=models.PROTECT)
 
-    timeline_dependancy = models.CharField(null=True, max_length=2, choices=(
+    timeline_dependency = models.CharField(null=True, max_length=2, choices=(
         ('SS', 'Start-Start'),
         ('SF', 'Start-Finish'),
         ('FS', 'Finish-Start'),

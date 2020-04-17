@@ -33,10 +33,10 @@ class Project(DjangoObjectType):
     has_belonger = graphene.Boolean()
 
     def resolve_predecessors(self, info): # TODO divide into SS/FF/SF/FS
-        return pjt.Project.objects.get_predecessors(self.pk, edge_column='timeline_dependancy')
+        return pjt.Project.objects.get_predecessors(self.pk, edge_column='timeline_dependency')
 
     def resolve_successors(self, info): # TODO divide into SS/FF/SF/FS
-        return pjt.Project.objects.get_successors(self.pk, edge_column='timeline_dependancy')
+        return pjt.Project.objects.get_successors(self.pk, edge_column='timeline_dependency')
 
     def resolve_belongs_to(self, info):
         if len(ge.Edge.objects.filter(source_node_id=self.pk, belongs_to=True)) == 0:
@@ -68,9 +68,9 @@ class Query(ObjectType):
 
 
 
-class TimelineDependanceInput(graphene.InputObjectType):
+class TimelinedependenceInput(graphene.InputObjectType):
     project_id = graphene.Int(required=True)
-    dependance_type = graphene.String(required=True)
+    dependence_type = graphene.String(required=True)
 
 
 class ProjectCreator(graphene.Mutation):
@@ -82,7 +82,7 @@ class ProjectCreator(graphene.Mutation):
         project_type = graphene.String(required=True)
         belongs_to = graphene.Int() # parent - choose final naming; group | project
         worktime_planned = graphene.String()
-        predecessors = graphene.List(TimelineDependanceInput) # dependance from other projects
+        predecessors = graphene.List(TimelinedependenceInput) # dependence from other projects
 
     project = graphene.Field(Project)
 
@@ -93,14 +93,14 @@ class ProjectCreator(graphene.Mutation):
             ge.GraphModelManager.connect_nodes(project.id, ge.Node.objects.get(id=belongs_to), belongs_to=True)
         if predecessors is not None:
             for i in predecessors:
-                ge.GraphModelManager.connect_nodes(project.id, ge.Node.objects.get(id=i['project_id']), timeline_dependancy=i['dependance_type'])
+                ge.GraphModelManager.connect_nodes(project.id, ge.Node.objects.get(id=i['project_id']), timeline_dependency=i['dependence_type'])
         return ProjectCreator(project=project)
 
 
 class ProjectUpdater(graphene.Mutation):
     class Arguments:
         project_id = graphene.Int(required=True)
-        predecessors = graphene.List(TimelineDependanceInput) # dependance from other projects
+        predecessors = graphene.List(TimelinedependenceInput) # dependence from other projects
 
     project = graphene.Field(Project)
 
@@ -110,9 +110,9 @@ class ProjectUpdater(graphene.Mutation):
             for i in predecessors:
                 edges = ge.Edge.objects.filter(source_node_id=i['project_id'], target_node_id=project.pk)
                 if len(edges) == 0:
-                    ge.GraphModelManager.connect_nodes(ge.Node.objects.get(id=i['project_id']), ge.Node.objects.get(id=project.pk), timeline_dependancy=i['dependance_type'])
+                    ge.GraphModelManager.connect_nodes(ge.Node.objects.get(id=i['project_id']), ge.Node.objects.get(id=project.pk), timeline_dependency=i['dependence_type'])
                 else:
-                    edges[0].timeline_dependancy = i['dependance_type']
+                    edges[0].timeline_dependency = i['dependence_type']
         return ProjectUpdater(project=project)
 
 

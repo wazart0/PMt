@@ -7,7 +7,7 @@ con = psycopg2.connect(user='ad', password='pass', database='pmt')
 
 av = pd.read_sql(open('../../pmt_calendar/sql_queries/calculate_availability.sql', 'r').read(), con)
 lp = pd.read_sql(open('../../baseline/sql_queries/temp_lowest_level_projects.sql', 'r').read() + 'select * from lowest_level_projects;', con)
-ld = pd.read_sql(open('../../baseline/sql_queries/temp_lowest_level_dependancies.sql', 'r').read() + 'select * from lowest_level_dependancy;', con)
+ld = pd.read_sql(open('../../baseline/sql_queries/temp_lowest_level_dependencies.sql', 'r').read() + 'select * from lowest_level_dependency;', con)
 
 con.close()
 
@@ -70,11 +70,11 @@ def assign_time_first_free(project_id, from_date = None, assignee = None, one_wo
     raise Exception("No more available time in calendar.")
 
 
-def fix_dependance_issues(one_worker_per_project = False):
+def fix_dependence_issues(one_worker_per_project = False):
     global av, lp, ld
     number_of_fixes = 0
-    while True: # fix dependancy issue
-        update = ld[ld.dependance == 'FS'].merge(lp, left_on='predecessor_id', right_on='project_id')[['project_id_x', 'end']].groupby(['project_id_x']).max()
+    while True: # fix dependency issue
+        update = ld[ld.dependence == 'FS'].merge(lp, left_on='predecessor_id', right_on='project_id')[['project_id_x', 'end']].groupby(['project_id_x']).max()
         update = update.merge(lp, left_on='project_id_x', right_on='project_id')
         update = update[update.start < update.end_x]
 
@@ -86,9 +86,9 @@ def fix_dependance_issues(one_worker_per_project = False):
         number_of_fixes += 1
 
 
-def create_dependancy_paths():
+def create_dependency_paths():
     global lp, ld
-    # build dependancy paths
+    # build dependency paths
     paths = [[i] for i in list(lp.project_id[~lp.project_id.isin(ld.project_id)])] # roots
     number_of_new_paths = len(paths)
     while number_of_new_paths:
@@ -104,7 +104,7 @@ def create_dependancy_paths():
     return paths
 
 
-def assign_projects_to_resources_no_dependance(one_worker_per_project = False):
+def assign_projects_to_resources_no_dependence(one_worker_per_project = False):
     global av, lp
     for project_id in lp.project_id: # assign first availble time to project
         assign_time_first_free(project_id, one_worker_per_project=one_worker_per_project)
@@ -116,7 +116,7 @@ def assign_projects_to_resources_first_free(one_worker_per_project = False):
         assign_time_first_free(project_id, one_worker_per_project=one_worker_per_project)
         
     # print("Start fixing...")
-    number_of_fixes = fix_dependance_issues(one_worker_per_project=one_worker_per_project)
+    number_of_fixes = fix_dependence_issues(one_worker_per_project=one_worker_per_project)
     print("Preliminary assignment quality: " + str(number_of_fixes))
     return lp.end.max()
 
@@ -125,7 +125,7 @@ def assign_projects_to_resources_first_free(one_worker_per_project = False):
 def assign_projects_to_resources_from_longest_path(one_worker_per_project = False):
     global av, lp, ld
 
-    paths = create_dependancy_paths()
+    paths = create_dependency_paths()
 
     for path in paths:
         path.append(lp[lp.project_id.isin(path)].worktime_planned.sum())
@@ -140,7 +140,7 @@ def assign_projects_to_resources_from_longest_path(one_worker_per_project = Fals
         # break
 
     # print("Start fixing...")
-        number_of_fixes = fix_dependance_issues(one_worker_per_project=one_worker_per_project)
+        number_of_fixes = fix_dependence_issues(one_worker_per_project=one_worker_per_project)
         # print("Preliminary assignment quality (bigger -> worser): " + str(number_of_fixes))
     return lp[lp.end.notnull()].end.max()
 
@@ -149,7 +149,7 @@ def assign_projects_to_resources_from_longest_path(one_worker_per_project = Fals
 def assign_projects_to_resources_from_path_begin(one_worker_per_project = False):
     global av, lp, ld
 
-    paths = create_dependancy_paths()
+    paths = create_dependency_paths()
 
     print('Assigning projects...')
 
@@ -168,7 +168,7 @@ def assign_projects_to_resources_from_path_begin(one_worker_per_project = False)
     print('Unassigned projects: ' + str(lp[~lp.project_id.isin(av.project_id)].shape[0]))
 
     # print("Start fixing...")
-    number_of_fixes = fix_dependance_issues(one_worker_per_project=one_worker_per_project)
+    number_of_fixes = fix_dependence_issues(one_worker_per_project=one_worker_per_project)
     print("Preliminary assignment quality (bigger -> worser): " + str(number_of_fixes))
     return lp.end.max()
 
@@ -194,7 +194,7 @@ def assign_projects_infinite_resources(start_date):
     lp['start'] = pd.Timestamp(start_date, tz='UTC')
     lp['end'] = lp['start'] + lp['worktime_planned']
     while True:
-        update = ld[ld.dependance == 'FS'].merge(lp, left_on='predecessor_id', right_on='project_id')[['project_id_x', 'end']].groupby(['project_id_x']).max()
+        update = ld[ld.dependence == 'FS'].merge(lp, left_on='predecessor_id', right_on='project_id')[['project_id_x', 'end']].groupby(['project_id_x']).max()
         update = update.merge(lp, left_on='project_id_x', right_on='project_id')
         update = update[update.start < update.end_x][['project_id', 'worktime_planned', 'end_x']].rename(columns={'end_x': 'start'})
         update['end'] = update.start + update.worktime_planned

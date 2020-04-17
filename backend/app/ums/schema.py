@@ -13,11 +13,11 @@ class User(DjangoObjectType):
     id = graphene.Int(required=True)
 
 
-class UserFilter(DjangoObjectType):
-    class Meta:
-        model = ums.User
-        interfaces = (graphene.Node,)
-        filter_fields = '__all__'
+# class UserFilter(DjangoObjectType):
+#     class Meta:
+#         model = ums.User
+#         interfaces = (graphene.Node,)
+#         filter_fields = '__all__'
 
 
 class Group(DjangoObjectType):
@@ -31,7 +31,7 @@ class Group(DjangoObjectType):
 class Query(ObjectType):
     user = graphene.Field(User, id=graphene.Int())
     users = graphene.List(User)
-    userFilter = DjangoFilterConnectionField(UserFilter)
+    # userFilter = DjangoFilterConnectionField(UserFilter)
 
     group = graphene.Field(Group, id=graphene.Int())
     groups = graphene.List(Group)

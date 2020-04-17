@@ -8,7 +8,7 @@ def modifyRequest(request, add_fields, values, remove_fields = []):
             for i in range(len(add_fields)):
                 request.data[add_fields[i]] = str(values[i])
         else:
-            raise valuesError('modifyRequest(): some error in querry')
+            raise ValueError('modifyRequest(): some error in querry')
     else:
         request.data[add_fields] = str(values)
     for field in remove_fields:

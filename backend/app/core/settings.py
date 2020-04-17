@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'project.apps.ProjectConfig',
     'operation.apps.OperationConfig',
     'pmt_calendar.apps.PmtCalendarConfig',
+    'baseline.apps.BaselineConfig',
 ]
 
 MIDDLEWARE = [

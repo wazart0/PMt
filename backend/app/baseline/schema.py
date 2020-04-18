@@ -8,6 +8,7 @@ from django.db import connection
 from time import time
 
 import baseline.models as bl
+# import baseline.models_virtual as bl_v
 import graph_engine.models as ge
 import project.models as pj
 import libs.timeline.primitive_estimation as lib
@@ -20,19 +21,24 @@ import libs.timeline.primitive_estimation as lib
 
 
 
+class ProjectTimeline(DjangoObjectType):
+    class Meta:
+        model = bl.Project
+        exclude = ('baseline_id', 'id',)
+
+    worktime_planned = graphene.String()
+
 
 class Timeline(DjangoObjectType):
     class Meta:
         model = bl.Timeline
-        exclude = ('baseline_id',)
-    # id = graphene.Int(required=True)
+        exclude = ('baseline_id', 'id',)
 
 
 class ProjectDependency(DjangoObjectType):
     class Meta:
         model = bl.ProjectDependency
-        exclude = ('baseline_id',)
-    # id = graphene.Int(required=True)
+        exclude = ('baseline_id', 'id',)
 
 
 class Baseline(DjangoObjectType):
@@ -43,6 +49,7 @@ class Baseline(DjangoObjectType):
     
     timeline = graphene.List(Timeline)
     dependencies = graphene.List(ProjectDependency)
+    projects = graphene.List(ProjectTimeline)
 
     def resolve_timeline(self, info):
         return bl.Timeline.objects.filter(baseline_id=self.id)
@@ -50,23 +57,22 @@ class Baseline(DjangoObjectType):
     def resolve_dependencies(self, info):
         return bl.ProjectDependency.objects.filter(baseline_id=self.id)
 
+    def resolve_projects(self, info):
+        return bl.Project.objects.filter(baseline_id=self.id)
+
 
 
 
 class Query(ObjectType):
     baseline = graphene.Field(Baseline, id=graphene.Int())
-    # projects = graphene.List(Project)
-    
-    # projectFilter = DjangoFilterConnectionField(ProjectFilter)
 
-    def resolve_project(self, info, **kwargs):
+    def resolve_baseline(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
             return bl.Baseline.objects.get(pk=id)
         return None
 
-    # def resolve_projects(self, info, **kwargs):
-    #     return pjt.Project.objects.all()
+
 
 
 
@@ -104,14 +110,15 @@ class BaselineUpdater(graphene.Mutation):
 
             algo_time_start = time()
             finish_date = proposal.assign_projects_to_resources_first_free(one_worker_per_project=True)
-            algo_time_end = time()
+            algo_time_finish = time()
 
             print('Project finish timestamp: ' + str(finish_date))
-            print('Calculation time [s]: ' + str(algo_time_end - algo_time_start))
-            print('Unassigned workers time during project: ' + str((proposal.av[proposal.av.project_id.isnull() & (proposal.av.start <= finish_date)].end - proposal.av[proposal.av.project_id.isnull() & (proposal.av.start <= finish_date)].start).sum()))
+            print('Calculation time [s]: ' + str(algo_time_finish - algo_time_start))
+            print('Unassigned workers time during project: ' + str((proposal.av[proposal.av.project_id.isnull() & (proposal.av.start <= finish_date)].finish - proposal.av[proposal.av.project_id.isnull() & (proposal.av.start <= finish_date)].start).sum()))
 
-            bl.Timeline.objects.filter(baseline_id=baseline.pk).delete()
-            bl.ProjectDependency.objects.filter(baseline_id=baseline.pk).delete()
+            bl.Project.objects.filter(baseline_id=baseline.pk).delete() # TODO move to proposal.to_db()
+            bl.Timeline.objects.filter(baseline_id=baseline.pk).delete() # TODO move to proposal.to_db()
+            bl.ProjectDependency.objects.filter(baseline_id=baseline.pk).delete() # TODO move to proposal.to_db()
             proposal.to_db(baseline.pk)
         return BaselineUpdater(baseline=baseline)
 

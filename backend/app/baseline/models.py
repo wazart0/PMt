@@ -27,8 +27,8 @@ class Timeline(models.Model):
     
     project_id = models.ForeignKey(to=Project, null=False, db_column='project_id', related_name='timeline_project_id', on_delete=models.CASCADE)
     user_id = models.ForeignKey(to=User, null=True, db_column='user_id', related_name='timeline_user_id', on_delete=models.CASCADE)
-    begin = models.DateTimeField(null=False)
-    end = models.DateTimeField(null=False)
+    start = models.DateTimeField(null=False)
+    finish = models.DateTimeField(null=False)
 
 
 class ProjectDependency(models.Model):
@@ -44,4 +44,16 @@ class ProjectDependency(models.Model):
         ('FF', 'Finish-Finish')
     )) # None | start-start | start-finish | finish-start | finish-finish
 
+
+class Project(models.Model):
+    # TODO check why Node is required instead of Baseline
+    baseline_id = models.ForeignKey(to=Node, null=False, db_column='baseline_id', related_name='project_baseline_id', on_delete=models.CASCADE)
+    
+    project_id = models.ForeignKey(to=Project, null=False, db_column='project_id', related_name='project_project_id', on_delete=models.CASCADE)
+    belongs_to = models.ForeignKey(to=Project, null=False, db_column='belongs_to', related_name='project_belongs_to', on_delete=models.CASCADE)
+    worktime_planned = models.DurationField(null=False)
+    # user_id = models.ForeignKey(to=User, null=True, db_column='user_id', related_name='timeline_user_id', on_delete=models.CASCADE)
+    start = models.DateTimeField(null=False)
+    finish = models.DateTimeField(null=False)
+    wbs = models.TextField(null=False)
 

@@ -117,12 +117,12 @@ class Baseline(models.Model):
     job_id = models.ForeignKey(null = False, to = Job, on_delete = models.CASCADE, editable = False, db_column = 'job_id', related_name = 'baseline_job_id')
     number = models.SmallIntegerField(null = False, editable = False)
 
-    begin = models.DateTimeField(null = False)
+    start = models.DateTimeField(null = False)
     worktime = models.DurationField(null = False)
 
     @property
-    def end(self):
-        return self.begin + self.worktime
+    def finish(self):
+        return self.start + self.worktime
         
     class Meta:
         unique_together = ('number', 'job_id')

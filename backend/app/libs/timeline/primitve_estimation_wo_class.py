@@ -146,7 +146,7 @@ def assign_projects_to_resources_from_longest_path(one_worker_per_project = Fals
 
 
 
-def assign_projects_to_resources_from_path_begin(one_worker_per_project = False):
+def assign_projects_to_resources_from_path_start(one_worker_per_project = False):
     global av, lp, ld
 
     paths = create_dependency_paths()
@@ -178,7 +178,7 @@ algo_time_start = time()
 
 finish_date = assign_projects_to_resources_first_free(one_worker_per_project=True)
 # finish_date = assign_projects_to_resources_from_longest_path(one_worker_per_project=False)
-# finish_date = assign_projects_to_resources_from_path_begin(one_worker_per_project=True)
+# finish_date = assign_projects_to_resources_from_path_start(one_worker_per_project=True)
 
 algo_time_end = time()
 

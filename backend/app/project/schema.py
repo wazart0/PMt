@@ -27,6 +27,8 @@ class Project(DjangoObjectType):
         model = pjt.Project
     id = graphene.Int(required=True)
 
+    worktime_planned = graphene.String()
+
     predecessors = graphene.List(lambda: Project)
     successors = graphene.List(lambda: Project)
     belongs_to = graphene.Field(lambda: Project)

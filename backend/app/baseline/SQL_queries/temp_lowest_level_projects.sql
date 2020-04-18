@@ -17,5 +17,5 @@ create temp table lowest_level_projects as (
 	where
 		id not in (select project_id from owns)
 	and
-		id in (select * from projects_in_tree)
+		id in (select project_id from projects_in_tree)
 );

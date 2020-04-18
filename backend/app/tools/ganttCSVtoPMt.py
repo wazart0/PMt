@@ -13,9 +13,12 @@ import_to_project_id = None
 
 
 
-gantt_input_columns = {
+gantt_base_columns = {
 	'ID': 'Int64',
-
+	'Name': str,
+	'Duration': 'Int64',
+	'Predecessors': str,
+	'Outline number': str
 }
 
 
@@ -50,7 +53,7 @@ mutation {{
 
 print('Starting ingestion.')
 
-csv = pandas.read_csv(input_csv, parse_dates=['Begin date', 'End date'])
+csv = pandas.read_csv(input_csv, dtype=gantt_base_columns, parse_dates=['Begin date', 'End date'])
 
 if import_to_project_id is None:
 	request_create_top_level = '''
@@ -105,7 +108,11 @@ for index, row in csv.iterrows():
 			print('WARNING: record not ingested: ' + str(url) + str(r.status_code) + str(r.json()) + str(data))
 	
 
-# pmt_id[row['Outline number']] = r.json()
-# print(pmt_id)
+# # pmt_id[row['Outline number']] = r.json()
+# # print(pmt_id)
 
 print("Ingestion finished.")
+
+print("Created project ID: " + str(import_to_project_id))
+
+# print(csv)

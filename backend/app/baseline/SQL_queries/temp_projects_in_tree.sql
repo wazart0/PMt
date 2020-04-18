@@ -1,3 +1,7 @@
+drop table if exists projects_in_tree;
+drop table if exists project_edges;
+
+
 create temp table projects_in_tree as (
 	with recursive
 	project_edges as (
@@ -18,11 +22,25 @@ create temp table projects_in_tree as (
 		select * from project_edges where belongs_to = 'True'
 	),
 	project_tree as (
-		select s1.source_node_id from project_hierarchy as s1 where s1.target_node_id = {top_level_node_id}
+			select 
+				s1.source_node_id, 
+				s1.target_node_id, 
+				cast(ROW_NUMBER() OVER () as varchar) AS wbs 
+			from project_hierarchy as s1 
+			where s1.target_node_id = 55
 		union all
-		select s2.source_node_id from project_hierarchy as s2, project_tree as s1 where s2.target_node_id = s1.source_node_id
+			select 
+				s2.source_node_id, 
+				s2.target_node_id, 
+				concat(s1.wbs, '.', cast(ROW_NUMBER() OVER () as varchar)) AS wbs 
+			from project_hierarchy as s2, project_tree as s1 
+			where s2.target_node_id = s1.source_node_id
 	)
-	select source_node_id as project_id from project_tree
+	select 
+		source_node_id as project_id,
+		target_node_id as belongs_to,
+		wbs
+	from project_tree
 );
 
 create temp table project_edges as (
@@ -31,8 +49,8 @@ create temp table project_edges as (
 	from
 		graph_engine_edge
 	where 
-		graph_engine_edge.source_node_id in (select * from projects_in_tree)
+		graph_engine_edge.source_node_id in (select project_id from projects_in_tree)
 	and
-		graph_engine_edge.target_node_id in (select * from projects_in_tree)
+		graph_engine_edge.target_node_id in (select project_id from projects_in_tree)
 );
 

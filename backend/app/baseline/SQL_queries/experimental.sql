@@ -124,8 +124,8 @@ create temp table lowest_level_projects as (
 );
 
 alter table lowest_level_projects 
-add column timestamp_begin timestamptz,
-add column timestamp_end timestamptz;
+add column timestamp_start timestamptz,
+add column timestamp_finish timestamptz;
 
 create temp table availability as (
 	with
@@ -133,7 +133,7 @@ create temp table availability as (
 		select 
 			id,
 			generate_series(pmt_calendar_availability.start, timestamptz '2020-03-01', pmt_calendar_availability.repeat_interval) as start,
-			generate_series(pmt_calendar_availability.end, timestamptz '2020-03-01', pmt_calendar_availability.repeat_interval) as end
+			generate_series(pmt_calendar_availability.finish, timestamptz '2020-03-01', pmt_calendar_availability.repeat_interval) as finish
 		from
 			pmt_calendar_availability
 	)
@@ -146,8 +146,8 @@ create temp table availability as (
 create temp table updated_timestamp as (
 	select
 		lowest_level_dependency.project_id as project_id,
-		max(predecessor.timestamp_begin + predecessor.worktime_planned) as predecessor_timestamp_end,
-		min(project.timestamp_begin) as project_timestamp_begin
+		max(predecessor.timestamp_start + predecessor.worktime_planned) as predecessor_timestamp_finish,
+		min(project.timestamp_start) as project_timestamp_start
 	from
 		lowest_level_dependency
 	join lowest_level_projects as predecessor on lowest_level_dependency.predecessor_id = predecessor.project_id
@@ -157,7 +157,7 @@ create temp table updated_timestamp as (
 	group by 
 		lowest_level_dependency.project_id
 	having
-		min(project.timestamp_begin) < max(predecessor.timestamp_begin + predecessor.worktime_planned)
+		min(project.timestamp_start) < max(predecessor.timestamp_start + predecessor.worktime_planned)
 );
 
 
@@ -170,14 +170,14 @@ select * from lowest_level_projects
 -- do $$
 -- declare 
 -- 	row_counter integer := 1;
--- begin
+-- start
 -- 	while row_counter > 0 loop
 -- 	-- 	with
 -- 		create temp table updated_timestamp as (
 -- 			select
 -- 				lowest_level_dependency.project_id as project_id,
--- 				max(predecessor.timestamp_begin + predecessor.worktime_planned) as predecessor_timestamp_end,
--- 				min(project.timestamp_begin) as project_timestamp_begin
+-- 				max(predecessor.timestamp_start + predecessor.worktime_planned) as predecessor_timestamp_finish,
+-- 				min(project.timestamp_start) as project_timestamp_start
 -- 			from
 -- 				lowest_level_dependency
 -- 			join lowest_level_projects as predecessor on lowest_level_dependency.predecessor_id = predecessor.project_id
@@ -187,11 +187,11 @@ select * from lowest_level_projects
 -- 			group by 
 -- 				lowest_level_dependency.project_id
 -- 			having
--- 				min(project.timestamp_begin) < max(predecessor.timestamp_begin + predecessor.worktime_planned)
+-- 				min(project.timestamp_start) < max(predecessor.timestamp_start + predecessor.worktime_planned)
 -- 		);
 		
 -- 		update lowest_level_projects
--- 		set timestamp_begin = updated_timestamp.predecessor_timestamp_end
+-- 		set timestamp_start = updated_timestamp.predecessor_timestamp_finish
 -- 		from updated_timestamp
 -- 		where lowest_level_projects.project_id = updated_timestamp.project_id;
 		

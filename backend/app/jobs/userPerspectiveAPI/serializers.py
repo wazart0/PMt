@@ -7,8 +7,8 @@ from jobs.models import *
 class BaselineSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Baseline
-        fields = ('id', 'number', 'begin', 'worktime', 'end')
-        read_only_fields = ('id', 'number', 'end')
+        fields = ('id', 'number', 'start', 'worktime', 'finish')
+        read_only_fields = ('id', 'number', 'finish')
 
 
 class MilestoneSerializer(serializers.ModelSerializer):

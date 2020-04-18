@@ -92,7 +92,7 @@ create temp table lowest_level_projects as (
 	select
 		id as project_id,
 		worktime_planned,
-		cast ('2019-12-30 00:00:00-00' as timestamptz) as timestamp_begin
+		cast ('2019-12-30 00:00:00-00' as timestamptz) as timestamp_start
 	from
 		project_project
 	where
@@ -105,8 +105,8 @@ create temp table lowest_level_projects as (
 
 select
 	lowest_level_dependency.project_id,
-	max(predecessor.timestamp_begin + predecessor.worktime_planned) as predecessor_timestamp_end,
-	min(project.timestamp_begin) as project_timestamp_begin
+	max(predecessor.timestamp_start + predecessor.worktime_planned) as predecessor_timestamp_end,
+	min(project.timestamp_start) as project_timestamp_start
 from
 	lowest_level_dependency
 join lowest_level_projects as predecessor on lowest_level_dependency.predecessor_id = predecessor.project_id
@@ -116,7 +116,7 @@ where
 group by 
 	lowest_level_dependency.project_id
 having
-	min(project.timestamp_begin) < max(predecessor.timestamp_begin + predecessor.worktime_planned)
+	min(project.timestamp_start) < max(predecessor.timestamp_start + predecessor.worktime_planned)
 
 
 ;

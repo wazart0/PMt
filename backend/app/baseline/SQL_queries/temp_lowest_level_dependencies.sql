@@ -70,7 +70,7 @@ create temp table lowest_level_dependency as (
 	)
 	select * from lowest_level_dependence
 	where 
-		project_id in (select * from projects_in_tree)
+		project_id in (select project_id from projects_in_tree)
 	and
-		predecessor_id in (select * from projects_in_tree)
+		predecessor_id in (select project_id from projects_in_tree)
 );

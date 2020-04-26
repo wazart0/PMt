@@ -1,0 +1,16 @@
+FROM node:lts-alpine
+WORKDIR /app
+COPY ./app/package*.json ./
+RUN npm install
+RUN npm install --save axios
+RUN npm install --save moment
+
+RUN npm install @vue/cli@3.7.0 -g
+RUN npm update
+
+COPY ./app/. .
+
+EXPOSE 80
+CMD ["npm", "run", "serve"]
+# ENTRYPOINT ["./entrypoint_develop.sh"]
+

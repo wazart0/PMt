@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  frontend:
+    image: 'pmt-frontend-vue-dev'
+    build:
+      context: ./
+      dockerfile: ./Dockerfile-develop
+    restart: always
+    ports:
+      - 8080:80
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./app/:/app/
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+
+networks:
+  default:
+    external:
+      name: pmt_network

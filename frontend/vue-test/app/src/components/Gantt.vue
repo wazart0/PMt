@@ -340,15 +340,19 @@ export default {
   },
   data() {
 
-    let url = 'http://51.83.129.102:8000/graphql/';
+    // let url = 'http://51.83.129.102:8000/graphql/';
+    let url = 'http://localhost:8000/graphql/';
     // let url = 'http://backend:8000/graphql/';
-		// console.log('some test');
+
     axios.post(url, {
       query: `
           {
-            baseline (id:110) {
+            baseline (id:111) {
               id
               name
+              belongsTo {
+                id
+              }
               projects {
                 wbs
                 projectId {
@@ -375,28 +379,22 @@ export default {
           start: projects[i]['start'],
           duration: moment(projects[i]['finish']).diff(moment(projects[i]['start'])),
           percent: 0,
-          type: "project"
+          type: "task"
         }
 
-        if (projects[i]['belongsTo']['id'] != 55) { 
+        if (projects[i]['belongsTo']['id'] != response['data']['data']['baseline']['belongsTo']['id']) { 
           task['parentId'] = projects[i]['belongsTo']['id']
         }
 
         this.tasks.push(task);
+        if (i == 0) {
+          this.tasks.shift(); 
+        }
       }
 
-      // console.log(moment(response['data']['data']['baseline']['projects'][0]['finish']).diff(moment(response['data']['data']['baseline']['projects'][0]['start'])))
-
-
-      this.tasks.shift();
-      // this.tasks.shift();
-      // this.tasks.pop();
-      
+     
     });//.catch(function (err) { console.error(err); });
 
-    // while (result.status != 200) {}
-    // console.log(result.status != 200)
-    // console.log(result)
 
 
     return {

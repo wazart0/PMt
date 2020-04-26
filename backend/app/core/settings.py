@@ -164,9 +164,11 @@ AUTH_USER_MODEL = 'ums.User'
 
 CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_ALLOW_ALL = False
-# CORS_ORIGIN_WHITELIST = (
-#     'http//:localhost:8000',
-# )
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:8000',
+    'http://frontend:8080',
+
+)
 
 
 REST_FRAMEWORK = {

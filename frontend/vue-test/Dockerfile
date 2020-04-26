@@ -3,6 +3,8 @@ FROM node:lts-alpine as pmt-fe-build-stage
 WORKDIR /app
 COPY ./app/package*.json ./
 RUN npm install
+RUN npm install --save axios
+RUN npm install --save moment
 COPY ./app/. .
 RUN npm run build
 

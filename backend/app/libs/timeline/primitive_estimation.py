@@ -9,6 +9,12 @@ from sqlalchemy import create_engine
 class ProposeAssigment():
 
     def __init__(self, project_id, path='', host='database', user='ad', password='pass', database='pmt'):
+        
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
+        
         con = psycopg2.connect(host=host, user=user, password=password, database=database)
 
         # TODO those SQLs should be rewritten to python (DB should only provide significant data)
@@ -33,8 +39,7 @@ class ProposeAssigment():
 
     def to_db(self, baseline_id):
         # con = psycopg2.connect(host='database', user='ad', password='pass', database='pmt')
-
-        engine = create_engine('postgresql://ad:pass@database:5432/pmt')
+        engine = create_engine('postgresql://' + self.user + ':' + self.password + '@' + self.host + ':5432/' + self.database)
 
         self.update_projects()
 
@@ -60,8 +65,10 @@ class ProposeAssigment():
     def update_projects(self):
         self.projects = self.projects.merge(self.lp, how='left', on='project_id')
         while True:
-            update = self.projects[self.projects.belongs_to.isin(self.projects[self.projects.worktime_planned.isnull()].project_id) & self.projects.worktime_planned.notnull()].groupby('belongs_to').agg({'worktime_planned':'sum', 'start':'min', 'finish':'max'})
-            if update.shape[0] == 0:
+            tmp = self.projects.groupby('belongs_to').count()
+            tmp = tmp[tmp.project_id == tmp.worktime_planned]
+            update = self.projects[self.projects.belongs_to.isin(tmp.index)].groupby('belongs_to').agg({'worktime_planned':'sum', 'start':'min', 'finish':'max'})
+            if self.projects[self.projects.worktime_planned.isnull()].shape[0] == 0:
                 return
             for index, row in update.iterrows():
                 self.projects.loc[self.projects.project_id == index, 'worktime_planned'] = row.worktime_planned
@@ -230,7 +237,7 @@ class ProposeAssigment():
 
 # algo_time_finish = time()
 
-# proposal.update_projects()
+# # proposal.update_projects()
 # print('Project finish timestamp: ' + str(finish_date))
 # print('Calculation time [s]: ' + str(algo_time_finish - algo_time_start))
 # print('Unassigned workers time during project: ' + str((proposal.av[proposal.av.project_id.isnull() & (proposal.av.start <= finish_date)].finish - proposal.av[proposal.av.project_id.isnull() & (proposal.av.start <= finish_date)].start).sum()))

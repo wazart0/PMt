@@ -333,7 +333,7 @@ let options = {
 };
 
 export default {
-  name: "Gantt",
+  name: "Gantt_cp",
   components: {
     GanttElastic,
     GanttHeader

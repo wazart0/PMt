@@ -24,7 +24,15 @@
             <q-icon name="mdi-code-tags" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Demo</q-item-label>
+            <q-item-label>all projects</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item clickable @click="$router.push('/lowest_level')">
+          <q-item-section avatar>
+            <q-icon name="mdi-code-tags" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>lowest levels projects</q-item-label>
           </q-item-section>
         </q-item>
         <q-item clickable @click="$router.push('/info')">

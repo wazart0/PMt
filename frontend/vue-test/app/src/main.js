@@ -2,6 +2,7 @@ import Vue from 'vue';
 import App from './App.vue';
 import Gantt from './components/Gantt.vue';
 import Info from './components/Info.vue';
+import Gantt_cp from './components/Gantt-copy.vue';
 
 import Router from 'vue-router';
 Vue.use(Router);
@@ -11,6 +12,10 @@ const router = new Router({
     {
       path: '/',
       component: Gantt
+    },
+    {
+      path: '/lowest_level',
+      component: Gantt_cp
     },
     {
       path: '/info',

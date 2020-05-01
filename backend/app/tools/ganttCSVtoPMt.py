@@ -51,7 +51,7 @@ mutation {{
 }}
 '''
 
-print('Starting ingestion.')
+print('=== PROJECTS INGESTION ===')
 
 csv = pandas.read_csv(input_csv, dtype=gantt_base_columns, parse_dates=['Begin date', 'End date'])
 
@@ -106,13 +106,61 @@ for index, row in csv.iterrows():
 		r = requests.post(url=url, json={"query": data})
 		if r.status_code != 200:
 			print('WARNING: record not ingested: ' + str(url) + str(r.status_code) + str(r.json()) + str(data))
-	
 
-# # pmt_id[row['Outline number']] = r.json()
-# # print(pmt_id)
-
-print("Ingestion finished.")
-
-print("Created project ID: " + str(import_to_project_id))
+print('=== INGESTION DONE ===')
 
 # print(csv)
+
+
+
+
+request_create_baseline = '''
+mutation {{
+	createBaseline (
+		projectId: {project_id}
+		name: "automated from ganttCSV"
+		default: true
+	) {{
+		baseline {{
+			id
+		}}
+	}}
+}}
+'''
+
+request_propose_timeline = '''
+mutation {{
+	updateBaseline (
+		baselineId: {baseline_id} 
+		proposeTimeline: true
+	) {{
+    baseline {{
+      	id
+    }}
+  }}
+}}
+'''
+
+
+print('=== CREATE BASELINE ===')
+
+data = request_create_baseline.format(project_id=import_to_project_id)
+r = requests.post(url=url, json={"query": data})
+if r.status_code != 200 or 'error' in r.json():
+	print('WARNING: record not ingested: ' + str(url) + str(r.status_code) + str(r.json()) + str(data))
+baseline_id = r.json()['data']['createBaseline']['baseline']['id']
+
+print('=== PROPOSE BASELINE ===')
+
+data = request_propose_timeline.format(baseline_id=baseline_id)
+r = requests.post(url=url, json={"query": data})
+if r.status_code != 200 or 'error' in r.json():
+	print('WARNING: record not ingested: ' + str(url) + str(r.status_code) + str(r.json()) + str(data))
+
+print('=== FINISHED ===')
+print('')
+
+print('Created project ID: ' + str(import_to_project_id))
+print('Created baseline ID: ' + str(baseline_id))
+print('')
+

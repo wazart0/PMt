@@ -53,7 +53,7 @@ class Group(models.Model):
     #     if (isCreated == True and self.pk is not None) or force_insert == True:
     #         groupPrivileges = GroupPrivileges.objects.all()
     #         for privilege in groupPrivileges:
-    #             GroupAuthorization.objects.create(user_id = self.creator_id, group_privilege_id = privilege, group_id = self, authorizer_id = self.creator_id)
+    #             GroupAuthorization.objects.create(user = self.creator_id, group_privilege = privilege, group = self, authorizer = self.creator_id)
 
 
 
@@ -66,11 +66,11 @@ class Group(models.Model):
 
 
 # class GroupAuthorization(models.Model):
-#     user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, db_column = 'user_id', related_name = 'groupauthorization_user_id')
-#     group_privilege_id = models.ForeignKey(null = False, to = GroupPrivileges, on_delete = models.CASCADE, db_column = 'group_privilege_id', related_name = 'groupauthorization_group_privilege_id')
-#     group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, db_column = 'group_id', related_name = 'groupauthorization_group_id')
+#     user = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, db_column = 'user_id', related_name = 'groupauthorization_user_id')
+#     group_privilege = models.ForeignKey(null = False, to = GroupPrivileges, on_delete = models.CASCADE, db_column = 'group_privilege_id', related_name = 'groupauthorization_group_privilege_id')
+#     group = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, db_column = 'group_id', related_name = 'groupauthorization_group_id')
 #     created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
-#     authorizer_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, db_column = 'authorizer_id', related_name = 'groupauthorization_authorizer_id')
+#     authorizer = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, db_column = 'authorizer_id', related_name = 'groupauthorization_authorizer_id')
     
 #     class Meta:
 #         unique_together = ('user_id', 'group_privilege_id', 'group_id')
@@ -81,10 +81,10 @@ class Group(models.Model):
 
 
 # class GroupMembers(models.Model):  -------->    moved to GroupAuthorization
-#     group_id = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, db_column = 'group_id', related_name = 'groupmembers_group_id')
-#     user_id = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, db_column = 'user_id', related_name = 'groupmembers_user_id')
+#     group = models.ForeignKey(null = False, to = Group, on_delete = models.CASCADE, db_column = 'group_id', related_name = 'groupmembers_group_id')
+#     user = models.ForeignKey(null = False, to = User, on_delete = models.CASCADE, db_column = 'user_id', related_name = 'groupmembers_user_id')
 #     created = models.DateTimeField(null = False, auto_now_add = True)
-#     inviter_id = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, db_column = 'inviter_id', related_name = 'groupmembers_inviter_id')
+#     inviter = models.ForeignKey(null = False, to = User, on_delete = models.PROTECT, db_column = 'inviter_id', related_name = 'groupmembers_inviter_id')
 #     class Meta:
 #         unique_together = ('group_id', 'user_id')
 #     objects = models.Manager()

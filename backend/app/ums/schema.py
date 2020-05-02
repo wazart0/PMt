@@ -58,7 +58,7 @@ class Query(ObjectType):
 
 class UserCreator(graphene.Mutation):
     class Arguments:
-        creator_id = graphene.Int()
+        creator = graphene.Int()
         email = graphene.String(required=True)
         password = graphene.String(required=True)
         name = graphene.String()
@@ -72,7 +72,7 @@ class UserCreator(graphene.Mutation):
 
 class GroupCreator(graphene.Mutation):
     class Arguments:
-        creator_id = graphene.Int(required=True)
+        creator = graphene.Int(required=True)
         name = graphene.String(required=True)
         description = graphene.String()
         is_active = graphene.String()

@@ -71,13 +71,13 @@ class Query(ObjectType):
 
 
 class TimelinedependenceInput(graphene.InputObjectType):
-    project_id = graphene.Int(required=True)
+    project = graphene.Int(required=True)
     dependence_type = graphene.String(required=True)
 
 
 class ProjectCreator(graphene.Mutation):
     class Arguments:
-        creator_id = graphene.Int(required=True)
+        creator = graphene.Int(required=True)
         name = graphene.String(required=True)
         description = graphene.String()
         closed = graphene.Boolean()
@@ -101,7 +101,7 @@ class ProjectCreator(graphene.Mutation):
 
 class ProjectUpdater(graphene.Mutation):
     class Arguments:
-        project_id = graphene.Int(required=True)
+        project = graphene.Int(required=True)
         predecessors = graphene.List(TimelinedependenceInput) # dependence from other projects
 
     project = graphene.Field(Project)

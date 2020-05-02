@@ -117,8 +117,8 @@ class Edge(models.Model): # probably this should be hidden in Node class
     class Meta:
         unique_together = ('source_node_id', 'target_node_id')
 
-    source_node_id = models.ForeignKey(to=Node, null=False, editable=False, db_column='source_node_id', related_name='edge_source_node_id', on_delete=models.PROTECT)
-    target_node_id = models.ForeignKey(to=Node, null=False, editable=False, db_column='target_node_id', related_name='edge_target_node_id', on_delete=models.PROTECT)
+    source_node = models.ForeignKey(to=Node, null=False, editable=False, db_column='source_node_id', related_name='edge_source_node_id', on_delete=models.PROTECT)
+    target_node = models.ForeignKey(to=Node, null=False, editable=False, db_column='target_node_id', related_name='edge_target_node_id', on_delete=models.PROTECT)
 
     timeline_dependency = models.CharField(null=True, max_length=2, choices=(
         ('SS', 'Start-Start'),

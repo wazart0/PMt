@@ -15,10 +15,10 @@ class Project(models.Model): # TODO deprecated for some time only
         managed = False
         db_table = 'baseline_project'
 
-    baseline_id = models.ForeignKey(to=Node, null=False, db_column='baseline_id', related_name='timeline_baseline_id', on_delete=models.CASCADE)
+    baseline = models.ForeignKey(to=Node, null=False, db_column='baseline_id', related_name='timeline_baseline_id', on_delete=models.CASCADE)
     
-    project_id = models.ForeignKey(to=Project, null=False, db_column='project_id', related_name='timeline_project_id', on_delete=models.CASCADE)
-    # user_id = models.ForeignKey(to=User, null=True, db_column='user_id', related_name='timeline_user_id', on_delete=models.CASCADE)
+    project = models.ForeignKey(to=Project, null=False, db_column='project_id', related_name='timeline_project_id', on_delete=models.CASCADE)
+    # user = models.ForeignKey(to=User, null=True, db_column='user_id', related_name='timeline_user_id', on_delete=models.CASCADE)
     start = models.DateTimeField(null=False)
     finish = models.DateTimeField(null=False)
     # wbs = models.TextField(null=False) # TODO implement, include initialize

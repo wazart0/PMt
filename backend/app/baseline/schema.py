@@ -85,7 +85,7 @@ class Query(ObjectType):
 
 class BaselineCreator(graphene.Mutation):
     class Arguments:
-        project_id = graphene.Int(required=True)
+        project = graphene.Int(required=True)
         name = graphene.String(required=True)
         description = graphene.String()
         default = graphene.Boolean()
@@ -101,7 +101,7 @@ class BaselineCreator(graphene.Mutation):
 
 class BaselineUpdater(graphene.Mutation):
     class Arguments:
-        baseline_id = graphene.Int(required=True)
+        baseline = graphene.Int(required=True)
         propose_timeline = graphene.Boolean()
         name = graphene.String()
         description = graphene.String()

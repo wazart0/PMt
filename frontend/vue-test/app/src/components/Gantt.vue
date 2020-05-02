@@ -355,7 +355,7 @@ export default {
               }
               projects {
                 wbs
-                projectId {
+                project {
                   id
                   name
                   predecessors {
@@ -376,8 +376,8 @@ export default {
 
       for (let i = 0; i < projects.length; i++) {
         let task = {
-          id: projects[i]['projectId']['id'],
-          label: '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">' + projects[i]['projectId']['name'] + '</a>',
+          id: projects[i]['project']['id'],
+          label: '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">' + projects[i]['project']['name'] + '</a>',
           // user: '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">Awesome!</a>',
           start: projects[i]['start'],
           duration: moment(projects[i]['finish']).diff(moment(projects[i]['start'])),
@@ -390,13 +390,13 @@ export default {
         }
 
         task['dependentOn'] = []
-        for (let j = 0; j < projects[i]['projectId']["predecessors"].length; j++) {
-          console.log(projects[i]['projectId']["predecessors"][j]["id"])
-          task['dependentOn'].push(projects[i]['projectId']["predecessors"][j]["id"])
+        for (let j = 0; j < projects[i]['project']["predecessors"].length; j++) {
+          console.log(projects[i]['project']["predecessors"][j]["id"])
+          task['dependentOn'].push(projects[i]['project']["predecessors"][j]["id"])
         }
 
         console.log(task['dependentOn'])
-        console.log(projects[i]['projectId']["predecessors"])
+        console.log(projects[i]['project']["predecessors"])
 
         this.tasks.push(task);
         if (i == 0) {

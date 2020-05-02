@@ -18,7 +18,7 @@ request_propose_timeline = '''
     description
     default
     projects {
-      projectId {
+      project {
         id
         name
       }
@@ -52,8 +52,8 @@ df = pd.DataFrame(columns=gantt_base_columns)
 
 for project in response['data']['baseline']['projects']:
 	row = {
-		'ID': project['projectId']['id'], 
-		'Name': project['projectId']['name'], 
+		'ID': project['project']['id'], 
+		'Name': project['project']['name'], 
 		'Predecessors': None, 
 		'Outline number': project['wbs'], 
 		'Begin date': str(pd.Timestamp(project['start']).to_pydatetime().strftime('%#m/%#d/%y')), 

@@ -36,7 +36,7 @@ class Query(ObjectType):
 
 class AvailabilityCreator(graphene.Mutation):
     class Arguments:
-        user_id = graphene.Int(required=True)
+        user = graphene.Int(required=True)
         start = graphene.String(required=True)
         duration = graphene.String(required=True)
         repeat_interval = graphene.String()
@@ -59,8 +59,8 @@ class AvailabilityCreator(graphene.Mutation):
 
 # class AssignCalendarsToUser(graphene.Mutation):
 #     class Arguments():
-#         user_id = graphene.Int(required=True)
-#         calendars_id = graphene.List(required=True)
+#         user = graphene.Int(required=True)
+#         calendars = graphene.List(required=True)
 
 
 class Mutation(graphene.ObjectType):

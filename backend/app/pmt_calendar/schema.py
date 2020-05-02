@@ -44,10 +44,10 @@ class AvailabilityCreator(graphene.Mutation):
 
     availability = graphene.Field(Availability)
 
-    def mutate(self, info, user_id, start, duration, repeat_interval=None, until=None):
-        user = ums.User.objects.get(pk=user_id)
+    def mutate(self, info, user, start, duration, repeat_interval=None, until=None):
+        user = ums.User.objects.get(pk=user)
         if user is None: # TODO check if it is enough
-            raise FieldError('User not exits, ID: ' + str(user_id))
+            raise FieldError('User not exits, ID: ' + str(user))
         availability = cal.Availability.objects.create(creator_id=1, start=start, duration=duration, repeat_interval=repeat_interval, until=until)
         if availability is None:
             raise FieldError('Cannot create availability - availability creation issue.')

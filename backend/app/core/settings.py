@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'graphene_django',
 
     'ums.apps.UMSConfig',
-    'jobs.apps.JobsConfig',
+    # 'jobs.apps.JobsConfig',
     'graph_engine.apps.GraphEngineConfig',
     'project.apps.ProjectConfig',
     'operation.apps.OperationConfig',

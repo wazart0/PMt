@@ -57,7 +57,6 @@ class ProposeAssigment():
 
         self.projects.to_sql('baseline_project', engine, index=False, if_exists='append')
         self.ld.to_sql('baseline_projectdependency', engine, index=False, if_exists='append')
-        print(self.av.head())
         self.av.to_sql('baseline_timeline', engine, index=False, if_exists='append')
 
         # con.close()

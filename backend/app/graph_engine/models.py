@@ -84,9 +84,9 @@ class GraphModelManager(models.Manager):
     def connect_nodes(source, target, **kwargs):
         if source is None or target is None or kwargs is None:
             raise FieldError('MISSING PARAMETERS: Cannot connect nodes (' + str(source) + ' -> ' + str(target) + '): ' + str(kwargs))
-        edge = Edge.objects.filter(source_node_id=source, target_node_id=target)
+        edge = Edge.objects.filter(source_node=source, target_node=target)
         if len(edge) == 0:
-            return Edge.objects.create(source_node_id=source, target_node_id=target, **kwargs)
+            return Edge.objects.create(source_node=source, target_node=target, **kwargs)
         edge.update(**kwargs)
         return edge[0]
 
@@ -114,8 +114,6 @@ class Node(models.Model):
 
 # TODO make it generic and add materialized views
 class Edge(models.Model): # probably this should be hidden in Node class
-    class Meta:
-        unique_together = ('source_node_id', 'target_node_id')
 
     source_node = models.ForeignKey(to=Node, null=False, editable=False, db_column='source_node_id', related_name='edge_source_node_id', on_delete=models.PROTECT)
     target_node = models.ForeignKey(to=Node, null=False, editable=False, db_column='target_node_id', related_name='edge_target_node_id', on_delete=models.PROTECT)
@@ -134,3 +132,6 @@ class Edge(models.Model): # probably this should be hidden in Node class
     member = models.BooleanField(null=True) # TODO has to be moved to permission level probably
 
     objects = models.Manager()
+
+    class Meta:
+        unique_together = ('source_node', 'target_node')

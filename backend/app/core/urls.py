@@ -11,10 +11,10 @@ schema_view = get_swagger_view(title='PMt API')
 
 
 from ums.rawAPI.views import router as rawUMSRouter
-from jobs.rawAPI.views import router as rawJobRouter
+# from jobs.rawAPI.views import router as rawJobRouter
 rawRouter = routers.DefaultRouter()
 rawRouter.registry.extend(rawUMSRouter.registry)
-rawRouter.registry.extend(rawJobRouter.registry)
+# rawRouter.registry.extend(rawJobRouter.registry)
 
 
 # from ums.userPerspectiveAPI.views import router as perspectiveUMSRouter

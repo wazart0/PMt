@@ -16,7 +16,7 @@ request_get_users = '''
 request_create_work_week = '''
 mutation {{
   createAvailability (
-    user: {user}
+    userId: {user}
 	  start: "{start}"
     duration: "{duration}"
     repeatInterval: "{repeat}"

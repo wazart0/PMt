@@ -20,7 +20,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin, mixins
     def userAuthorizedQuery():
         return buildUniversalQueryTree(
             tableName = 'ums_user', 
-            parentPrimaryKey = 'creator', 
+            parentPrimaryKey = 'creator_id', 
             subQuery = '''SELECT id FROM ums_group WHERE id = %s''')
 
     @staticmethod
@@ -30,11 +30,11 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelMixin, mixins
     def get_queryset(self):
         return User.objects.filter(id__in = RawSQL(
                 self.userAuthorizedQuery(), 
-                self.userAuthorizedQueryArgs(self.kwargs['context_user']))
+                self.userAuthorizedQueryArgs(self.kwargs['context_user_id']))
             ).order_by('id')
 
     def create(self, request, *args, **kwargs):
-        return super().create(modifyRequest(request, 'creator', kwargs['context_user']), *args, **kwargs)
+        return super().create(modifyRequest(request, 'creator_id', kwargs['context_user_id']), *args, **kwargs)
 
 
 
@@ -46,10 +46,10 @@ class GroupViewSet(viewsets.ModelViewSet):
     def userAuthorizedQuery(): # show groups in which user has chosen privilege
         return buildUniversalQueryTree(
             tableName = 'ums_group', 
-            parentPrimaryKey = 'parent', 
+            parentPrimaryKey = 'parent_id', 
             subQuery = '''
-                    SELECT group FROM ums_groupauthorization WHERE group_privilege = (
-                        SELECT id FROM ums_groupprivileges WHERE code_name = %s) AND user = %s
+                    SELECT group_id FROM ums_groupauthorization WHERE group_privilege_id = (
+                        SELECT id FROM ums_groupprivileges WHERE code_name = %s) AND user_id = %s
                 ''')
 
     @staticmethod
@@ -59,11 +59,11 @@ class GroupViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Group.objects.filter(id__in = RawSQL(
                 self.userAuthorizedQuery(), 
-                self.userAuthorizedQueryArgs(self.kwargs['context_user'], 'member'))
+                self.userAuthorizedQueryArgs(self.kwargs['context_user_id'], 'member'))
             ).filter(is_hidden = False).order_by('id')
 
     def create(self, request, *args, **kwargs): # TODO check permision (now every member can add) - only for parent ID
-        return super().create(modifyRequest(request, 'creator', kwargs['context_user']), *args, **kwargs)
+        return super().create(modifyRequest(request, 'creator_id', kwargs['context_user_id']), *args, **kwargs)
 
 
 
@@ -74,7 +74,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 #     @staticmethod
 #     def userAuthorizedQuery():
 #         return '''
-#             SELECT id FROM ums_groupauthorization WHERE group = %s AND group IN ({userGroups})
+#             SELECT id FROM ums_groupauthorization WHERE group_id = %s AND group_id IN ({userGroups})
 #         '''.format(userGroups = GroupViewSet.userAuthorizedQuery())
 
 #     @staticmethod
@@ -84,12 +84,12 @@ class GroupViewSet(viewsets.ModelViewSet):
 #     def get_queryset(self):
 #         return GroupAuthorization.objects.filter(id__in = RawSQL(
 #                 self.userAuthorizedQuery(),
-#                 self.userAuthorizedQueryArgs(self.kwargs['context_user'], self.kwargs['group'], 'member'))
+#                 self.userAuthorizedQueryArgs(self.kwargs['context_user_id'], self.kwargs['group_id'], 'member'))
 #             ).order_by('id')
 
 #     def create(self, request, *args, **kwargs): # TODO check permision (now every member can add)
 #         return super().create(
-#             modifyRequest(request, ['authorizer', 'group'], [kwargs['context_user'], kwargs['group']]),
+#             modifyRequest(request, ['authorizer_id', 'group_id'], [kwargs['context_user_id'], kwargs['group_id']]),
 #             *args, 
 #             **kwargs)
 
@@ -102,7 +102,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 router = routers.SimpleRouter()
-router.register(r'(?P<context_user>.+)/user', UserViewSet)
-router.register(r'(?P<context_user>.+)/group', GroupViewSet)
-router.register(r'(?P<context_user>.+)/group/(?P<group>.+)/authorization', GroupAuthorizationViewSet)
-router.register(r'(?P<context_user>.+)/group/privileges/', GroupPrivilegesViewSet)
+router.register(r'(?P<context_user_id>.+)/user', UserViewSet)
+router.register(r'(?P<context_user_id>.+)/group', GroupViewSet)
+router.register(r'(?P<context_user_id>.+)/group/(?P<group_id>.+)/authorization', GroupAuthorizationViewSet)
+router.register(r'(?P<context_user_id>.+)/group/privileges/', GroupPrivilegesViewSet)

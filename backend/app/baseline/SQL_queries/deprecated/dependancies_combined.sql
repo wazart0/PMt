@@ -11,16 +11,16 @@ create temp table lowest_level_dependency as (
 		inner join
 			project_project as source_project
 		on 
-			source_node = source_project.id
+			source_node_id = source_project.id
 		inner join
 			project_project as target_project
 		on
-			target_node = target_project.id
+			target_node_id = target_project.id
 	),
 	owns as (
 		select 
-			target_node as project, 
-			source_node as own 
+			target_node_id as project_id, 
+			source_node_id as own_id 
 		from 
 			project_edges 
 		where 
@@ -32,8 +32,8 @@ create temp table lowest_level_dependency as (
 			with recursive 
 			dependence_edge as (
 				select 
-					project_edges.target_node as project,
-					project_edges.source_node as predecessor,
+					project_edges.target_node_id as project_id,
+					project_edges.source_node_id as predecessor_id,
 					project_edges.timeline_dependency as dependence
 				from 
 					project_edges
@@ -42,48 +42,48 @@ create temp table lowest_level_dependency as (
 			),
 			populate_project as (
 					select 
-						translation_project.project,
-						own.own
-					from dependence_edge as translation_project
+						translation_project_id.project_id,
+						own.own_id
+					from dependence_edge as translation_project_id
 					join owns as own
-					on own.project = translation_project.project
+					on own.project_id = translation_project_id.project_id
 				union 
 					select 
-						populate_project.project,
-						own1.own
+						populate_project.project_id,
+						own1.own_id
 					from populate_project
 					join owns as own1
-					on own1.project = populate_project.own
+					on own1.project_id = populate_project.own_id
 			),
 			populate_predecessors as (
 					select 
-						translation_predecessor.predecessor,
-						own.own
-					from dependence_edge as translation_predecessor
+						translation_predecessor_id.predecessor_id,
+						own.own_id
+					from dependence_edge as translation_predecessor_id
 					join owns as own
-					on own.project = translation_predecessor.predecessor
+					on own.project_id = translation_predecessor_id.predecessor_id
 				union 
 					select 
-						populate_predecessors.predecessor,
-						own1.own
+						populate_predecessors.predecessor_id,
+						own1.own_id
 					from populate_predecessors
 					join owns as own1
-					on own1.project = populate_predecessors.own
+					on own1.project_id = populate_predecessors.own_id
 			)
 			select 
-				coalesce (populate_project.own, dependence_edge.project) as project,
-				coalesce (populate_predecessors.own, dependence_edge.predecessor) as predecessor,
+				coalesce (populate_project.own_id, dependence_edge.project_id) as project_id,
+				coalesce (populate_predecessors.own_id, dependence_edge.predecessor_id) as predecessor_id,
 				dependence_edge.dependence as dependence
 			from dependence_edge
-			left join populate_project on dependence_edge.project = populate_project.project
-			left join populate_predecessors on dependence_edge.predecessor = populate_predecessors.predecessor
+			left join populate_project on dependence_edge.project_id = populate_project.project_id
+			left join populate_predecessors on dependence_edge.predecessor_id = populate_predecessors.predecessor_id
 		)
 		select * 
 		from unfiltered_dependency
 		where 
-			unfiltered_dependency.project not in (select project from owns)
+			unfiltered_dependency.project_id not in (select project_id from owns)
 		and
-			unfiltered_dependency.predecessor not in (select project from owns)
+			unfiltered_dependency.predecessor_id not in (select project_id from owns)
 	)
 	select * from lowest_level_dependence
 );
@@ -98,45 +98,45 @@ create temp table lowest_level_projects as (
 		inner join
 			project_project as source_project
 		on 
-			source_node = source_project.id
+			source_node_id = source_project.id
 		inner join
 			project_project as target_project
 		on
-			target_node = target_project.id
+			target_node_id = target_project.id
 	),
 	owns as (
 		select 
-			target_node as project, 
-			source_node as own 
+			target_node_id as project_id, 
+			source_node_id as own_id 
 		from 
 			project_edges 
 		where 
 			belongs_to = 'True'
 	)
 	select
-		id as project,
+		id as project_id,
 		worktime_planned
 	from
 		project_project
 	where
-		id not in (select project from owns)
+		id not in (select project_id from owns)
 );
 
 alter table lowest_level_projects 
 	add column timestamp_start timestamptz default cast('2019-12-30 00:00:00-00' as timestamptz);
 
 -- select
--- 	lowest_level_dependency.project,
+-- 	lowest_level_dependency.project_id,
 -- 	max(predecessor.timestamp_start + predecessor.worktime_planned) as predecessor_timestamp_end,
 -- 	min(project.timestamp_start) as project_timestamp_start
 -- from
 -- 	lowest_level_dependency
--- join lowest_level_projects as predecessor on lowest_level_dependency.predecessor = predecessor.project
--- join lowest_level_projects as project on lowest_level_dependency.project = project.project
+-- join lowest_level_projects as predecessor on lowest_level_dependency.predecessor_id = predecessor.project_id
+-- join lowest_level_projects as project on lowest_level_dependency.project_id = project.project_id
 -- where
 -- 	lowest_level_dependency.dependence = 'FS'
 -- group by 
--- 	lowest_level_dependency.project
+-- 	lowest_level_dependency.project_id
 -- having
 -- 	min(project.timestamp_start) < max(predecessor.timestamp_start + predecessor.worktime_planned)
 
@@ -152,17 +152,17 @@ start
 	-- 	with
 		create temp table updated_timestamp as (
 			select
-				lowest_level_dependency.project as project,
+				lowest_level_dependency.project_id as project_id,
 				max(predecessor.timestamp_start + predecessor.worktime_planned) as predecessor_timestamp_finish,
 				min(project.timestamp_start) as project_timestamp_start
 			from
 				lowest_level_dependency
-			join lowest_level_projects as predecessor on lowest_level_dependency.predecessor = predecessor.project
-			join lowest_level_projects as project on lowest_level_dependency.project = project.project
+			join lowest_level_projects as predecessor on lowest_level_dependency.predecessor_id = predecessor.project_id
+			join lowest_level_projects as project on lowest_level_dependency.project_id = project.project_id
 			where
 				lowest_level_dependency.dependence = 'FS'
 			group by 
-				lowest_level_dependency.project
+				lowest_level_dependency.project_id
 			having
 				min(project.timestamp_start) < max(predecessor.timestamp_start + predecessor.worktime_planned)
 		);
@@ -170,7 +170,7 @@ start
 		update lowest_level_projects
 		set timestamp_start = updated_timestamp.predecessor_timestamp_end
 		from updated_timestamp
-		where lowest_level_projects.project = updated_timestamp.project;
+		where lowest_level_projects.project_id = updated_timestamp.project_id;
 		
 		row_counter := (select count(*) from updated_timestamp);
 		

@@ -31,7 +31,7 @@ gantt_base_columns = {
 request_create_project = '''
 mutation {{
 	createProject (
-		creator: {creator}
+		creatorId: {creator}
 		name: "{name}"
 		worktimePlanned: "{worktime}"
 		projectType: "Task"
@@ -47,7 +47,7 @@ mutation {{
 request_update_project = '''
 mutation {{
 	updateProject (
-		project: {project}
+		projectId: {project}
 		{dependence}
 	) {{
 		project {{
@@ -65,7 +65,7 @@ if import_to_project_id is None:
 	request_create_top_level = '''
 	mutation {{
 		createProject (
-			creator: {creator}
+			creatorId: {creator}
 			name: "{name}"
 			projectType: "Project"
 		) {{
@@ -105,7 +105,7 @@ for index, row in csv.iterrows():
 	if pandas.notna(row['Predecessors']):
 		print([row['ID'], row['Name'].strip(), row['Duration'], row['Predecessors'], row['Outline number']])
 		# TODO resolve issue when there is different predecessor type than FS  <<<<<<<<=========================
-		timeline_dependence = 'predecessors:[' + ','.join(['{{dependenceType:"{}",project:{}}}'.format(i.split('-')[1] if len(i.split('-')) > 1 else 'FS', translation_id[int(i.split('-')[0])]) for i in row['Predecessors'].split(';')]) + ']'
+		timeline_dependence = 'predecessors:[' + ','.join(['{{dependenceType:"{}",projectId:{}}}'.format(i.split('-')[1] if len(i.split('-')) > 1 else 'FS', translation_id[int(i.split('-')[0])]) for i in row['Predecessors'].split(';')]) + ']'
 		print(timeline_dependence)
 		data = request_update_project.format(project=translation_id[row['ID']], dependence=timeline_dependence)
 		# print(data)
@@ -123,7 +123,7 @@ print('=== INGESTION DONE ===')
 request_create_baseline = '''
 mutation {{
 	createBaseline (
-		project: {project_id}
+		projectId: {project_id}
 		name: "automated from ganttCSV"
 		default: true
 	) {{
@@ -137,7 +137,7 @@ mutation {{
 request_propose_timeline = '''
 mutation {{
 	updateBaseline (
-		baseline: {baseline_id} 
+		baselineId: {baseline_id} 
 		proposeTimeline: true
 	) {{
     baseline {{

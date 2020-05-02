@@ -18,7 +18,7 @@ request_propose_timeline = '''
     description
     default
     projects {
-      project {
+      projectId {
         id
         name
       }

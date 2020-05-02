@@ -11,7 +11,7 @@ mutation {{
   createUser ( 
   email: "{email}"
     password: "{password}"
-    # creator: {creator}
+    # creatorId: {creator}
     ) {{
     user {{
       id

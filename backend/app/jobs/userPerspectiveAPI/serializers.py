@@ -15,12 +15,12 @@ class MilestoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Milestone
         fields = '__all__'
-        read_only_fields = ('id', 'creator', 'created', 'updated')
+        read_only_fields = ('id', 'creator_id', 'created', 'updated')
         
 
 
 class JobSerializer(serializers.ModelSerializer):
-    # default_baseline = BaselineSerializer()
+    # default_baseline_id = BaselineSerializer()
     # baselines = BaselineSerializer(many = True)
     # milestones = MilestoneSerializer(many = True)
 

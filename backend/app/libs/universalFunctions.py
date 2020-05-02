@@ -42,7 +42,7 @@ def duplicateArgs(*args):
 # def checkAuthorization(authTable, privTable, privCodeName, userColumnName, userID):
 #     return \
 #     '''
-#         select group from {authorization} where group_privilege = (
+#         select group_id from {authorization} where group_privilege_id = (
 #                 select id from {privileges} where code_name = {privilege}) 
 #             and {userColumn} = {userID}
 #     '''

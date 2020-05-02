@@ -36,7 +36,7 @@ class Query(ObjectType):
 
 class AvailabilityCreator(graphene.Mutation):
     class Arguments:
-        user = graphene.Int(required=True)
+        user_id = graphene.Int(required=True)
         start = graphene.String(required=True)
         duration = graphene.String(required=True)
         repeat_interval = graphene.String()
@@ -44,11 +44,11 @@ class AvailabilityCreator(graphene.Mutation):
 
     availability = graphene.Field(Availability)
 
-    def mutate(self, info, user, start, duration, repeat_interval=None, until=None):
-        user = ums.User.objects.get(pk=user)
+    def mutate(self, info, user_id, start, duration, repeat_interval=None, until=None):
+        user = ums.User.objects.get(pk=user_id)
         if user is None: # TODO check if it is enough
-            raise FieldError('User not exits, ID: ' + str(user))
-        availability = cal.Availability.objects.create(creator=1, start=start, duration=duration, repeat_interval=repeat_interval, until=until)
+            raise FieldError('User not exits, ID: ' + str(user_id))
+        availability = cal.Availability.objects.create(creator_id=1, start=start, duration=duration, repeat_interval=repeat_interval, until=until)
         if availability is None:
             raise FieldError('Cannot create availability - availability creation issue.')
         edge = ge.GraphModelManager.connect_nodes(ge.Node.objects.get(id=user.pk), ge.Node.objects.get(id=availability.pk), assignee=True)
@@ -59,8 +59,8 @@ class AvailabilityCreator(graphene.Mutation):
 
 # class AssignCalendarsToUser(graphene.Mutation):
 #     class Arguments():
-#         user = graphene.Int(required=True)
-#         calendars = graphene.List(required=True)
+#         user_id = graphene.Int(required=True)
+#         calendars_id = graphene.List(required=True)
 
 
 class Mutation(graphene.ObjectType):

@@ -11,16 +11,16 @@ def create_views(sender, **kwargs):
         drop view if exists baseline_project;
         create view baseline_project as (
             select
-                baseline_timeline.baseline,
-                baseline_timeline.project,
+                baseline_timeline.baseline_id,
+                baseline_timeline.project_id,
                 min(baseline_timeline.id) as id,
                 min(baseline_timeline.start) as start,
                 max(baseline_timeline.finish) as finish
             from 
                 baseline_timeline
             group by 
-                project,
-                baseline
+                project_id,
+                baseline_id
         );
     '''
 

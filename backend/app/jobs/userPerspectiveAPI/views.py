@@ -20,11 +20,11 @@ class JobViewSet(viewsets.ModelViewSet):
     def userAuthorizedQuery():
         return buildUniversalQueryTree(
             tableName = 'jobs_job', 
-            parentPrimaryKey = 'parent', 
+            parentPrimaryKey = 'parent_id', 
             subQuery = '''
-                    SELECT job FROM jobs_jobauthorization WHERE privilege = (
-                        SELECT id FROM jobs_privileges WHERE code_name = %s) AND group IN ({userGroups})
-                    GROUP BY job
+                    SELECT job_id FROM jobs_jobauthorization WHERE privilege_id = (
+                        SELECT id FROM jobs_privileges WHERE code_name = %s) AND group_id IN ({userGroups})
+                    GROUP BY job_id
                 '''.format(userGroups = GroupViewSet.userAuthorizedQuery()))
 
     @staticmethod
@@ -34,11 +34,11 @@ class JobViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Job.objects.filter(id__in = RawSQL(
                 self.userAuthorizedQuery(), 
-                self.userAuthorizedQueryArgs(self.kwargs['context_user'], 'observer'))
+                self.userAuthorizedQueryArgs(self.kwargs['context_user_id'], 'observer'))
             ).order_by('id')
 
     def create(self, request, *args, **kwargs): # TODO check permision (now every member can add) - only for parent ID
-        return super().create(modifyRequest(request, 'creator', kwargs['context_user']), *args, **kwargs)
+        return super().create(modifyRequest(request, 'creator_id', kwargs['context_user_id']), *args, **kwargs)
 
 
 
@@ -49,7 +49,7 @@ class JobAuthorizationViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelM
     @staticmethod
     def userAuthorizedQuery():
         return '''
-            SELECT id FROM jobs_jobauthorization WHERE job = %s AND job IN ({userJobs})
+            SELECT id FROM jobs_jobauthorization WHERE job_id = %s AND job_id IN ({userJobs})
         '''.format(userJobs = JobViewSet.userAuthorizedQuery())
 
     @staticmethod
@@ -59,25 +59,25 @@ class JobAuthorizationViewSet(viewsets.ReadOnlyModelViewSet, mixins.CreateModelM
     def get_queryset(self):
         return JobAuthorization.objects.filter(id__in = RawSQL(
                 self.userAuthorizedQuery(), 
-                self.userAuthorizedQueryArgs(self.kwargs['context_user'], self.kwargs['job'], 'observer'))
+                self.userAuthorizedQueryArgs(self.kwargs['context_user_id'], self.kwargs['job_id'], 'observer'))
             ).order_by('id')
 
     def create(self, request, *args, **kwargs): # TODO check permision (now every member can add); add request error if nothing returns from cursor query
-        if 'group' in request.data:
+        if 'group_id' in request.data:
             return super().create(
-                modifyRequest(request, ['authorizer', 'job'], [kwargs['context_user'], kwargs['job']]),
+                modifyRequest(request, ['authorizer_id', 'job_id'], [kwargs['context_user_id'], kwargs['job_id']]),
                 *args, 
                 **kwargs)
         cursor = connection.cursor()
-        cursor.execute('SELECT id FROM ums_group WHERE is_hidden = True AND creator = %s AND name = %s', [request.data['user'], str(request.data['user'])])
+        cursor.execute('SELECT id FROM ums_group WHERE is_hidden = True AND creator_id = %s AND name = %s', [request.data['user_id'], str(request.data['user_id'])])
         row = cursor.fetchall()
         return super().create(
-            modifyRequest(request, ['authorizer', 'job', 'group'], [kwargs['context_user'], kwargs['job'], row[0][0]]),
+            modifyRequest(request, ['authorizer_id', 'job_id', 'group_id'], [kwargs['context_user_id'], kwargs['job_id'], row[0][0]]),
             *args, 
             **kwargs)
     
 
 
 router = routers.SimpleRouter()
-router.register(r'(?P<context_user>.+)/jobs', JobViewSet)
-router.register(r'(?P<context_user>.+)/jobs/(?P<job>.+)/authorization', JobAuthorizationViewSet)
+router.register(r'(?P<context_user_id>.+)/jobs', JobViewSet)
+router.register(r'(?P<context_user_id>.+)/jobs/(?P<job_id>.+)/authorization', JobAuthorizationViewSet)

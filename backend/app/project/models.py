@@ -10,7 +10,7 @@ import graph_engine.models as ge
 class Project(models.Model):
     node_type = 'project'
     objects = NodeModelManager()
-    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='project', on_delete=models.PROTECT)
+    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='project_id', on_delete=models.PROTECT)
 
     created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
     updated = models.DateTimeField(null=False, editable=False, auto_now=True) # TODO special logger has to be implemented - later remove
@@ -22,14 +22,14 @@ class Project(models.Model):
     # project_type -> project/task/user story/epic/other
 
     # responsible user -> it is just a supervisor of given project - not assignee
-    def add_assignee(self, user): #  TODO assignee should be managed on resource level
+    def add_assignee(self, user_id): #  TODO assignee should be managed on resource level
         pass
 
 
     # @property
     # def has_belonger_(self):
     #     return True
-    #     return len(ge.Edge.objects.filter(target_node=self.pk, belongs_to=True)) != 0
+    #     return len(ge.Edge.objects.filter(target_node_id=self.pk, belongs_to=True)) != 0
     
 
 
@@ -38,7 +38,7 @@ class Project(models.Model):
 class Milestone(models.Model):
     node_type = 'milestone'
     objects = NodeModelManager()
-    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='milestone', on_delete=models.PROTECT)
+    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='milestone_id', on_delete=models.PROTECT)
 
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)

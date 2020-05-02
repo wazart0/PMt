@@ -9,7 +9,7 @@ from graph_engine.models import Node, NodeModelManager
 class TimeResource(models.Model):
     node_type = 'timeresource'
     objects = NodeModelManager()
-    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='timeresource', on_delete=models.PROTECT)
+    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='timeresource_id', on_delete=models.PROTECT)
 
     created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, editable = False, auto_now = True) # TODO special logger has to be implemented - later remove

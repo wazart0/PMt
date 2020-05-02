@@ -1,7 +1,10 @@
 import requests
-import pandas
+import pandas._libs.hashtable
+import os
 # import numpy as np
 
+path = os.path.dirname(os.path.realpath(__file__)) + '/'
+print(path)
 
 url = 'http://localhost:8000/graphql/'
 
@@ -12,6 +15,9 @@ creator_id = 1
 import_to_project_id = None
 
 
+
+print('URL: ' + url)
+print('Creator id: ' + str(creator_id))
 
 gantt_base_columns = {
 	'ID': 'Int64',
@@ -53,7 +59,7 @@ mutation {{
 
 print('=== PROJECTS INGESTION ===')
 
-csv = pandas.read_csv(input_csv, dtype=gantt_base_columns, parse_dates=['Begin date', 'End date'])
+csv = pandas.read_csv(path + input_csv, dtype=gantt_base_columns, parse_dates=['Begin date', 'End date'])
 
 if import_to_project_id is None:
 	request_create_top_level = '''
@@ -71,7 +77,7 @@ if import_to_project_id is None:
 	'''
 	data = request_create_top_level.format(creator=creator_id, name=input_csv)
 	r = requests.post(url=url, json={"query": data})
-	if r.status_code != 200 or 'error' in r.json():
+	if r.status_code != 200 or 'errors' in r.json():
 		print('WARNING: record not ingested: ' + str(url) + str(r.status_code) + str(r.json()) + str(data))
 	else:
 		import_to_project_id = r.json()['data']['createProject']['project']['id']
@@ -87,7 +93,7 @@ for index, row in csv.iterrows():
 
 	data = request_create_project.format(creator=creator_id, name=row['Name'].strip(), worktime=str(row['Duration']) + 'd', belonging=belongs_to)
 	r = requests.post(url=url, json={"query": data})
-	if r.status_code != 200:
+	if r.status_code != 200 or 'errors' in r.json():
 		print('WARNING: record not ingested: ' + str(url) + str(r.status_code) + str(r.json()) + str(data))
 	else:
 		pmt_id[row['Outline number']] = r.json()['data']['createProject']['project']['id']
@@ -104,7 +110,7 @@ for index, row in csv.iterrows():
 		data = request_update_project.format(project=translation_id[row['ID']], dependence=timeline_dependence)
 		# print(data)
 		r = requests.post(url=url, json={"query": data})
-		if r.status_code != 200:
+		if r.status_code != 200 or 'errors' in r.json():
 			print('WARNING: record not ingested: ' + str(url) + str(r.status_code) + str(r.json()) + str(data))
 
 print('=== INGESTION DONE ===')
@@ -146,7 +152,7 @@ print('=== CREATE BASELINE ===')
 
 data = request_create_baseline.format(project_id=import_to_project_id)
 r = requests.post(url=url, json={"query": data})
-if r.status_code != 200 or 'error' in r.json():
+if r.status_code != 200 or 'errors' in r.json():
 	print('WARNING: record not ingested: ' + str(url) + str(r.status_code) + str(r.json()) + str(data))
 baseline_id = r.json()['data']['createBaseline']['baseline']['id']
 
@@ -154,7 +160,7 @@ print('=== PROPOSE BASELINE ===')
 
 data = request_propose_timeline.format(baseline_id=baseline_id)
 r = requests.post(url=url, json={"query": data})
-if r.status_code != 200 or 'error' in r.json():
+if r.status_code != 200 or 'errors' in r.json():
 	print('WARNING: record not ingested: ' + str(url) + str(r.status_code) + str(r.json()) + str(data))
 
 print('=== FINISHED ===')

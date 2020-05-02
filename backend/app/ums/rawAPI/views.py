@@ -12,7 +12,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def create(self, request, *args, **kwargs):
-        return super().create(modifyRequest(request, 'creator_id', 4), *args, **kwargs)
+        return super().create(modifyRequest(request, 'creator', 4), *args, **kwargs)
 
  
 class GroupViewSet(viewsets.ModelViewSet):

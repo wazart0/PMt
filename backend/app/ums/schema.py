@@ -58,29 +58,29 @@ class Query(ObjectType):
 
 class UserCreator(graphene.Mutation):
     class Arguments:
-        creator_id = graphene.Int()
+        creator = graphene.Int()
         email = graphene.String(required=True)
         password = graphene.String(required=True)
         name = graphene.String()
     
     user = graphene.Field(User)
 
-    def mutate(self, info, email, password, name=None, creator_id=None):
-        user = ums.User.objects.create(creator_id=creator_id, email=email, password=password, name=name)
+    def mutate(self, info, email, password, name=None, creator=None):
+        user = ums.User.objects.create(creator=creator, email=email, password=password, name=name)
         return UserCreator(user=user)
 
 
 class GroupCreator(graphene.Mutation):
     class Arguments:
-        creator_id = graphene.Int(required=True)
+        creator = graphene.Int(required=True)
         name = graphene.String(required=True)
         description = graphene.String()
         is_active = graphene.String()
 
     group = graphene.Field(Group)
 
-    def mutate(self, info, name, creator_id, description=None, is_active=True):
-        group = ums.Group.objects.create(creator_id=creator_id, name=name, description=description, is_active=is_active)
+    def mutate(self, info, name, creator, description=None, is_active=True):
+        group = ums.Group.objects.create(creator=creator, name=name, description=description, is_active=is_active)
         return GroupCreator(group=group)
 
 

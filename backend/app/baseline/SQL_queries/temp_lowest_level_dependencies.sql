@@ -2,8 +2,8 @@ create temp table lowest_level_dependency as (
 	with
 	owns as (
 		select 
-			target_node_id as project_id, 
-			source_node_id as own_id 
+			target_node as project, 
+			source_node as own 
 		from 
 			project_edges 
 		where 
@@ -15,8 +15,8 @@ create temp table lowest_level_dependency as (
 			with recursive 
 			dependence_edge as (
 				select 
-					project_edges.target_node_id as project_id,
-					project_edges.source_node_id as predecessor_id,
+					project_edges.target_node as project,
+					project_edges.source_node as predecessor,
 					project_edges.timeline_dependency as dependence
 				from 
 					project_edges
@@ -25,52 +25,52 @@ create temp table lowest_level_dependency as (
 			),
 			populate_project as (
 					select 
-						translation_project_id.project_id,
-						own.own_id
-					from dependence_edge as translation_project_id
+						translation_project.project,
+						own.own
+					from dependence_edge as translation_project
 					join owns as own
-					on own.project_id = translation_project_id.project_id
+					on own.project = translation_project.project
 				union 
 					select 
-						populate_project.project_id,
-						own1.own_id
+						populate_project.project,
+						own1.own
 					from populate_project
 					join owns as own1
-					on own1.project_id = populate_project.own_id
+					on own1.project = populate_project.own
 			),
 			populate_predecessors as (
 					select 
-						translation_predecessor_id.predecessor_id,
-						own.own_id
-					from dependence_edge as translation_predecessor_id
+						translation_predecessor.predecessor,
+						own.own
+					from dependence_edge as translation_predecessor
 					join owns as own
-					on own.project_id = translation_predecessor_id.predecessor_id
+					on own.project = translation_predecessor.predecessor
 				union 
 					select 
-						populate_predecessors.predecessor_id,
-						own1.own_id
+						populate_predecessors.predecessor,
+						own1.own
 					from populate_predecessors
 					join owns as own1
-					on own1.project_id = populate_predecessors.own_id
+					on own1.project = populate_predecessors.own
 			)
 			select 
-				coalesce (populate_project.own_id, dependence_edge.project_id) as project_id,
-				coalesce (populate_predecessors.own_id, dependence_edge.predecessor_id) as predecessor_id,
+				coalesce (populate_project.own, dependence_edge.project) as project,
+				coalesce (populate_predecessors.own, dependence_edge.predecessor) as predecessor,
 				dependence_edge.dependence as dependence
 			from dependence_edge
-			left join populate_project on dependence_edge.project_id = populate_project.project_id
-			left join populate_predecessors on dependence_edge.predecessor_id = populate_predecessors.predecessor_id
+			left join populate_project on dependence_edge.project = populate_project.project
+			left join populate_predecessors on dependence_edge.predecessor = populate_predecessors.predecessor
 		)
 		select * 
 		from unfiltered_dependency
 		where 
-			unfiltered_dependency.project_id not in (select project_id from owns)
+			unfiltered_dependency.project not in (select project from owns)
 		and
-			unfiltered_dependency.predecessor_id not in (select project_id from owns)
+			unfiltered_dependency.predecessor not in (select project from owns)
 	)
 	select * from lowest_level_dependence
 	where 
-		project_id in (select project_id from projects_in_tree)
+		project in (select project from projects_in_tree)
 	and
-		predecessor_id in (select project_id from projects_in_tree)
+		predecessor in (select project from projects_in_tree)
 );

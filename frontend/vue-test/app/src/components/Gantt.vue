@@ -358,15 +358,13 @@ export default {
                 project {
                   id
                   name
-                  predecessors {
-                    id
-                  }
                 }
                 start
                 finish
                 belongsTo {
                   id
                 }
+                predecessorsIdFS
               }
             }
           }
@@ -389,14 +387,8 @@ export default {
           task['parentId'] = projects[i]['belongsTo']['id']
         }
 
-        task['dependentOn'] = []
-        for (let j = 0; j < projects[i]['project']["predecessors"].length; j++) {
-          console.log(projects[i]['project']["predecessors"][j]["id"])
-          task['dependentOn'].push(projects[i]['project']["predecessors"][j]["id"])
-        }
+        task['dependentOn'] = projects[i]['predecessorsIdFS']
 
-        console.log(task['dependentOn'])
-        console.log(projects[i]['project']["predecessors"])
 
         this.tasks.push(task);
         if (i == 0) {

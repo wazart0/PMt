@@ -14,20 +14,26 @@ class ProposeAssigment():
         self.user = user
         self.password = password
         self.database = database
+
+        self.root_project_id = project_id
         
         con = psycopg2.connect(host=host, user=user, password=password, database=database)
 
-        # TODO those SQLs should be rewritten to python (DB should only provide significant data)
         cursor = con.cursor()
-        cursor.execute(open(path + 'baseline/sql_queries/temp_projects_in_tree.sql', 'r').read().format(top_level_node_id=project_id))
-        cursor.execute(open(path + 'pmt_calendar/sql_queries/calculate_availability.sql', 'r').read())
-        cursor.execute(open(path + 'baseline/sql_queries/temp_lowest_level_projects.sql', 'r').read())
-        cursor.execute(open(path + 'baseline/sql_queries/temp_lowest_level_dependencies.sql', 'r').read())
+        # TODO those SQLs should be rewritten to python (DB should only provide significant data)
+        cursor.execute(open(path + 'baseline/sql_queries/temp_projects_in_tree.sql', 'r').read().format(top_level_node_id=project_id)) # TODO create WBS in pandas
+        cursor.execute(open(path + 'baseline/sql_queries/temp_timeline_dependence.sql', 'r').read())
+        cursor.execute(open(path + 'pmt_calendar/sql_queries/calculate_availability.sql', 'r').read()) # TODO retrieve only assigned users
+
+        cursor.execute(open(path + 'baseline/sql_queries/temp_lowest_level_dependencies.sql', 'r').read()) # TODO calculate in pandas
 
         self.projects = pd.read_sql('select * from projects_in_tree;', con)
+        self.dependencies = pd.read_sql('select * from timeline_dependency;', con)
         self.av = pd.read_sql('select * from availability;', con)
-        self.lp = pd.read_sql('select * from lowest_level_projects;', con)
-        self.ld = pd.read_sql('select * from lowest_level_dependency;', con)
+
+        self.create_lowest_level_projects()
+
+        self.ld = pd.read_sql('select * from lowest_level_dependency;', con) # TODO calculate in pandas
 
         con.close()
 
@@ -38,28 +44,45 @@ class ProposeAssigment():
 
 
     def to_db(self, baseline_id):
-        # con = psycopg2.connect(host='database', user='ad', password='pass', database='pmt')
         engine = create_engine('postgresql://' + self.user + ':' + self.password + '@' + self.host + ':5432/' + self.database)
 
+        self.projects.head()
         self.update_projects()
+        self.projects['baseline_id'] = baseline_id
+        self.projects['llp'] = False
+        self.projects.llp.loc[self.projects.project_id.isin(self.lp.project_id)] = True
+        self.projects.worktime_planned = self.projects.worktime_planned.astype(str) # TODO do we really need to convert?
 
         self.ld['baseline_id'] = baseline_id
-        self.av['baseline_id'] = baseline_id
-        self.projects['baseline_id'] = baseline_id
-
+        self.ld['llp'] = True
         self.ld.rename(columns={'dependence': 'timeline_dependency'}, inplace=True)
 
-        self.av.drop(['id'], axis=1, inplace=True)
-        self.av = self.av[self.av.project_id.notnull()]
-        self.av['project_id'] = self.av.project_id.astype(int)
+        self.dependencies['baseline_id'] = baseline_id
+        self.dependencies['llp'] = False
+        self.dependencies.rename(columns={'dependence': 'timeline_dependency'}, inplace=True)
 
-        self.projects.worktime_planned = self.projects.worktime_planned.astype(str) # TODO do we really need to convert?
+        self.av = self.av[self.av.project_id.notnull()]
+        self.av.drop(['id'], axis=1, inplace=True)
+        self.av['baseline_id'] = baseline_id
+        self.av['project_id'] = self.av.project_id.astype(int)
 
         self.projects.to_sql('baseline_project', engine, index=False, if_exists='append')
         self.ld.to_sql('baseline_projectdependency', engine, index=False, if_exists='append')
+        self.dependencies.to_sql('baseline_projectdependency', engine, index=False, if_exists='append')
         self.av.to_sql('baseline_timeline', engine, index=False, if_exists='append')
 
-        # con.close()
+
+    # def create_wbs(self):
+
+
+    def create_lowest_level_projects(self):
+        self.lp = self.projects[~self.projects.project_id.isin(self.projects.belongs_to)][['project_id', 'worktime_planned']]
+        # self.projects.worktime_planned.loc[self.projects.project_id.isin(self.projects.belongs_to)] = None
+        self.projects.drop(['worktime_planned'], axis=1, inplace=True)
+
+
+    # def create_lowest_level_dependencies(self):
+    #     pass
 
 
     def update_projects(self):
@@ -237,7 +260,7 @@ class ProposeAssigment():
 
 # algo_time_finish = time()
 
-# # proposal.update_projects()
+# proposal.update_projects()
 # print('Project finish timestamp: ' + str(finish_date))
 # print('Calculation time [s]: ' + str(algo_time_finish - algo_time_start))
 # print('Unassigned workers time during project: ' + str((proposal.av[proposal.av.project_id.isnull() & (proposal.av.start <= finish_date)].finish - proposal.av[proposal.av.project_id.isnull() & (proposal.av.start <= finish_date)].start).sum()))

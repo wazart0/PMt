@@ -353,26 +353,21 @@ export default {
               belongsTo {
                 id
               }
-              projects {
+              LLPProjects {
                 wbs
                 project {
                   id
                   name
-                  predecessors {
-                    id
-                  }
                 }
                 start
                 finish
-                belongsTo {
-                  id
-                }
+                LLPPredecessorsIdFS
               }
             }
           }
         `
     }).then((response) => { 
-      let projects = response['data']['data']['baseline']['projects']; 
+      let projects = response['data']['data']['baseline']['LLPProjects']; 
 
       for (let i = 0; i < projects.length; i++) {
         let task = {
@@ -385,18 +380,8 @@ export default {
           type: "task"
         }
 
-        if (projects[i]['belongsTo']['id'] != response['data']['data']['baseline']['belongsTo']['id']) { 
-          task['parentId'] = projects[i]['belongsTo']['id']
-        }
+        task['dependentOn'] = projects[i]['LLPPredecessorsIdFS']
 
-        task['dependentOn'] = []
-        for (let j = 0; j < projects[i]['project']["predecessors"].length; j++) {
-          console.log(projects[i]['project']["predecessors"][j]["id"])
-          task['dependentOn'].push(projects[i]['project']["predecessors"][j]["id"])
-        }
-
-        console.log(task['dependentOn'])
-        console.log(projects[i]['project']["predecessors"])
 
         this.tasks.push(task);
         if (i == 0) {

@@ -27,7 +27,39 @@ class ProjectTimeline(DjangoObjectType):
         model = bl.Project
         exclude = ('baseline', 'id',)
 
+    raw_sql_dependency = '''
+        select 
+            array_agg(predecessor_id)
+        from baseline_projectdependency
+        where
+            llp = '{llp}'
+        and
+            baseline_id = {baseline_id}
+        and
+            project_id = {project_id}
+        group by project_id
+    '''
+
     worktime_planned = graphene.String()
+    predecessors_ID_F_S = graphene.List(graphene.Int)
+    L_L_P_predecessors_ID_F_S = graphene.List(graphene.Int)
+
+    def resolve_predecessors_ID_F_S(self, info):
+        cur = connection.cursor()
+        cur.execute(ProjectTimeline.raw_sql_dependency.format(llp=False, baseline_id=self.baseline.pk, project_id=self.project.pk))
+        result = cur.fetchall()
+        if len(result) > 1:
+            raise Exception("ERROR: Cannot return more than one lines")
+        return [] if len(result) == 0 else result[0][0]
+
+    def resolve_L_L_P_predecessors_ID_F_S(self, info):
+        cur = connection.cursor()
+        cur.execute(ProjectTimeline.raw_sql_dependency.format(llp=True, baseline_id=self.baseline.pk, project_id=self.project.pk))
+        result = cur.fetchall()
+        if len(result) > 1:
+            raise Exception("ERROR: Cannot return more than one lines")
+        return [] if len(result) == 0 else result[0][0]
+
 
 
 class Timeline(DjangoObjectType):
@@ -52,6 +84,7 @@ class Baseline(DjangoObjectType):
     timeline = graphene.List(Timeline)
     dependencies = graphene.List(ProjectDependency)
     projects = graphene.List(ProjectTimeline)
+    L_L_P_projects = graphene.List(ProjectTimeline)
 
     def resolve_belongs_to(self, info):
         if len(ge.Edge.objects.filter(source_node=self.pk, belongs_to=True)) == 0:
@@ -66,6 +99,9 @@ class Baseline(DjangoObjectType):
 
     def resolve_projects(self, info):
         return bl.Project.objects.filter(baseline=self.id)
+
+    def resolve_L_L_P_projects(self, info):
+        return bl.Project.objects.filter(baseline=self.id, llp=True)
 
 
 

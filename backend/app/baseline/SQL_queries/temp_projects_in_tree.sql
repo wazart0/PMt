@@ -27,7 +27,7 @@ create temp table projects_in_tree as (
 				s1.target_node_id, 
 				cast(ROW_NUMBER() OVER () as varchar) AS wbs 
 			from project_hierarchy as s1 
-			where s1.target_node_id = 55
+			where s1.target_node_id = {top_level_node_id}
 		union all
 			select 
 				s2.source_node_id, 
@@ -39,8 +39,10 @@ create temp table projects_in_tree as (
 	select 
 		source_node_id as project_id,
 		target_node_id as belongs_to,
-		wbs
+		wbs,
+		project_project.worktime_planned
 	from project_tree
+	left join project_project on project_tree.source_node_id = project_project.id
 );
 
 create temp table project_edges as (

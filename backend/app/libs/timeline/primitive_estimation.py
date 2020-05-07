@@ -176,10 +176,27 @@ class ProposeAssigment():
         for project_id in self.lp.project_id: # assign first availble time to project
             self.assign_time_first_free(project_id, one_worker_per_project=one_worker_per_project)
             
-        # print("Start fixing...")
         number_of_fixes = self.fix_dependence_issues(one_worker_per_project=one_worker_per_project)
         print("Preliminary assignment quality: " + str(number_of_fixes))
         return self.lp.finish.max()
+
+
+    def assign_projects_by_start_based_on_infinite_resources(self, one_worker_per_project = False):
+        
+        self.assign_projects_infinite_resources('2020-02-01')
+        temp_df = self.lp.copy(deep=True)
+        self.lp.start = None
+        self.lp.finish = None
+
+        temp_df.sort_values(['start'], inplace=True)
+
+        for project_id in temp_df.project_id:
+            self.assign_time_first_free(project_id, one_worker_per_project=one_worker_per_project)
+            
+        number_of_fixes = self.fix_dependence_issues(one_worker_per_project=one_worker_per_project)
+        print("Preliminary assignment quality: " + str(number_of_fixes))
+        return self.lp.finish.max()
+
 
 
 
@@ -207,11 +224,8 @@ class ProposeAssigment():
 
 
     def assign_projects_to_resources_from_path_start(self, one_worker_per_project = False):
-
         paths = self.create_dependency_paths()
-
         print('Assigning projects...')
-
         level = 0
         while True:
             projects_on_level = list(set([(i[level] if (len(i) > level) else None) for i in paths]))
@@ -225,7 +239,6 @@ class ProposeAssigment():
             level += 1
 
         print('Unassigned projects: ' + str(self.lp[~self.lp.project_id.isin(self.av.project_id)].shape[0]))
-
         # print("Start fixing...")
         number_of_fixes = self.fix_dependence_issues(one_worker_per_project=one_worker_per_project)
         print("Preliminary assignment quality (bigger -> worser): " + str(number_of_fixes))
@@ -254,7 +267,11 @@ class ProposeAssigment():
 # proposal = ProposeAssigment(project_id=55, host='localhost', path='../../')
 # algo_time_start = time()
 
-# finish_date = proposal.assign_projects_to_resources_first_free(one_worker_per_project=True)
+# # finish_date = proposal.assign_projects_infinite_resources('2020-02-01')
+# # finish_date = proposal.assign_projects_to_resources_first_free(one_worker_per_project=True)
+# finish_date = proposal.assign_projects_by_start_based_on_infinite_resources(one_worker_per_project=True)
+
+# # # not so good methods (probably some logic has to be reviewed):
 # # finish_date = proposal.assign_projects_to_resources_from_longest_path(one_worker_per_project=False)
 # # finish_date = proposal.assign_projects_to_resources_from_path_start(one_worker_per_project=True)
 

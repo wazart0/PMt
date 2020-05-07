@@ -152,7 +152,9 @@ class BaselineUpdater(graphene.Mutation):
             proposal = lib.ProposeAssigment(project_id=edge[0].target_node.pk)
 
             algo_time_start = time()
-            finish_date = proposal.assign_projects_to_resources_first_free(one_worker_per_project=True)
+            # finish_date = proposal.assign_projects_infinite_resources('2020-02-01')
+            # finish_date = proposal.assign_projects_to_resources_first_free(one_worker_per_project=True)
+            finish_date = proposal.assign_projects_by_start_based_on_infinite_resources(one_worker_per_project=True)
             algo_time_finish = time()
 
             print('Project finish timestamp: ' + str(finish_date))

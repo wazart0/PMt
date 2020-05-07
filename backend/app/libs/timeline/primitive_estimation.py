@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 # class version seems to be significantly slower (or maybe not - to be confirmed)
 class ProposeAssigment():
 
-    def __init__(self, project_id, path='', host='database', user='ad', password='pass', database='pmt'):
+    def __init__(self, project_id, start, path='', host='database', user='ad', password='pass', database='pmt'):
         
         self.host = host
         self.user = user
@@ -16,6 +16,7 @@ class ProposeAssigment():
         self.database = database
 
         self.root_project_id = project_id
+        self.start = start
         
         con = psycopg2.connect(host=host, user=user, password=password, database=database)
 
@@ -23,7 +24,7 @@ class ProposeAssigment():
         # TODO those SQLs should be rewritten to python (DB should only provide significant data)
         cursor.execute(open(path + 'baseline/sql_queries/temp_projects_in_tree.sql', 'r').read().format(top_level_node_id=project_id)) # TODO create WBS in pandas
         cursor.execute(open(path + 'baseline/sql_queries/temp_timeline_dependence.sql', 'r').read())
-        cursor.execute(open(path + 'pmt_calendar/sql_queries/calculate_availability.sql', 'r').read()) # TODO retrieve only assigned users
+        cursor.execute(open(path + 'pmt_calendar/sql_queries/calculate_availability.sql', 'r').read().format(start=str(start))) # TODO retrieve only assigned users
 
         cursor.execute(open(path + 'baseline/sql_queries/temp_lowest_level_dependencies.sql', 'r').read()) # TODO calculate in pandas
 
@@ -183,7 +184,7 @@ class ProposeAssigment():
 
     def assign_projects_by_start_based_on_infinite_resources(self, one_worker_per_project = False):
         
-        self.assign_projects_infinite_resources('2020-02-01')
+        self.assign_projects_infinite_resources(self.start)
         temp_df = self.lp.copy(deep=True)
         self.lp.start = None
         self.lp.finish = None
@@ -247,7 +248,8 @@ class ProposeAssigment():
 
 
     def assign_projects_infinite_resources(self, start_date):
-        self.lp['start'] = pd.Timestamp(start_date, tz='UTC')
+        # self.lp['start'] = pd.Timestamp(start_date, tz='UTC')
+        self.lp['start'] = start_date
         self.lp['finish'] = self.lp['start'] + self.lp['worktime_planned']
         while True:
             update = self.ld[self.ld.dependence == 'FS'].merge(self.lp, left_on='predecessor_id', right_on='project_id')[['project_id_x', 'finish']].groupby(['project_id_x']).max()

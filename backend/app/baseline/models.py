@@ -18,6 +18,8 @@ class Baseline(models.Model):
     name = models.CharField(null=False, max_length=100)
     description = models.TextField(null=True, default=None)
     default = models.BooleanField(default=False)
+    start = models.DateTimeField(null=False, auto_now_add=True)
+    # finish should be calculated based on estimations
 
 
 

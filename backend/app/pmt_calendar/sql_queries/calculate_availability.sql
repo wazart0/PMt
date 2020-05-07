@@ -28,6 +28,6 @@ create temp table availability as (
 			selected_availability
 	)
 	select * from availability 
-	where start > timestamptz '2020-02-01'
+	where start > timestamptz '{start}'
 	order by start asc
 );

@@ -41,7 +41,7 @@ class ProjectTimeline(DjangoObjectType):
     '''
 
     worktime_planned = graphene.String()
-    predecessors_ID_F_S = graphene.List(graphene.Int)
+    predecessors_ID_F_S = graphene.List(graphene.Int) # TODO add support for other types and create graphene object for filtering
     L_L_P_predecessors_ID_F_S = graphene.List(graphene.Int)
 
     def resolve_predecessors_ID_F_S(self, info):
@@ -122,9 +122,11 @@ class Query(ObjectType):
 class BaselineCreator(graphene.Mutation):
     class Arguments:
         project = graphene.Int(required=True)
+
         name = graphene.String(required=True)
         description = graphene.String()
         default = graphene.Boolean()
+        start = graphene.DateTime()
 
     baseline = graphene.Field(Baseline)
 
@@ -139,20 +141,23 @@ class BaselineUpdater(graphene.Mutation):
     class Arguments:
         baseline = graphene.Int(required=True)
         propose_timeline = graphene.Boolean()
+
         name = graphene.String()
         description = graphene.String()
         default = graphene.Boolean()
+        start = graphene.DateTime()
 
     baseline = graphene.Field(Baseline)
 
     def mutate(self, info, baseline, propose_timeline = None, **kwargs):
+        bl.Baseline.objects.filter(pk=baseline).update(**kwargs)
         baseline = bl.Baseline.objects.get(id=baseline)
         if propose_timeline:
             edge = ge.Edge.objects.filter(source_node=baseline.pk, belongs_to=True)
-            proposal = lib.ProposeAssigment(project_id=edge[0].target_node.pk)
+            proposal = lib.ProposeAssigment(project_id=edge[0].target_node.pk, start=baseline.start)
 
             algo_time_start = time()
-            # finish_date = proposal.assign_projects_infinite_resources('2020-02-01')
+            # finish_date = proposal.assign_projects_infinite_resources(baseline.start)
             # finish_date = proposal.assign_projects_to_resources_first_free(one_worker_per_project=True)
             finish_date = proposal.assign_projects_by_start_based_on_infinite_resources(one_worker_per_project=True)
             algo_time_finish = time()

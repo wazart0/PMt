@@ -32,12 +32,13 @@ class ProposeAssigment():
         self.dependencies = pd.read_sql('select * from timeline_dependency;', con)
         self.av = pd.read_sql('select * from availability;', con)
 
-        self.create_lowest_level_projects()
-
         self.ld = pd.read_sql('select * from lowest_level_dependency;', con) # TODO calculate in pandas
 
         con.close()
 
+        # self.validate_schema()
+
+        self.lp = self.create_lowest_level_projects()
         self.lp['start'] = None
         self.lp['finish'] = None
 
@@ -47,7 +48,6 @@ class ProposeAssigment():
     def to_db(self, baseline_id):
         engine = create_engine('postgresql://' + self.user + ':' + self.password + '@' + self.host + ':5432/' + self.database)
 
-        self.projects.head()
         self.update_projects()
         self.projects['baseline_id'] = baseline_id
         self.projects['llp'] = False
@@ -73,13 +73,18 @@ class ProposeAssigment():
         self.av.to_sql('baseline_timeline', engine, index=False, if_exists='append')
 
 
-    # def create_wbs(self):
+    # def create_wbs(self): TODO
+
+    def validate_schema(self):
+        self.projects.astype(dtype={'project_id': 'int64', 'belongs_to': 'int64', 'worktime_planned': 'timedelta64', 'start': 'datetime64[ns]', 'finish': 'datetime64[ns]'})
+        self.dependencies.astype(dtype={'project_id': 'int64', 'predecessor_id': 'int64', 'dependence': 'str'})
+        self.av.astype(dtype={'user_id': 'int64', 'start': 'datetime64[ns]', 'finish': 'datetime64[ns]'})
 
 
     def create_lowest_level_projects(self):
-        self.lp = self.projects[~self.projects.project_id.isin(self.projects.belongs_to)][['project_id', 'worktime_planned']]
+        return self.projects[~self.projects.project_id.isin(self.projects.belongs_to)][['project_id', 'worktime_planned']]
         # self.projects.worktime_planned.loc[self.projects.project_id.isin(self.projects.belongs_to)] = None
-        self.projects.drop(['worktime_planned'], axis=1, inplace=True)
+        # self.projects.drop(['worktime_planned'], axis=1, inplace=True)
 
 
     # def create_lowest_level_dependencies(self):
@@ -87,13 +92,16 @@ class ProposeAssigment():
 
 
     def update_projects(self):
+        self.projects.drop(['start', 'finish', 'worktime_planned'], axis=1, inplace=True)
         self.projects = self.projects.merge(self.lp, how='left', on='project_id')
         while True:
             tmp = self.projects.groupby('belongs_to').count()
             tmp = tmp[tmp.project_id == tmp.worktime_planned]
             update = self.projects[self.projects.belongs_to.isin(tmp.index)].groupby('belongs_to').agg({'worktime_planned':'sum', 'start':'min', 'finish':'max'})
+
             if self.projects[self.projects.worktime_planned.isnull()].shape[0] == 0:
                 return
+
             for index, row in update.iterrows():
                 self.projects.loc[self.projects.project_id == index, 'worktime_planned'] = row.worktime_planned
                 self.projects.loc[self.projects.project_id == index, 'start'] = row.start
@@ -136,12 +144,20 @@ class ProposeAssigment():
         raise Exception("No more available time in calendar.")
 
 
-    def fix_dependence_issues(self, one_worker_per_project = False):
+    def find_incorrect_dependencies_FS(self, partial_update = False):
+        update = self.ld[self.ld.dependence == 'FS'].merge(self.lp, left_on='predecessor_id', right_on='project_id')[['project_id_x', 'finish']].groupby(['project_id_x']).max()
+        update = update.merge(self.lp, left_on='project_id_x', right_on='project_id')
+        update = update[update.start < update.finish_x]
+        if partial_update == True:
+            update = update[update.project_id.isin(self.projects[self.projects.finish.isnull()].project_id)]
+        return update
+
+
+
+    def fix_dependence_issues(self, partial_update = False, one_worker_per_project = False):
         number_of_fixes = 0
         while True: # fix dependency issue
-            update = self.ld[self.ld.dependence == 'FS'].merge(self.lp, left_on='predecessor_id', right_on='project_id')[['project_id_x', 'finish']].groupby(['project_id_x']).max()
-            update = update.merge(self.lp, left_on='project_id_x', right_on='project_id')
-            update = update[update.start < update.finish_x]
+            update = self.find_incorrect_dependencies_FS(partial_update=partial_update)
 
             if update.shape[0] == 0:
                 return number_of_fixes
@@ -182,23 +198,35 @@ class ProposeAssigment():
         return self.lp.finish.max()
 
 
-    def assign_projects_by_start_based_on_infinite_resources(self, one_worker_per_project = False):
-        
-        self.assign_projects_infinite_resources(self.start)
+    def update_lp_based_on_projects(self):
+        for index, row in self.lp.iterrows(): # TODO: find better way to update
+            self.lp.loc[self.lp.project_id == row['project_id'], 'start'] = self.projects[self.projects.project_id == row['project_id']].start.iloc[0]
+            self.lp.loc[self.lp.project_id == row['project_id'], 'finish'] = self.projects[self.projects.project_id == row['project_id']].finish.iloc[0]
+
+
+    def assign_projects_by_start_based_on_infinite_resources(self, partial_update = False, partial_update_from = None, one_worker_per_project = False):
+        if partial_update == True and partial_update_from is None:
+            partial_update_from = pd.Timestamp.utcnow()
+
+        self.assign_projects_infinite_resources(partial_update=partial_update, partial_update_from=partial_update_from)
         temp_df = self.lp.copy(deep=True)
+        temp_df.sort_values(['start'], inplace=True)
         self.lp.start = None
         self.lp.finish = None
-
-        temp_df.sort_values(['start'], inplace=True)
+        self.update_lp_based_on_projects()
 
         for project_id in temp_df.project_id:
-            self.assign_time_first_free(project_id, one_worker_per_project=one_worker_per_project)
+            if partial_update == True:
+                if self.projects[self.projects.project_id == project_id].finish.iloc[0] is pd.NaT:
+                    self.assign_time_first_free(project_id, one_worker_per_project=one_worker_per_project)
+            else:
+                self.assign_time_first_free(project_id, one_worker_per_project=one_worker_per_project)
+
+        print(self.lp)
             
-        number_of_fixes = self.fix_dependence_issues(one_worker_per_project=one_worker_per_project)
+        number_of_fixes = self.fix_dependence_issues(partial_update=partial_update, one_worker_per_project=one_worker_per_project)
         print("Preliminary assignment quality: " + str(number_of_fixes))
         return self.lp.finish.max()
-
-
 
 
     def assign_projects_to_resources_from_longest_path(self, one_worker_per_project = False):
@@ -247,39 +275,52 @@ class ProposeAssigment():
 
 
 
-    def assign_projects_infinite_resources(self, start_date):
-        # self.lp['start'] = pd.Timestamp(start_date, tz='UTC')
-        self.lp['start'] = start_date
-        self.lp['finish'] = self.lp['start'] + self.lp['worktime_planned']
+    def assign_projects_infinite_resources(self, partial_update = False, partial_update_from = None):
+        if partial_update == True:
+            if partial_update_from is None:
+                partial_update_from = pd.Timestamp.utcnow()
+            self.update_lp_based_on_projects()
+            self.lp.start[self.lp.start.isnull()] = partial_update_from
+            self.lp.finish = self.lp.apply(lambda row: (row['start'] + row['worktime_planned']) if row['finish'] is pd.NaT else row['finish'], axis=1)
+        else:
+            self.lp['start'] = self.start
+            self.lp['finish'] = self.lp['start'] + self.lp['worktime_planned']
+
         while True:
-            update = self.ld[self.ld.dependence == 'FS'].merge(self.lp, left_on='predecessor_id', right_on='project_id')[['project_id_x', 'finish']].groupby(['project_id_x']).max()
-            update = update.merge(self.lp, left_on='project_id_x', right_on='project_id')
-            update = update[update.start < update.finish_x][['project_id', 'worktime_planned', 'finish_x']].rename(columns={'finish_x': 'start'})
-            update['finish'] = update.start + update.worktime_planned
+            update = self.find_incorrect_dependencies_FS()
+            #1 update = update[['project_id', 'worktime_planned', 'finish_x']].rename(columns={'finish_x': 'start'})
+            #1 update['finish'] = update.start + update.worktime_planned
             
             if update.shape[0] == 0:
                 return self.lp.finish.max()
 
-            self.lp = pd.concat([self.lp[~self.lp.project_id.isin(update.project_id)], update], ignore_index=True)
+            #1 self.lp = pd.concat([self.lp[~self.lp.project_id.isin(update.project_id)], update], ignore_index=True)
+            
+            for index, row in update.iterrows(): # TODO: find better way to update
+                self.lp.loc[self.lp.project_id == row['project_id'], 'start'] = row.finish_x
+                self.lp.loc[self.lp.project_id == row['project_id'], 'finish'] = row.finish_x + row.worktime_planned
+
             
         
 
 
 
-# proposal = ProposeAssigment(project_id=55, host='localhost', path='../../')
+# proposal = ProposeAssigment(project_id=56, start=pd.Timestamp('2020-02-01', tz='UTC'), host='localhost', path='../../')
 # algo_time_start = time()
 
-# # finish_date = proposal.assign_projects_infinite_resources('2020-02-01')
-# # finish_date = proposal.assign_projects_to_resources_first_free(one_worker_per_project=True)
-# finish_date = proposal.assign_projects_by_start_based_on_infinite_resources(one_worker_per_project=True)
+# # finish_date = proposal.assign_projects_infinite_resources()
+# # finish_date = proposal.assign_projects_infinite_resources(partial_update=True, partial_update_from=pd.Timestamp('2021-01-01', tz='UTC'))
+# # finish_date = proposal.assign_projects_by_start_based_on_infinite_resources(one_worker_per_project=True)
+# finish_date = proposal.assign_projects_by_start_based_on_infinite_resources(partial_update=True, partial_update_from=pd.Timestamp('2021-01-01', tz='UTC'), one_worker_per_project=True)
 
 # # # not so good methods (probably some logic has to be reviewed):
+# # finish_date = proposal.assign_projects_to_resources_first_free(one_worker_per_project=True)
 # # finish_date = proposal.assign_projects_to_resources_from_longest_path(one_worker_per_project=False)
 # # finish_date = proposal.assign_projects_to_resources_from_path_start(one_worker_per_project=True)
 
 # algo_time_finish = time()
 
-# proposal.update_projects()
+# # proposal.update_projects()
 # print('Project finish timestamp: ' + str(finish_date))
 # print('Calculation time [s]: ' + str(algo_time_finish - algo_time_start))
 # print('Unassigned workers time during project: ' + str((proposal.av[proposal.av.project_id.isnull() & (proposal.av.start <= finish_date)].finish - proposal.av[proposal.av.project_id.isnull() & (proposal.av.start <= finish_date)].start).sum()))

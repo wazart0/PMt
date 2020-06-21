@@ -24,14 +24,14 @@ mutation {{
 
 users = [
     ['awaz@bcaw.biz', 'qwe', None],
-	['kf@ggg.com', 'qwe', None],
-	['adwaz@bcaw.biz', 'qwe', None],
-	['another@ad.com', 'qwe', None],
-	['next@ad.com', 'qwe', None],
-	['sieg@bcaw.biz', 'qwe', None],
-	['deb@bcaw.biz', 'qwe', None],
-	['kil@ad.com', 'qwe', None],
-	['extra@ad.com', 'qwe', None]
+    ['kf@ggg.com', 'qwe', None],
+    ['adwaz@bcaw.biz', 'qwe', None],
+    ['another@ad.com', 'qwe', None],
+    ['next@ad.com', 'qwe', None],
+    ['sieg@bcaw.biz', 'qwe', None],
+    ['deb@bcaw.biz', 'qwe', None],
+    ['kil@ad.com', 'qwe', None],
+    ['extra@ad.com', 'qwe', None]
 ]
 
 

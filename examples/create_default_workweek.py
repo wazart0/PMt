@@ -17,7 +17,7 @@ request_create_work_week = '''
 mutation {{
   createAvailability (
     user: {user}
-	start: "{start}"
+	  start: "{start}"
     duration: "{duration}"
     repeatInterval: "{repeat}"
     # until: "{until}"

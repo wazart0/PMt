@@ -80,7 +80,7 @@ class ProjectCreator(graphene.Mutation):
         creator = graphene.Int(required=True)
         name = graphene.String(required=True)
         description = graphene.String()
-        closed = graphene.Boolean()
+        # closed = graphene.Boolean()
         project_type = graphene.String(required=True)
         belongs_to = graphene.Int() # parent - choose final naming; group | project
         worktime_planned = graphene.String()
@@ -88,8 +88,8 @@ class ProjectCreator(graphene.Mutation):
 
     project = graphene.Field(Project)
 
-    def mutate(self, info, name, project_type, creator, description=None, closed=None, belongs_to=None, predecessors=None, worktime_planned=None):
-        project = pjt.Project.objects.create(creator_id=creator, name=name, description=description, closed=closed, worktime_planned=worktime_planned)
+    def mutate(self, info, name, project_type, creator, description=None, belongs_to=None, predecessors=None, worktime_planned=None):
+        project = pjt.Project.objects.create(creator_id=creator, name=name, description=description, worktime_planned=worktime_planned)
         # print(predecessors)
         if belongs_to is not None:
             ge.GraphModelManager.connect_nodes(project.id, ge.Node.objects.get(id=belongs_to), belongs_to=True)
@@ -101,13 +101,15 @@ class ProjectCreator(graphene.Mutation):
 
 class ProjectUpdater(graphene.Mutation):
     class Arguments:
-        project = graphene.Int(required=True)
+        id = graphene.Int(required=True)
         predecessors = graphene.List(TimelinedependenceInput) # dependence from other projects
+        start = graphene.types.datetime.DateTime()
+        finish = graphene.types.datetime.DateTime()
 
     project = graphene.Field(Project)
 
-    def mutate(self, info, project, predecessors=None):
-        project = pjt.Project.objects.get(pk=project)
+    def mutate(self, info, id, predecessors=None, start=None, finish=None):
+        project = pjt.Project.objects.get(pk=id)
         if predecessors is not None:
             for i in predecessors:
                 edges = ge.Edge.objects.filter(source_node=i['project'], target_node=project.pk)
@@ -115,6 +117,10 @@ class ProjectUpdater(graphene.Mutation):
                     ge.GraphModelManager.connect_nodes(ge.Node.objects.get(id=i['project']), ge.Node.objects.get(id=project.pk), timeline_dependency=i['dependence_type'])
                 else:
                     edges[0].timeline_dependency = i['dependence_type']
+        if start is not None: project.start = start
+        if finish is not None: project.finish = finish
+
+        project.save()
         return ProjectUpdater(project=project)
 
 

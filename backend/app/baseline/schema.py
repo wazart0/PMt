@@ -6,6 +6,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from django.db import connection
 
 from time import time
+import pandas as pd
 
 import baseline.models as bl
 # import baseline.models_virtual as bl_v
@@ -147,9 +148,13 @@ class BaselineUpdater(graphene.Mutation):
         default = graphene.Boolean()
         start = graphene.DateTime()
 
+        partial_update = graphene.Boolean()
+        partial_update_from = graphene.DateTime()
+        
+
     baseline = graphene.Field(Baseline)
 
-    def mutate(self, info, baseline, propose_timeline = None, **kwargs):
+    def mutate(self, info, baseline, propose_timeline = None, partial_update = False, partial_update_from = None, **kwargs):
         bl.Baseline.objects.filter(pk=baseline).update(**kwargs)
         baseline = bl.Baseline.objects.get(id=baseline)
         if propose_timeline:
@@ -159,7 +164,8 @@ class BaselineUpdater(graphene.Mutation):
             algo_time_start = time()
             # finish_date = proposal.assign_projects_infinite_resources(baseline.start)
             # finish_date = proposal.assign_projects_to_resources_first_free(one_worker_per_project=True)
-            finish_date = proposal.assign_projects_by_start_based_on_infinite_resources(one_worker_per_project=True)
+            # finish_date = proposal.assign_projects_by_start_based_on_infinite_resources(one_worker_per_project=True)
+            finish_date = proposal.assign_projects_by_start_based_on_infinite_resources(partial_update=partial_update, partial_update_from=partial_update_from, one_worker_per_project=True)
             algo_time_finish = time()
 
             print('Project finish timestamp: ' + str(finish_date))

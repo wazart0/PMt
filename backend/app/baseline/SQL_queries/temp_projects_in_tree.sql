@@ -40,7 +40,9 @@ create temp table projects_in_tree as (
 		source_node_id as project_id,
 		target_node_id as belongs_to,
 		wbs,
-		project_project.worktime_planned
+		project_project.worktime_planned,
+		project_project.start,
+		project_project.finish
 	from project_tree
 	left join project_project on project_tree.source_node_id = project_project.id
 );

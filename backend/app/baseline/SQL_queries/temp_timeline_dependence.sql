@@ -2,16 +2,16 @@ drop table if exists timeline_dependency;
 
 create temp table timeline_dependency as (
 	select
-		graph_engine_edge.target_node_id as project_id,
-		graph_engine_edge.source_node_id as predecessor_id,
-		graph_engine_edge.timeline_dependency as dependence
+		ge_edge.target_vertex_id as project_id,
+		ge_edge.source_vertex_id as predecessor_id,
+		ge_edge.details->>'type' as dependence
 	from
-		graph_engine_edge
+		ge_edge
 	where 
-		graph_engine_edge.source_node_id in (select project_id from projects_in_tree)
+		ge_edge.source_vertex_id in (select project_id from projects_in_tree)
 	and
-		graph_engine_edge.target_node_id in (select project_id from projects_in_tree)
+		ge_edge.target_vertex_id in (select project_id from projects_in_tree)
 	and
-		graph_engine_edge.timeline_dependency is not null
+		ge_edge.edge_type_id = 'dependence'
 );
 

@@ -22,7 +22,7 @@ class ProposeAssigment():
 
         cursor = con.cursor()
         # TODO those SQLs should be rewritten to python (DB should only provide significant data)
-        cursor.execute(open(path + 'baseline/sql_queries/temp_projects_in_tree.sql', 'r').read().format(top_level_node_id=project_id)) # TODO create WBS in pandas
+        cursor.execute(open(path + 'baseline/sql_queries/temp_projects_in_tree.sql', 'r').read().format(top_level_vertex_id=project_id)) # TODO create WBS in pandas
         cursor.execute(open(path + 'baseline/sql_queries/temp_timeline_dependence.sql', 'r').read())
         cursor.execute(open(path + 'pmt_calendar/sql_queries/calculate_availability.sql', 'r').read().format(start=str(start))) # TODO retrieve only assigned users
 
@@ -221,8 +221,6 @@ class ProposeAssigment():
                     self.assign_time_first_free(project_id, one_worker_per_project=one_worker_per_project)
             else:
                 self.assign_time_first_free(project_id, one_worker_per_project=one_worker_per_project)
-
-        print(self.lp)
             
         number_of_fixes = self.fix_dependence_issues(partial_update=partial_update, one_worker_per_project=one_worker_per_project)
         print("Preliminary assignment quality: " + str(number_of_fixes))

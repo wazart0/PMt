@@ -5,15 +5,15 @@ from django.db import connection
 
 
 
-def node_type_init(sender, **kwargs):
+def vertex_type_init(sender, **kwargs):
     
     query = '''
-    INSERT INTO graph_engine_nodetype
+    INSERT INTO ge_vertextype
         (id, display_name, description)
     SELECT %s, %s, %s
     WHERE
         NOT EXISTS (
-            SELECT id FROM graph_engine_nodetype WHERE id = %s
+            SELECT id FROM ge_vertextype WHERE id = %s
         );
     '''
 
@@ -26,7 +26,32 @@ def node_type_init(sender, **kwargs):
         ['baseline', 'Baseline', None, 'baseline']
     ]
 
-    print('Initializing node types...')
+    print('Initializing vertex types...')
+    cursor = connection.cursor()
+    for i in data:
+        cursor.execute(query, i)
+
+
+def edge_type_init(sender, **kwargs):
+    
+    query = '''
+    INSERT INTO ge_edgetype
+        (id, display_name, description)
+    SELECT %s, %s, %s
+    WHERE
+        NOT EXISTS (
+            SELECT id FROM ge_edgetype WHERE id = %s
+        );
+    '''
+
+    data = [
+        ['creator', 'Creator', None, 'creator'],
+        ['calendar', 'Calendar', None, 'calendar'],
+        ['dependence', 'Dependency', None, 'dependence'],
+        ['belongs_to', 'Belongs to', None, 'belongs_to']
+    ]
+
+    print('Initializing edge types...')
     cursor = connection.cursor()
     for i in data:
         cursor.execute(query, i)

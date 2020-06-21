@@ -4,10 +4,10 @@ import project.schema
 import pmt_calendar.schema
 import baseline.schema
 # import jobs.userPerspectiveAPI.schema
-# import graph_engine.schema
+# import ge.schema
 
 class Query(
-    # graph_engine.schema.Query,
+    # ge.schema.Query,
     ums.schema.Query, 
     project.schema.Query,
     pmt_calendar.schema.Query,

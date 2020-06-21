@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 
     'ums.apps.UMSConfig',
     # 'jobs.apps.JobsConfig',
-    'graph_engine.apps.GraphEngineConfig',
+    'ge.apps.GraphEngineConfig',
     'project.apps.ProjectConfig',
     'operation.apps.OperationConfig',
     'pmt_calendar.apps.PmtCalendarConfig',

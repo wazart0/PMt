@@ -1,3 +1,5 @@
+drop table if exists availability;
+
 create temp table availability as (
 	with
 	users as (
@@ -6,17 +8,17 @@ create temp table availability as (
 	selected_availability as (
 		select 
 			pmt_calendar_availability.id as id,
-			graph_engine_edge.source_node_id as user_id,
+			ge_edge.source_vertex_id as user_id,
 			pmt_calendar_availability.start,
 			pmt_calendar_availability.duration,
 			pmt_calendar_availability.repeat_interval,
 			pmt_calendar_availability.until	
-		from graph_engine_edge
-		inner join pmt_calendar_availability on graph_engine_edge.target_node_id = pmt_calendar_availability.id
+		from ge_edge
+		inner join pmt_calendar_availability on ge_edge.target_vertex_id = pmt_calendar_availability.id
 		where 
-			graph_engine_edge.source_node_id in (select * from users)
+			ge_edge.source_vertex_id in (select * from users)
 		and
-			graph_engine_edge.assignee = 'True'
+			ge_edge.edge_type_id = 'calendar'
 	),
 	availability as (
 		select 
@@ -31,3 +33,4 @@ create temp table availability as (
 	where start > timestamptz '{start}'
 	order by start asc
 );
+

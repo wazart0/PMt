@@ -1,14 +1,14 @@
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser
 
-from graph_engine.models import Node, NodeModelManager
+from ge.models import Vertex, DirectedGraphModelManager
 
 
 
 class User(AbstractBaseUser):
-    node_type = 'user'
-    objects = NodeModelManager()
-    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='user_id', on_delete=models.PROTECT)
+    vertex_type = 'user'
+    objects = DirectedGraphModelManager()
+    id = models.OneToOneField(to=Vertex, primary_key=True, editable=False, db_column='id', related_name='user_id', on_delete=models.PROTECT)
 
     created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, editable = False, auto_now = True) # TODO special logger has to be implemented - later remove
@@ -26,9 +26,9 @@ class User(AbstractBaseUser):
 
 
 class Group(models.Model):
-    node_type = 'group'
-    objects = NodeModelManager()
-    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='group_id', on_delete=models.PROTECT)
+    vertex_type = 'group'
+    objects = DirectedGraphModelManager()
+    id = models.OneToOneField(to=Vertex, primary_key=True, editable=False, db_column='id', related_name='group_id', on_delete=models.PROTECT)
 
     created = models.DateTimeField(null = False, editable = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, editable = False, auto_now = True) # TODO special logger has to be implemented - later remove
@@ -40,7 +40,7 @@ class Group(models.Model):
 
     def add_member(self, user_id):
         user = User.objects.get(id=user_id)
-        Node.objects.connect_nodes(self.id, user.id, member=True)
+        Vertex.objects.connect_nodes(self.id, user.id, member=True)
         return self
 
 

@@ -10,7 +10,7 @@ import pandas as pd
 
 import baseline.models as bl
 # import baseline.models_virtual as bl_v
-import graph_engine.models as ge
+import ge.models as ge
 import project.models as pjt
 import project.schema as pjt_sch
 import libs.timeline.primitive_estimation as lib
@@ -88,9 +88,9 @@ class Baseline(DjangoObjectType):
     L_L_P_projects = graphene.List(ProjectTimeline)
 
     def resolve_belongs_to(self, info):
-        if len(ge.Edge.objects.filter(source_node=self.pk, belongs_to=True)) == 0:
+        if len(ge.Edge.objects.filter(source_vertex=self.pk, edge_type_id=ge.EdgeType.objects.get(id='belongs_to'))) == 0:
             return None
-        return pjt.Project.objects.get(pk=ge.Edge.objects.filter(source_node=self.pk, belongs_to=True)[0].target_node.pk)
+        return pjt.Project.objects.get(pk=ge.Edge.objects.filter(source_vertex=self.pk, edge_type_id=ge.EdgeType.objects.get(id='belongs_to'))[0].target_vertex.pk)
 
     def resolve_timeline(self, info):
         return bl.Timeline.objects.filter(baseline=self.id)
@@ -134,7 +134,7 @@ class BaselineCreator(graphene.Mutation):
     def mutate(self, info, project, **kwargs):
         project = pjt.Project.objects.get(pk=project)
         baseline = bl.Baseline.objects.create(creator_id=1, **kwargs)
-        ge.GraphModelManager.connect_nodes(ge.Node.objects.get(id=baseline.pk), ge.Node.objects.get(id=project.pk), belongs_to=True)
+        ge.DirectedGraphModelManager.connect_nodes(ge.Vertex.objects.get(id=baseline.pk), ge.Vertex.objects.get(id=project.pk), ge.EdgeType.objects.get(id='belongs_to'))
         return BaselineCreator(baseline=baseline)
 
 
@@ -158,8 +158,8 @@ class BaselineUpdater(graphene.Mutation):
         bl.Baseline.objects.filter(pk=baseline).update(**kwargs)
         baseline = bl.Baseline.objects.get(id=baseline)
         if propose_timeline:
-            edge = ge.Edge.objects.filter(source_node=baseline.pk, belongs_to=True)
-            proposal = lib.ProposeAssigment(project_id=edge[0].target_node.pk, start=baseline.start)
+            edge = ge.Edge.objects.filter(source_vertex=baseline.pk, edge_type=ge.EdgeType.objects.get(id='belongs_to'))
+            proposal = lib.ProposeAssigment(project_id=edge[0].target_vertex.pk, start=baseline.start)
 
             algo_time_start = time()
             # finish_date = proposal.assign_projects_infinite_resources(baseline.start)

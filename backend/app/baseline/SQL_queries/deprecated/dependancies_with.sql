@@ -1,22 +1,22 @@
 with
 project_edges as (
 	select
-		graph_engine_edge.*
+		ge_edge.*
 	from
-		graph_engine_edge 
+		ge_edge 
 	inner join
 		project_project as source_project
 	on 
-		source_node_id = source_project.id
+		source_vertex_id = source_project.id
 	inner join
 		project_project as target_project
 	on
-		target_node_id = target_project.id
+		target_vertex_id = target_project.id
 ),
 owns as (
 	select 
-		target_node_id as project_id, 
-		source_node_id as own_id 
+		target_vertex_id as project_id, 
+		source_vertex_id as own_id 
 	from 
 		project_edges 
 	where 
@@ -28,8 +28,8 @@ lowest_level_dependency as (
 		with recursive 
 		dependence_edge as (
 			select 
-				project_edges.target_node_id as project_id,
-				project_edges.source_node_id as predecessor_id,
+				project_edges.target_vertex_id as project_id,
+				project_edges.source_vertex_id as predecessor_id,
 				project_edges.timeline_dependency as dependence
 			from 
 				project_edges

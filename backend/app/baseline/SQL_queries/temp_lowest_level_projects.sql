@@ -2,12 +2,12 @@ create temp table lowest_level_projects as (
 	with
 	owns as (
 		select 
-			target_node_id as project_id, 
-			source_node_id as own_id 
+			target_vertex_id as project_id, 
+			source_vertex_id as own_id 
 		from 
 			project_edges 
 		where 
-			belongs_to = 'True'
+			edge_type_id = 'belongs_to'
 	)
 	select
 		id as project_id,

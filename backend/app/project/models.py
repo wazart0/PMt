@@ -1,7 +1,7 @@
 from django.db import models
 
-from graph_engine.models import Node, NodeModelManager
-import graph_engine.models as ge
+from ge.models import Vertex, DirectedGraphModelManager
+import ge.models as ge
 
 
 
@@ -36,9 +36,9 @@ import graph_engine.models as ge
 
 
 class Project(models.Model):
-    node_type = 'project'
-    objects = NodeModelManager()
-    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='project_id', on_delete=models.PROTECT)
+    vertex_type = 'project'
+    objects = DirectedGraphModelManager()
+    id = models.OneToOneField(to=Vertex, primary_key=True, editable=False, db_column='id', related_name='project_id', on_delete=models.PROTECT)
 
     created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
     updated = models.DateTimeField(null=False, editable=False, auto_now=True) # TODO special logger has to be implemented - later remove
@@ -59,7 +59,7 @@ class Project(models.Model):
     # @property
     # def has_belonger_(self):
     #     return True
-    #     return len(ge.Edge.objects.filter(target_node_id=self.pk, belongs_to=True)) != 0
+    #     return len(ge.Edge.objects.filter(target_node_id=self.pk, edge_type_id=ge.EdgeType.objects.get(id='belongs_to'))) != 0
         
 
 
@@ -75,9 +75,9 @@ class Project(models.Model):
 
 
 class Milestone(models.Model):
-    node_type = 'milestone'
-    objects = NodeModelManager() # TODO should it really have ID not project-dependent?
-    id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='milestone_id', on_delete=models.PROTECT)
+    vertex_type = 'milestone'
+    objects = DirectedGraphModelManager() # TODO should it really have ID not project-dependent?
+    id = models.OneToOneField(to=Vertex, primary_key=True, editable=False, db_column='id', related_name='milestone_id', on_delete=models.PROTECT)
 
     created = models.DateTimeField(null = False, auto_now_add = True)
     updated = models.DateTimeField(null = False, auto_now = True)

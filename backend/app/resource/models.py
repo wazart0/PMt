@@ -1,13 +1,13 @@
 from django.db import models
 
-from graph_engine.models import Node, NodeModelManager
+from ge.models import Node, NodeModelManager
 
 
 
 
 
 class TimeResource(models.Model):
-    node_type = 'timeresource'
+    vertex_type = 'timeresource'
     objects = NodeModelManager()
     id = models.OneToOneField(to=Node, primary_key=True, editable=False, db_column='id', related_name='timeresource_id', on_delete=models.PROTECT)
 

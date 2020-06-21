@@ -4,7 +4,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from django.core.exceptions import FieldError
 
 import pmt_calendar.models as cal 
-import graph_engine.models as ge
+import ge.models as ge
 import ums.models as ums
 
 
@@ -51,7 +51,7 @@ class AvailabilityCreator(graphene.Mutation):
         availability = cal.Availability.objects.create(creator_id=1, start=start, duration=duration, repeat_interval=repeat_interval, until=until)
         if availability is None:
             raise FieldError('Cannot create availability - availability creation issue.')
-        edge = ge.GraphModelManager.connect_nodes(ge.Node.objects.get(id=user.pk), ge.Node.objects.get(id=availability.pk), assignee=True)
+        edge = ge.DirectedGraphModelManager.connect_nodes(ge.Vertex.objects.get(id=user.pk), ge.Vertex.objects.get(id=availability.pk), ge.EdgeType.objects.get(id='calendar'))
         if edge is None:
             raise FieldError('Cannot create availability - Edge creation issue.')
         return AvailabilityCreator(availability=availability)

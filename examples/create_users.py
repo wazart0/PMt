@@ -41,7 +41,8 @@ print('Creating users.')
 for i in users:
     data = request_create_user.format(email=i[0], password=i[1], creator=i[2])
     r = requests.post(url=url, json={"query": data})
-    if r.status_code != 200:
+    if r.status_code != 200 or 'errors' in r.json():
         print('WARNING: record not ingested: ' + str(url) + str(r.status_code) + str(r.json()) + str(data))
+        exit()
 
 print('Users created.')

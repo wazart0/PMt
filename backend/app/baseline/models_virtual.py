@@ -1,7 +1,7 @@
 from django.db import models
 
-from graph_engine.models import Node, NodeModelManager
-import graph_engine.models as ge
+from ge.models import Node, NodeModelManager
+import ge.models as ge
 from project.models import Project
 from ums.models import User
 # from baseline.models import bl

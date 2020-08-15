@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 services:
   frontend:
@@ -8,10 +8,9 @@ services:
       dockerfile: ./Dockerfile
     restart: always
     ports:
-      - 8080:80
+      - 8080:43434
     stdin_open: true
     tty: true
-
 
 networks:
   default:

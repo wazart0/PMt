@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 services:
   frontend:
@@ -8,14 +8,13 @@ services:
       dockerfile: ./Dockerfile-develop
     restart: always
     ports:
-      - 8080:80
+      - 8080:43434
     stdin_open: true
     tty: true
     volumes:
       - ./app/:/app/
     environment:
       - CHOKIDAR_USEPOLLING=true
-
 
 networks:
   default:

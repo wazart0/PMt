@@ -37,7 +37,7 @@ from django.db.models.expressions import RawSQL
 from django.contrib.postgres.fields import JSONField
 
 
-import libs.GraphEngine.abstract_model as ge
+# import libs.GraphEngine.abstract_model as ge
 
 
 

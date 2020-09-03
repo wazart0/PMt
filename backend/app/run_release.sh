@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-cd ./backend/app/
+# cd ./backend/app/
 
 printf '\n\nInitialize DB (migration):\n'
 # python3 manage.py makemigrations ums jobs
@@ -15,6 +15,6 @@ python3 manage.py migrate
 # python3 ./manage.py loaddata 'db.json'
 
 printf '\n\nStart server:\n'
-python3 ./manage.py runserver_plus --print-sql 0.0.0.0:8000
+python3 ./manage.py runserver --noreload 0.0.0.0:8000
 # python3 ./manage.py runserver_plus 0.0.0.0:8000
 

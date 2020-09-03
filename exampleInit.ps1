@@ -1,5 +1,5 @@
 
-python.exe .\examples\create_users.py
-python.exe .\examples\create_default_workweek.py
+python .\examples\create_users.py
+python .\examples\create_default_workweek.py
 
-python.exe .\examples\tools\ganttCSVtoPMt.py
+python .\examples\tools\ganttCSVtoPMt.py

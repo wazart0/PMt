@@ -55,14 +55,13 @@ export default {
 			// 	},
 			// ];
 
-
 			// let url = 'http://51.83.129.102:8000/graphql/';
-			let url = 'http://localhost:8000/graphql/';
+			let url = 'http://51.83.129.102:8000/graphql/';
 			var data = [];
 			// let url = 'http://backend:8000/graphql/';
-
-			axios.post(url, {
-			query: `
+			axios
+				.post(url, {
+					query: `
 				{
 					baseline (id:110) {
 					id
@@ -85,49 +84,48 @@ export default {
 					}
 					}
 				}
-				`
-			}).then((response) => { 
-			let projects = response['data']['data']['baseline']['projects']; 
+				`,
+				})
+				.then((response) => {
+					let projects = response['data']['data']['baseline']['projects'];
+					console.log(projects);
 
-			for (let i = 0; i < projects.length; i++) {
-				let task = {
-					id: projects[i]['project']['id'].toString(),
-					name: projects[i]['project']['name'],
-					// user: '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">Awesome!</a>',
-					actualStart: projects[i]['start'],
-					actualEnd: projects[i]['finish']
-					// duration: moment(projects[i]['finish']).diff(moment(projects[i]['start'])),
-					// percent: 0,
-					// type: "task"
-				}
+					for (let i = 0; i < projects.length; i++) {
+						let task = {
+							id: projects[i]['project']['id'].toString(),
+							name: projects[i]['project']['name'],
+							// user: '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">Awesome!</a>',
+							actualStart: projects[i]['start'],
+							actualEnd: projects[i]['finish'],
+							// duration: moment(projects[i]['finish']).diff(moment(projects[i]['start'])),
+							// percent: 0,
+							// type: "task"
+						};
 
-				if (projects[i]['belongsTo']['id'] != response['data']['data']['baseline']['belongsTo']['id']) { 
-					task['parent'] = projects[i]['belongsTo']['id'].toString()
-				}
+						if (projects[i]['belongsTo']['id'] != response['data']['data']['baseline']['belongsTo']['id']) {
+							task['parent'] = projects[i]['belongsTo']['id'].toString();
+						}
 
-				// task['dependentOn'] = projects[i]['predecessorsIdFS']
+						// task['dependentOn'] = projects[i]['predecessorsIdFS']
 
+						data.push(task);
+					}
 
-				data.push(task);
-			}
+					console.log(data);
 
-			
-			});
-
-			console.log(data);
-
-			// create a data tree
-			var treeData = anychart.data.tree(data, 'as-table');
-			// create a chart
-			var chart = anychart.ganttProject();
-			// set the data
-			chart.data(treeData);
-			// set the container id
-			chart.container('container');
-			// initiate drawing the chart
-			chart.draw();
-			// fit elements to the width of the timeline
-			chart.fitAll();
+					// create a data tree
+					var treeData = anychart.data.tree(data, 'as-table');
+					// create a chart
+					var chart = anychart.ganttProject();
+					// set the data
+					chart.data(treeData);
+					// set the container id
+					chart.container('container');
+					// initiate drawing the chart
+					chart.draw();
+					// fit elements to the width of the timeline
+					chart.fitAll();
+				});
 		},
 	},
 };

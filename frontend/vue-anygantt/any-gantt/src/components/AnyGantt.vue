@@ -14,81 +14,42 @@ export default {
 		// Declares the method
 		gantt: function() {
 			// create data
-			// var data = [
-			// 	{
-			// 		id: '1',
-			// 		name: 'Development1',
-			// 		actualStart: '2018-01-15',
-			// 		actualEnd: '2018-03-10',
-			// 		children: [
-			// 			{
-			// 				id: '1_1',
-			// 				name: 'Analysis',
-			// 				actualStart: '2018-01-15',
-			// 				actualEnd: '2018-01-25',
-			// 			},
-			// 			{
-			// 				id: '1_2',
-			// 				name: 'Design',
-			// 				actualStart: '2018-01-20',
-			// 				actualEnd: '2018-02-04',
-			// 			},
-			// 			{
-			// 				id: '1_3',
-			// 				name: 'Meeting',
-			// 				actualStart: '2018-02-05',
-			// 				actualEnd: '2018-02-05',
-			// 			},
-			// 			{
-			// 				id: '1_4',
-			// 				name: 'Implementation',
-			// 				actualStart: '2018-02-05',
-			// 				actualEnd: '2018-02-24',
-			// 			},
-			// 			{
-			// 				id: '1_5',
-			// 				name: 'Testing',
-			// 				actualStart: '2018-02-25',
-			// 				actualEnd: '2018-03-10',
-			// 			},
-			// 		],
-			// 	},
-			// ];
 
-			// let url = 'http://51.83.129.102:8000/graphql/';
 			let url = 'http://51.83.129.102:8000/graphql/';
-			var data = [];
+			// let url = 'http://localhost:8000/graphql/';
 			// let url = 'http://backend:8000/graphql/';
+
+			var data = [];
 			axios
 				.post(url, {
 					query: `
-				{
-					baseline (id:110) {
-					id
-					name
-					belongsTo {
-						id
-					}
-					projects {
-						wbs
-						project {
-						id
-						name
+						{
+							baseline (id:110) {
+							id
+							name
+							belongsTo {
+								id
+							}
+							projects {
+								wbs
+								project {
+								id
+								name
+								}
+								start
+								finish
+								belongsTo {
+								id
+								}
+								predecessorsIdFS
+							}
+							}
 						}
-						start
-						finish
-						belongsTo {
-						id
-						}
-						predecessorsIdFS
-					}
-					}
-				}
-				`,
+						`,
 				})
 				.then((response) => {
 					let projects = response['data']['data']['baseline']['projects'];
-					console.log(projects);
+					// console.log(projects);
 
 					for (let i = 0; i < projects.length; i++) {
 						let task = {
@@ -111,10 +72,10 @@ export default {
 						data.push(task);
 					}
 
-					console.log(data);
+					// console.log(data);
 
 					// create a data tree
-					var treeData = anychart.data.tree(data, 'as-table');
+					var treeData = anychart.data.tree(data, 'as-tree');
 					// create a chart
 					var chart = anychart.ganttProject();
 					// set the data

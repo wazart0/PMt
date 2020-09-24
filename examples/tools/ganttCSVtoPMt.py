@@ -7,6 +7,7 @@ path = os.path.dirname(os.path.realpath(__file__)) + '/'
 print(path)
 
 url = 'http://localhost:8000/graphql/'
+# url = 'http://51.83.129.102:8000/graphql/'
 
 # input_csv = 'BNext-optimization.csv'
 input_csv = 'test_FS_only.csv'

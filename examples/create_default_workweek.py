@@ -3,6 +3,7 @@ import requests
 
 
 url = 'http://localhost:8000/graphql/'
+# url = 'http://51.83.129.102:8000/graphql/'
 
 
 request_get_users = '''

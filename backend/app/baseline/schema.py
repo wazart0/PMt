@@ -44,13 +44,13 @@ class ProjectTimeline(DjangoObjectType):
     worktime_planned = graphene.String()
     predecessors_ID_F_S = graphene.List(graphene.Int) # TODO add support for other types and create graphene object for filtering
     L_L_P_predecessors_ID_F_S = graphene.List(graphene.Int)
-    start = graphene.String()
-    finish = graphene.String()
+    # start = graphene.String()
+    # finish = graphene.String()
 
-    def resolve_start(self, info):
-        return self.start.strftime('%Y-%m-%d')
-    def resolve_finish(self, info):
-        return self.finish.strftime('%Y-%m-%d')
+    # def resolve_start(self, info):
+    #     return self.start.strftime('%Y-%m-%dT%H:%M:%S')
+    # def resolve_finish(self, info):
+    #     return self.finish.strftime('%Y-%m-%dT%H:%M:%S')
 
     def resolve_predecessors_ID_F_S(self, info):
         cur = connection.cursor()

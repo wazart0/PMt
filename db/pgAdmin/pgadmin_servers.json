@@ -1,0 +1,11 @@
+{
+    "Servers": {
+        "Name": "PMt",
+        "Port": 5432,
+        "Username": "ad",
+        "Host": "database",
+        "SSLMode": "prefer",
+        "MaintenanceDB": "pmt",
+        "PassFile": "/pgadmin4/password.file"
+    }
+}

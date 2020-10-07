@@ -1,0 +1,132 @@
+{
+  "version": 2,
+  "tables": [
+    {
+      "table": {
+        "schema": "public",
+        "name": "baseline"
+      },
+      "array_relationships": [
+        {
+          "name": "projects",
+          "using": {
+            "foreign_key_constraint_on": {
+              "column": "default_baseline_id",
+              "table": {
+                "schema": "public",
+                "name": "project"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "table": {
+        "schema": "public",
+        "name": "baseline_project"
+      },
+      "object_relationships": [
+        {
+          "name": "baseline",
+          "using": {
+            "foreign_key_constraint_on": "baseline_id"
+          }
+        },
+        {
+          "name": "parent",
+          "using": {
+            "foreign_key_constraint_on": "parent_id"
+          }
+        },
+        {
+          "name": "project",
+          "using": {
+            "foreign_key_constraint_on": "project_id"
+          }
+        }
+      ]
+    },
+    {
+      "table": {
+        "schema": "public",
+        "name": "baseline_project_assignees_timeline"
+      }
+    },
+    {
+      "table": {
+        "schema": "public",
+        "name": "baseline_project_dependency"
+      }
+    },
+    {
+      "table": {
+        "schema": "public",
+        "name": "calendar"
+      }
+    },
+    {
+      "table": {
+        "schema": "public",
+        "name": "project"
+      },
+      "object_relationships": [
+        {
+          "name": "default_baseline",
+          "using": {
+            "foreign_key_constraint_on": "default_baseline_id"
+          }
+        },
+        {
+          "name": "parent",
+          "using": {
+            "manual_configuration": {
+              "remote_table": {
+                "schema": "public",
+                "name": "baseline_project"
+              },
+              "column_mapping": {
+                "default_baseline_id": "baseline_id",
+                "id": "project_id"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "table": {
+        "schema": "public",
+        "name": "user"
+      }
+    }
+  ],
+  "custom_types": {
+    "input_objects": [
+      {
+        "name": "SampleInput",
+        "fields": [
+          {
+            "name": "username",
+            "type": "String!"
+          },
+          {
+            "name": "password",
+            "type": "String!"
+          }
+        ]
+      }
+    ],
+    "objects": [
+      {
+        "name": "SampleOutput",
+        "fields": [
+          {
+            "name": "accessToken",
+            "type": "String!"
+          }
+        ]
+      }
+    ]
+  }
+}

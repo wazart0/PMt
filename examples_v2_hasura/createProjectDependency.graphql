@@ -1,0 +1,8 @@
+mutation insert_dependency($baseline_id: uuid = "{baseline_id}", $predecessor_id: uuid = "{predecessor_id}", $project_id: uuid = "{project_id}") {
+  insert_baseline_project_dependency_one(object: {baseline_id: $baseline_id, predecessor_id: $predecessor_id, project_id: $project_id, type: "{type}"}) {
+    baseline_id
+    predecessor_id
+    project_id
+    type
+  }
+}

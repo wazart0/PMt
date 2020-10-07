@@ -1,0 +1,12 @@
+mutation createProjectChild($project_id: uuid! = "{project_id}", $parent_project_id: uuid! = "{parent_project_id}", $baseline_id: uuid! = "{baseline_id}") {
+  insert_project_one(object: {name: "{name}", label: "{label}", id: $project_id, default_baseline_id: $baseline_id}) {
+    id
+    name
+    default_baseline_id
+  }
+  insert_baseline_project_one(object: {project_id: $project_id, parent_id: $parent_project_id, baseline_id: $baseline_id, , worktime: "{worktime}"}) {
+    project_id
+    parent_id
+    baseline_id
+  }
+}

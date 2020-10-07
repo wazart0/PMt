@@ -16,9 +16,10 @@ class Availability(models.Model):
     updated = models.DateTimeField(null=False, editable=False, auto_now=True) # TODO special logger has to be implemented - later remove
 
     start = models.DateTimeField(null=False)
-    duration = models.DurationField(null=False)
-    repeat_interval = models.DurationField(null=True)
-    until = models.DateTimeField(null=True) # TODO decide whether required
+    finish = models.DateTimeField(null=True) 
+
+    duration = models.DurationField(null=True) # if partially available in given interval
+    repeat_interval = models.DurationField(null=True) # if partially available in given interval
 
     # TODO add constraints: (duration < repeat_interval)
 

@@ -1,0 +1,21 @@
+mutation createProjectRoot($project_id: uuid! = "{project_id}", $baseline_id: uuid! = "{baseline_id}") {
+  insert_project_one(object: {name: "{name}", label: "{label}", id: $project_id}) {
+    id
+    name
+    default_baseline_id
+  }
+  insert_baseline_one(object: {base_project_id: $project_id, id: $baseline_id, name: "default"}) {
+    id
+    name
+  }
+  update_project_by_pk(pk_columns: {id: $project_id}, _set: {default_baseline_id: $baseline_id}) {
+    id
+    name
+    default_baseline_id
+  }
+  insert_baseline_project_one(object: {project_id: $project_id, baseline_id: $baseline_id}) {
+    baseline_id
+    project_id
+    parent_id
+  }
+}

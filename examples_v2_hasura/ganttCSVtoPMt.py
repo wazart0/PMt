@@ -12,8 +12,8 @@ print(path)
 url = 'http://localhost:8090/v1/graphql'
 # url = 'http://51.83.129.102:8000/graphql/'
 
-# input_csv = 'BNext-optimization.csv'
 input_csv_path = '../examples/tools/'
+# input_csv = 'BNext-optimization.csv'
 input_csv = 'test_FS_only.csv'
 
 creator_id = 1
@@ -73,7 +73,9 @@ for index, row in csv.iterrows():
 		.replace('{baseline_id}', str(default_baseline_id)) \
 		.replace('{name}', str(row['Name'].strip())) \
 		.replace('{label}', str(row['Outline number'])) \
-		.replace('{worktime}', str(row['Duration']) + 'd')
+		.replace('{worktime}', str(row['Duration']) + 'd') \
+		.replace('{start}', str(row['Begin date'])) \
+		.replace('{finish}', str(row['End date']))
 	r = requests.post(url=url, json={"query": data})
 
 	if r.status_code != 200 or 'errors' in r.json():

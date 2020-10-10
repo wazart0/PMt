@@ -4,9 +4,12 @@ mutation createProjectChild($project_id: uuid! = "{project_id}", $parent_project
     name
     default_baseline_id
   }
-  insert_baseline_project_one(object: {project_id: $project_id, parent_id: $parent_project_id, baseline_id: $baseline_id, , worktime: "{worktime}"}) {
+  insert_baseline_project_one(object: {project_id: $project_id, parent_id: $parent_project_id, baseline_id: $baseline_id, worktime: "{worktime}", start: "{start}", finish: "{finish}"}) {
     project_id
     parent_id
     baseline_id
+    start
+    finish
+    worktime
   }
 }

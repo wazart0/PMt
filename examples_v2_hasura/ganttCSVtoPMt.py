@@ -10,7 +10,7 @@ print(path)
 
 
 url = 'http://localhost:8090/v1/graphql'
-# url = 'http://51.83.129.102:8000/graphql/'
+# url = 'http://51.83.129.102:8090/v1/graphql/'
 
 input_csv_path = '../examples/tools/'
 # input_csv = 'BNext-optimization.csv'

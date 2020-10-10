@@ -26,7 +26,7 @@ export default {
     gantt() {
       // create data
 
-      let url = "http://51.83.129.102:8000/graphql/";
+      let url = "http://51.83.129.102:8090/v1/graphql/";
       // let url = 'http://localhost:8000/graphql/';
       // let url = 'http://backend:8000/graphql/';
 
@@ -35,37 +35,30 @@ export default {
       axios
         .post(url, {
           query: `
-						{
-							baseline (id:110) {
-							id
-							name
-							belongsTo {
-								id
-							}
-							projects {
-								wbs
-								project {
-								id
-								name
-								}
-								start
-								finish
-								belongsTo {
-								id
-								}
-								predecessorsIdFS
-							}
-							}
-						}
+            query projects_for_baseline {
+              baseline(where: {name: {_eq: "default"}, base_project: {name: {_eq: "test_FS_only.csv"}}}) {
+                projects(order_by: {project: {created_at: asc}}) {
+                  finish
+                  parent_id
+                  project_id
+                  start
+                  project {
+                    name
+                    label
+                  }
+                }
+              }
+            }
 						`,
         })
         .then((response) => {
-          let projects = response["data"]["data"]["baseline"]["projects"];
+          // console.log(response);
+          let projects = response["data"]["data"]["baseline"][0]["projects"];
           // console.log(projects);
 
           for (let i = 0; i < projects.length; i++) {
             let task = {
-              id: projects[i]["project"]["id"].toString(),
+              id: projects[i]["project_id"].toString(),
               name: projects[i]["project"]["name"],
               // user: '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">Awesome!</a>',
               actualStart: projects[i]["start"],
@@ -73,14 +66,15 @@ export default {
               // duration: moment(projects[i]['finish']).diff(moment(projects[i]['start'])),
               // percent: 0,
               // type: "task"
+              parent: projects[i]["parent_id"]
             };
 
-            if (
-              projects[i]["belongsTo"]["id"] !=
-              response["data"]["data"]["baseline"]["belongsTo"]["id"]
-            ) {
-              task["parent"] = projects[i]["belongsTo"]["id"].toString();
-            }
+            // if (
+            //   projects[i]["belongsTo"]["id"] !=
+            //   response["data"]["data"]["baseline"]["belongsTo"]["id"]
+            // ) {
+            //   task["parent"] = projects[i]["belongsTo"]["id"].toString();
+            // }
 
             // task['dependentOn'] = projects[i]['predecessorsIdFS']
 

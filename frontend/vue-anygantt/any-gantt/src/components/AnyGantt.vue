@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="container" style="width: 1600px; height: 700px;"></div>
+    <div id="container" style="width: 1400px; height: 600px;"></div>
     <button @click="exportChart">export</button>
   </div>
 </template>

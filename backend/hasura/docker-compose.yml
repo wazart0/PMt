@@ -9,6 +9,9 @@ services:
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://ad:pass@database:5432/pmt
       HASURA_GRAPHQL_ENABLE_CONSOLE: 'false'
+      HASURA_GRAPHQL_CORS_DOMAIN: '*'
+      HASURA_GRAPHQL_DEV_MODE: 'false'
+      HASURA_GRAPHQL_ENABLE_ALLOWLIST: 'false'
     ports:
       - 8090:8080
 

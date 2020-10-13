@@ -42,7 +42,7 @@
   - name: default_baseline
     using:
       foreign_key_constraint_on: default_baseline_id
-  - name: parent
+  - name: default_baseline_project
     using:
       manual_configuration:
         remote_table:

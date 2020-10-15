@@ -26,7 +26,6 @@ export class AnychartTestComponent implements OnInit {
     // var vm = this;
 
     this.reportService.get().subscribe((response) => {
-      console.log(response);
       let projects = response['data']['baseline'][0]['projects'];
       // console.log(projects);
 

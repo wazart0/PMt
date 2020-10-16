@@ -1,3 +1,4 @@
+import { SharedModule } from './../../shared/shared.module';
 import { ReportRoutingModule } from './report-routing.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -6,6 +7,6 @@ import { ReportPageComponent } from './report-page/report-page.component';
 
 @NgModule({
   declarations: [AnychartTestComponent, ReportPageComponent],
-  imports: [CommonModule, ReportRoutingModule],
+  imports: [CommonModule, ReportRoutingModule, SharedModule],
 })
 export class ReportModule {}

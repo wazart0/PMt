@@ -1,5 +1,5 @@
 import { ReportService } from './../report.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import 'anychart';
 
 @Component({
@@ -8,14 +8,23 @@ import 'anychart';
   styleUrls: ['./anychart-test.component.scss'],
 })
 export class AnychartTestComponent implements OnInit {
-  chart;
+  chart: anychart.charts.Gantt;
+
+  @Input()
+  search: string;
   constructor(private reportService: ReportService) {}
 
   ngOnInit() {
     console.log(anychart);
     this.gantt();
   }
-  gantt() {
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.search?.currentValue) {
+      this.gantt(this.search);
+    }
+  }
+  gantt(search?: string) {
     // create data
 
     let url = 'http://51.83.129.102:8000/graphql/';
@@ -25,7 +34,12 @@ export class AnychartTestComponent implements OnInit {
     var data = [];
     // var vm = this;
 
-    this.reportService.get().subscribe((response) => {
+    this.reportService.get(search).subscribe((response: any) => {
+      console.log(response);
+      if (response.data.baseline.length == 0) {
+        this.chart.dispose();
+        return;
+      }
       let projects = response['data']['baseline'][0]['projects'];
       // console.log(projects);
 
@@ -59,6 +73,29 @@ export class AnychartTestComponent implements OnInit {
       // create a chart
       var chart = anychart.ganttProject();
       this.chart = chart;
+
+      const timeline = chart.getTimeline();
+      timeline.enabled(false);
+
+      chart.splitterPosition('150%');
+
+      const name = chart.dataGrid().column(1);
+      name.width(150);
+
+      const start = chart.dataGrid().column(2);
+      start.width(150);
+      start.title('Start');
+      start.labels().format('{%start}{dateTimeFormat:dd MMM}');
+      start.depthPaddingMultiplier(20);
+      start.collapseExpandButtons(true);
+
+      const end = chart.dataGrid().column(3);
+      end.width(150);
+      end.title('End');
+      end.labels().format('{%end}{dateTimeFormat:dd MMM}');
+      end.depthPaddingMultiplier(20);
+      end.collapseExpandButtons(true);
+
       // set the data
       this.chart.data(treeData);
       // set the container id

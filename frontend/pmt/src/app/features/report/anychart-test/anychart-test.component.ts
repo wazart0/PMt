@@ -36,24 +36,24 @@ export class AnychartTestComponent implements OnInit {
 
     this.reportService.get(search).subscribe((response: any) => {
       console.log(response);
-      if (response.data.baseline.length == 0) {
+      if (response.data.project.length == 0) {
         this.chart.dispose();
         return;
       }
-      let projects = response['data']['baseline'][0]['projects'];
+      let projects = response['data']['project'];
       // console.log(projects);
 
       for (let i = 0; i < projects.length; i++) {
         let task = {
-          id: projects[i]['project_id'].toString(),
-          name: projects[i]['project']['name'],
+          id: projects[i]['id'].toString(),
+          name: projects[i]['name'],
           // user: '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">Awesome!</a>',
-          actualStart: projects[i]['start'],
-          actualEnd: projects[i]['finish'],
+          actualStart: projects[i]['default_baseline_project']['start'],
+          actualEnd: projects[i]['default_baseline_project']['finish'],
           // duration: moment(projects[i]['finish']).diff(moment(projects[i]['start'])),
           // percent: 0,
           // type: "task"
-          parent: projects[i]['parent_id'],
+          // parent: projects[i]['default_baseline_project']['parent']['id'],
         };
 
         // if (

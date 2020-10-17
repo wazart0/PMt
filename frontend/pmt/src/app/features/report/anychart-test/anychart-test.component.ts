@@ -53,7 +53,7 @@ export class AnychartTestComponent implements OnInit {
           // duration: moment(projects[i]['finish']).diff(moment(projects[i]['start'])),
           // percent: 0,
           // type: "task"
-          // parent: projects[i]['default_baseline_project']['parent']['id'],
+          parent: projects[i]['default_baseline_project']['parent_id'],
         };
 
         // if (

@@ -34,6 +34,9 @@ export class AnychartTestComponent implements OnInit {
     var data = [];
     // var vm = this;
 
+    if (this.chart) {
+      this.chart.dispose();
+    }
     this.reportService.get(search).subscribe((response: any) => {
       console.log(response);
       if (response.data.project.length == 0) {

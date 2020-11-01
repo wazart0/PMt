@@ -2,6 +2,7 @@ import pandas as pd
 
 from libs.db_access.pg_connect import PGconnection
 from libs.algorithms.primitive_estimation import ProposeAssigment
+from calculate.expand_calendar import UserCalendarExpander
 
 
 
@@ -44,6 +45,7 @@ class ProposeTimeline():
         partial_update_from = '' # some date for partial update
 
         solver = ProposeAssigment()
+        expander = UserCalendarExpander(start_date)
 
 
         cursor = self.db.connect()
@@ -51,8 +53,8 @@ class ProposeTimeline():
         if source_baseline_id is None:
             source_baseline_id = get_default_baseline_id(project_id, cursor)
 
-        # if baseline_id is None:
-        #     baseline_id = create_baseline(project_id, cursor)
+        if baseline_id is None: 
+            baseline_id = create_baseline(project_id, cursor) # TODO why it doesn't work?
 
 
 
@@ -61,20 +63,16 @@ class ProposeTimeline():
         path = './calculate/sql/'
 
         # TODO those SQLs should be rewritten to python (DB should only provide significant data)
-        cursor.execute(open(path + 'temp_projects.sql', 'r').read().
-            format(project_id=project_id, source_baseline_id=source_baseline_id)) # TODO create WBS in pandas
+        cursor.execute(open(path + 'temp_projects.sql', 'r').read() \
+            .format(project_id=project_id, source_baseline_id=source_baseline_id)) # TODO create WBS in pandas
+        cursor.execute(open(path + 'get_calendars_for_users.sql', 'r').read() \
+            .format(start_date=start_date)) # TODO retrieve only assigned users
 
-        # cursor.execute(open(path + 'calculate_availability.sql', 'r').read().format(start=str(start))) # TODO retrieve only assigned users
 
         solver.projects = pd.read_sql('select * from projects_in_tree;', self.db.con)
         solver.dependencies = pd.read_sql('select * from projects_dependency;', self.db.con)
-
-        self.db.disconnect()
-        return solver
-
-        solver.av = pd.read_sql('select * from availability;', self.db.con)
-
-        solver.ld = pd.read_sql('select * from lowest_level_dependency;', self.db.con) # TODO calculate in pandas
+        expander.user_calendar = pd.read_sql('select * from temp_filtered_user_calendar;', self.db.con)
+        expander.calendar = pd.read_sql('select * from temp_filtered_calendar;', self.db.con)
 
         self.db.disconnect()
 
@@ -82,7 +80,9 @@ class ProposeTimeline():
 
         # Calculation part
 
-        solver.initialize()
+        solver.av = expander.create_availability_frame()
+        solver.initialize(start_date)
+
 
         from time import time
         algo_time_start = time()
@@ -102,34 +102,40 @@ class ProposeTimeline():
 
         solver.update_projects()
         solver.projects['baseline_id'] = baseline_id
-        solver.projects['llp'] = False
-        solver.projects.llp.loc[solver.projects.project_id.isin(solver.lp.project_id)] = True
-        solver.projects.worktime_planned = solver.projects.worktime_planned.astype(str) # TODO do we really need to convert?
-
-        solver.ld['baseline_id'] = baseline_id
-        solver.ld['llp'] = True
-        solver.ld.rename(columns={'dependence': 'timeline_dependency'}, inplace=True)
+        solver.projects.worktime = solver.projects.worktime.astype(str) # TODO do we really need to convert?
 
         solver.dependencies['baseline_id'] = baseline_id
-        solver.dependencies['llp'] = False
         solver.dependencies.rename(columns={'dependence': 'timeline_dependency'}, inplace=True)
 
-        solver.av = solver.av[solver.av.project_id.notnull()]
-        solver.av.drop(['id'], axis=1, inplace=True)
         solver.av['baseline_id'] = baseline_id
-        solver.av['project_id'] = solver.av.project_id.astype(int)
+        solver.av = solver.av[solver.av.project_id.notnull()]
 
+        
+        # TODO lowest level dependency - is that really needed?
+        # solver.projects['llp'] = False
+        # solver.projects.llp.loc[solver.projects.project_id.isin(solver.lp.project_id)] = True
 
+        # solver.ld['baseline_id'] = baseline_id
+        # solver.ld['llp'] = True
+        # solver.ld.rename(columns={'dependence': 'timeline_dependency'}, inplace=True)
+        
+        # solver.dependencies['llp'] = False
+
+        
 
         # insert or update data in DB
 
         engine = self.db.get_engine()
 
-        # solver.projects.to_sql('baseline_project', engine, index=False, if_exists='append')
-        # solver.av.to_sql('baseline_timeline', engine, index=False, if_exists='append')
+        # TODO add drop for given baseline_id
+        solver.projects.to_sql('baseline_project', engine, index=False, if_exists='append')
+        solver.av.to_sql('baseline_project_assignees_timeline', engine, index=False, if_exists='append')
+        solver.dependencies.to_sql('baseline_project_dependency', engine, index=False, if_exists='append')
+
         # # dependencies probably not needed in new version
         # solver.ld.to_sql('baseline_projectdependency', engine, index=False, if_exists='append')
-        # solver.dependencies.to_sql('baseline_projectdependency', engine, index=False, if_exists='append')
+
+        return baseline_id
 
 
 

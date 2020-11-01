@@ -1,7 +1,7 @@
 from flask import Flask
 from flask import request
 from calculate.propose_timeline import ProposeTimeline
-
+import dateutil.parser
 
 app = Flask(__name__)
 
@@ -17,6 +17,8 @@ def propose_timeline():
     start_date = request.args.get('start_date')
     baseline_id = request.args.get('baseline_id')
     source_baseline_id = request.args.get('source_baseline_id') # TODO for now default baseline
+
+    start_date = dateutil.parser.parse(start_date.replace(' ', '+')) # TODO find some better solution or change args to json format
     timeline = ProposeTimeline()
     baseline_id = timeline.basic_solver(project_id, start_date, baseline_id, source_baseline_id)
     return str(project_id) + ', ' + str(baseline_id) + ', ' + str(start_date)

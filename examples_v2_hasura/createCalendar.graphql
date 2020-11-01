@@ -1,0 +1,5 @@
+mutation insert_calendar_one {
+  insert_calendar_one(object: {name: "{name}", description: "{description}", calculation_details: {calculation_details}}) {
+    id
+  }
+}

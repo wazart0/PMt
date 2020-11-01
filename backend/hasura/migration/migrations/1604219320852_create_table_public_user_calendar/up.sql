@@ -1,0 +1,1 @@
+CREATE TABLE "public"."user_calendar"("user_id" uuid NOT NULL, "calendar_id" uuid NOT NULL, PRIMARY KEY ("user_id","calendar_id") , FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON UPDATE restrict ON DELETE restrict, FOREIGN KEY ("calendar_id") REFERENCES "public"."calendar"("id") ON UPDATE restrict ON DELETE restrict);

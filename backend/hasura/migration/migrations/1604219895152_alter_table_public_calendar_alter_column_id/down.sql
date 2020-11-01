@@ -1,0 +1,1 @@
+ALTER TABLE ONLY "public"."calendar" ALTER COLUMN "id" DROP DEFAULT;

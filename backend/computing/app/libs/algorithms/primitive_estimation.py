@@ -15,9 +15,10 @@ class ProposeAssigment():
         self.av = availability
 
 
-    def initialize(self):
-
+    def initialize(self, start):
         # self.validate_schema()
+
+        self.start = start
 
         self.lp = self.create_lowest_level_projects()
         self.lp['start'] = None
@@ -25,7 +26,7 @@ class ProposeAssigment():
 
         self.ld = self.create_lowest_level_dependencies()
 
-        # self.av['project_id'] = None
+        self.av['project_id'] = None
 
 
     # def create_wbs(self): TODO
@@ -33,7 +34,7 @@ class ProposeAssigment():
 
     def validate_schema(self):
         self.projects.astype(dtype={'project_id': 'int64', 'parent_id': 'int64', 'worktime': 'timedelta64', 'start': 'datetime64[ns]', 'finish': 'datetime64[ns]'})
-        self.dependencies.astype(dtype={'project_id': 'int64', 'predecessor_id': 'int64', 'dependence': 'str'})
+        self.dependencies.astype(dtype={'project_id': 'int64', 'predecessor_id': 'int64', 'type': 'str'})
         self.av.astype(dtype={'user_id': 'int64', 'start': 'datetime64[ns]', 'finish': 'datetime64[ns]'})
 
 
@@ -122,7 +123,7 @@ class ProposeAssigment():
 
 
     def find_incorrect_dependencies_FS(self, partial_update = False):
-        update = self.ld[self.ld.dependence == 'FS'].merge(self.lp, left_on='predecessor_id', right_on='project_id')[['project_id_x', 'finish']].groupby(['project_id_x']).max()
+        update = self.ld[self.ld.type == 'FS'].merge(self.lp, left_on='predecessor_id', right_on='project_id')[['project_id_x', 'finish']].groupby(['project_id_x']).max()
         update = update.merge(self.lp, left_on='project_id_x', right_on='project_id')
         update = update[update.start < update.finish_x]
         if partial_update == True:

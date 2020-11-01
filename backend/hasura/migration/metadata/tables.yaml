@@ -54,3 +54,6 @@
 - table:
     schema: public
     name: user
+- table:
+    schema: public
+    name: user_calendar

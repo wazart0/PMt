@@ -4,7 +4,7 @@ mutation createProjectRoot($project_id: uuid! = "{project_id}", $baseline_id: uu
     name
     default_baseline_id
   }
-  insert_baseline_one(object: {base_project_id: $project_id, id: $baseline_id, name: "default"}) {
+  insert_baseline_one(object: {base_project_id: $project_id, id: $baseline_id, name: "Current status"}) {
     id
     name
   }

@@ -14,7 +14,7 @@ class PGconnection():
 
     def connect(self):
         self.con = psycopg2.connect(host=self.host, user=self.user, password=self.password, database=self.database)
-        return con.cursor()
+        return self.con.cursor()
 
     def disconnect(self):
         self.con.close()

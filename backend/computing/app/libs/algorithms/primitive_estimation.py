@@ -13,7 +13,6 @@ class ProposeAssigment():
         self.projects = projects
         self.dependencies = dependencies
         self.av = availability
-        self.ld = ld
 
 
     def initialize(self):
@@ -24,40 +23,64 @@ class ProposeAssigment():
         self.lp['start'] = None
         self.lp['finish'] = None
 
-        self.av['project_id'] = None
+        self.ld = self.create_lowest_level_dependencies()
+
+        # self.av['project_id'] = None
 
 
     # def create_wbs(self): TODO
+    
 
     def validate_schema(self):
-        self.projects.astype(dtype={'project_id': 'int64', 'belongs_to': 'int64', 'worktime_planned': 'timedelta64', 'start': 'datetime64[ns]', 'finish': 'datetime64[ns]'})
+        self.projects.astype(dtype={'project_id': 'int64', 'parent_id': 'int64', 'worktime': 'timedelta64', 'start': 'datetime64[ns]', 'finish': 'datetime64[ns]'})
         self.dependencies.astype(dtype={'project_id': 'int64', 'predecessor_id': 'int64', 'dependence': 'str'})
         self.av.astype(dtype={'user_id': 'int64', 'start': 'datetime64[ns]', 'finish': 'datetime64[ns]'})
 
 
     def create_lowest_level_projects(self):
-        return self.projects[~self.projects.project_id.isin(self.projects.belongs_to)][['project_id', 'worktime_planned']]
-        # self.projects.worktime_planned.loc[self.projects.project_id.isin(self.projects.belongs_to)] = None
-        # self.projects.drop(['worktime_planned'], axis=1, inplace=True)
+        return self.projects[~self.projects.project_id.isin(self.projects.parent_id)][['project_id', 'worktime']]
+        # self.projects.worktime.loc[self.projects.project_id.isin(self.projects.parent_id)] = None
+        # self.projects.drop(['worktime'], axis=1, inplace=True)
 
 
-    # def create_lowest_level_dependencies(self):
-    #     pass
+    def create_lowest_level_dependencies(self):
+        projects = self.projects[self.projects.parent_id.isnull()][['project_id', 'parent_id']]
+        ld = self.dependencies.copy(deep=True)
+
+        while True:
+            if projects.shape[0] == 0:
+                break
+
+            expanded_dependency = projects. \
+                merge(ld, how='inner', left_on='parent_id', right_on='project_id'). \
+                rename(columns={'project_id_x': 'project_id'}) \
+                [ld.columns.values.tolist()]
+            ld = ld[~ld.project_id.isin(projects.parent_id)].append(expanded_dependency)
+
+            expanded_dependency = projects. \
+                merge(ld, how='inner', left_on='parent_id', right_on='predecessor_id'). \
+                rename(columns={'predecessor_id': 'to_remove', 'project_id_y': 'project_id', 'project_id_x': 'predecessor_id'}) \
+                [ld.columns.values.tolist()]
+            ld = ld[~ld.predecessor_id.isin(projects.parent_id)].append(expanded_dependency)
+
+            projects = self.projects[self.projects.parent_id.isin(projects.project_id)][['project_id', 'parent_id']]
+        
+        return ld
 
 
     def update_projects(self):
-        self.projects.drop(['start', 'finish', 'worktime_planned'], axis=1, inplace=True)
+        self.projects.drop(['start', 'finish', 'worktime'], axis=1, inplace=True)
         self.projects = self.projects.merge(self.lp, how='left', on='project_id')
         while True:
-            tmp = self.projects.groupby('belongs_to').count()
-            tmp = tmp[tmp.project_id == tmp.worktime_planned]
-            update = self.projects[self.projects.belongs_to.isin(tmp.index)].groupby('belongs_to').agg({'worktime_planned':'sum', 'start':'min', 'finish':'max'})
+            tmp = self.projects.groupby('parent_id').count()
+            tmp = tmp[tmp.project_id == tmp.worktime]
+            update = self.projects[self.projects.parent_id.isin(tmp.index)].groupby('parent_id').agg({'worktime':'sum', 'start':'min', 'finish':'max'})
 
-            if self.projects[self.projects.worktime_planned.isnull()].shape[0] == 0:
+            if self.projects[self.projects.worktime.isnull()].shape[0] == 0:
                 return
 
             for index, row in update.iterrows():
-                self.projects.loc[self.projects.project_id == index, 'worktime_planned'] = row.worktime_planned
+                self.projects.loc[self.projects.project_id == index, 'worktime'] = row.worktime
                 self.projects.loc[self.projects.project_id == index, 'start'] = row.start
                 self.projects.loc[self.projects.project_id == index, 'finish'] = row.finish
 
@@ -75,7 +98,7 @@ class ProposeAssigment():
         if one_worker_per_project:
             assignee = [self.av[self.av.user_id.isin(assignee) & self.av.project_id.isnull() & (from_date <= self.av.start)].sort_values(['start']).user_id.iat[0]]
             # print(assignee)
-        time_left = self.lp.at[lp_index, 'worktime_planned']
+        time_left = self.lp.at[lp_index, 'worktime']
         first = False
         for index in self.av[self.av.user_id.isin(assignee) & self.av.project_id.isnull() & (from_date <= self.av.start)].sort_values(['start']).index:
             worktime = self.av.at[index, 'finish'] - self.av.at[index, 'start']
@@ -186,7 +209,7 @@ class ProposeAssigment():
         paths = self.create_dependency_paths()
 
         for path in paths:
-            path.append(self.lp[self.lp.project_id.isin(path)].worktime_planned.sum())
+            path.append(self.lp[self.lp.project_id.isin(path)].worktime.sum())
         paths = sorted(paths, key=lambda path: path[-1], reverse=True)
 
         for path in paths:
@@ -233,15 +256,15 @@ class ProposeAssigment():
                 partial_update_from = pd.Timestamp.utcnow()
             self.update_lp_based_on_projects()
             self.lp.start[self.lp.start.isnull()] = partial_update_from
-            self.lp.finish = self.lp.apply(lambda row: (row['start'] + row['worktime_planned']) if row['finish'] is pd.NaT else row['finish'], axis=1)
+            self.lp.finish = self.lp.apply(lambda row: (row['start'] + row['worktime']) if row['finish'] is pd.NaT else row['finish'], axis=1)
         else:
             self.lp['start'] = self.start
-            self.lp['finish'] = self.lp['start'] + self.lp['worktime_planned']
+            self.lp['finish'] = self.lp['start'] + self.lp['worktime']
 
         while True:
             update = self.find_incorrect_dependencies_FS()
-            #1 update = update[['project_id', 'worktime_planned', 'finish_x']].rename(columns={'finish_x': 'start'})
-            #1 update['finish'] = update.start + update.worktime_planned
+            #1 update = update[['project_id', 'worktime', 'finish_x']].rename(columns={'finish_x': 'start'})
+            #1 update['finish'] = update.start + update.worktime
             
             if update.shape[0] == 0:
                 return self.lp.finish.max()
@@ -250,7 +273,7 @@ class ProposeAssigment():
             
             for index, row in update.iterrows(): # TODO: find better way to update
                 self.lp.loc[self.lp.project_id == row['project_id'], 'start'] = row.finish_x
-                self.lp.loc[self.lp.project_id == row['project_id'], 'finish'] = row.finish_x + row.worktime_planned
+                self.lp.loc[self.lp.project_id == row['project_id'], 'finish'] = row.finish_x + row.worktime
 
             
         

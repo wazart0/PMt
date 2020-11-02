@@ -1,1 +1,20 @@
+<button
+  nz-button
+  nz-dropdown
+  [nzDropdownMenu]="menu4"
+  class="export"
+  *ngIf="chartDisplayed"
+>
+  Export
+  <i nz-icon nzType="down"></i>
+</button>
+<nz-dropdown-menu #menu4="nzDropdownMenu">
+  <ul nz-menu>
+    <li nz-menu-item (click)="saveAsPng()">*.png</li>
+    <li nz-menu-item (click)="saveAsSvg()">*.svg</li>
+    <li nz-menu-item (click)="saveAsCsv()">*.csv</li>
+    <li nz-menu-item (click)="saveAsXlsx()">*.xlsx</li>
+  </ul>
+</nz-dropdown-menu>
+
 <div id="container" class="chart" #chartContainer></div>

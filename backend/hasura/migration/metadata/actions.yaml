@@ -1,6 +1,28 @@
-actions: []
+actions:
+- name: generate_baseline_proposal
+  definition:
+    kind: synchronous
+    handler: http://pmt_computing_1:5000/generate_baseline_proposal/
+    headers:
+    - value: project_id
+      name: project_id
+    - value: start_date
+      name: start_date
+    - value: baseline_id
+      name: baseline_id
+    - value: source_baseline_id
+      name: source_baseline_id
 custom_types:
   enums: []
   input_objects: []
-  objects: []
+  objects:
+  - name: Baseline_ID
+    relationships:
+    - remote_table:
+        schema: public
+        name: baseline
+      name: baseline
+      type: object
+      field_mapping:
+        baseline_id: id
   scalars: []

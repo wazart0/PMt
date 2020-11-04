@@ -123,9 +123,16 @@ class ProposeTimeline():
 
         
 
-        # insert or update data in DB
+        # delete and insert data to DB
 
         engine = self.db.get_engine()
+
+        cursor = self.db.connect()
+        cursor.execute('delete from baseline_project where baseline_id = \'' + baseline_id + '\';')
+        cursor.execute('delete from baseline_project_assignees_timeline where baseline_id = \'' + baseline_id + '\';')
+        cursor.execute('delete from baseline_project_dependency where baseline_id = \'' + baseline_id + '\';')
+        self.db.con.commit()
+        self.db.disconnect()
 
         # TODO add drop for given baseline_id
         solver.projects.to_sql('baseline_project', engine, index=False, if_exists='append')

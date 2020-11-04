@@ -1,2 +1,16 @@
+type Mutation {
+  generate_baseline_proposal (
+    project_id: String!
+    start_date: String!
+    baseline_id: String
+    source_baseline_id: String
+  ): Baseline_ID
+}
 
+
+
+
+type Baseline_ID {
+  baseline_id : String!
+}
 

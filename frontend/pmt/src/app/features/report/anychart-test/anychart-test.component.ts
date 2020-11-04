@@ -10,6 +10,8 @@ import { Subscription } from 'rxjs';
 })
 export class AnychartTestComponent implements OnChanges {
   chart: anychart.charts.Gantt;
+  chartDisplayed = false;
+  data = [];
   ganttDataSubscription: Subscription;
 
   @Input()
@@ -24,10 +26,10 @@ export class AnychartTestComponent implements OnChanges {
   }
 
   gantt(search?: string) {
-    let data = [];
-
+    this.data = [];
     if (this.chart) {
       this.chart.dispose();
+      this.chartDisplayed = false;
     }
 
     if (this.ganttDataSubscription) {
@@ -50,11 +52,11 @@ export class AnychartTestComponent implements OnChanges {
             actualEnd: projects[i]['default_baseline_project']['finish'],
             parent: projects[i]['default_baseline_project']['parent_id'],
           };
-          data.push(task);
+          this.data.push(task);
         }
 
         // create a data tree
-        var treeData = anychart.data.tree(data, 'as-tree');
+        var treeData = anychart.data.tree(this.data, 'as-tree');
         // create a chart
         var chart = anychart.ganttProject();
         this.chart = chart;
@@ -87,8 +89,24 @@ export class AnychartTestComponent implements OnChanges {
         this.chart.container('container');
         // initiate drawing the chart
         this.chart.draw();
+        this.chartDisplayed = true;
         // fit elements to the width of the timeline
         this.chart.fitAll();
       });
+  }
+  saveAsPng() {
+    this.chart.saveAsPng(600, this.data.length * 23);
+  }
+
+  saveAsSvg() {
+    this.chart.saveAsSvg(600, this.data.length * 23);
+  }
+
+  saveAsCsv() {
+    this.chart.saveAsCsv();
+  }
+
+  saveAsXlsx() {
+    this.chart.saveAsXlsx();
   }
 }

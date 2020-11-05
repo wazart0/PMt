@@ -55,6 +55,7 @@ class ProposeTimeline():
 
         if baseline_id is None: 
             baseline_id = create_baseline(project_id, cursor) # TODO why it doesn't work?
+            self.db.con.commit()
 
 
 

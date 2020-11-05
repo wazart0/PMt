@@ -54,6 +54,15 @@
 - table:
     schema: public
     name: user
+  array_relationships:
+  - name: baseline_project_timeline
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: baseline_project_assignees_timeline
+        column_mapping:
+          id: user_id
 - table:
     schema: public
     name: user_calendar

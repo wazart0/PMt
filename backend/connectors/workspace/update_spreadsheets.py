@@ -10,9 +10,8 @@ import pytz
 
 
 
-def get_issue_changlog(jira_info: dict, issue_key: str) -> tuple:
-    response = requests.get('https://tangramcare.atlassian.net/rest/api/latest/issue/{0}?expand=changelog'.format(issue_key), auth=(jira_info['username'], jira_info['api_token']))
-    return response.json()
+def get_issue_changelog(jira_info: dict, issue_key: str) -> tuple:
+    return requests.get('https://tangramcare.atlassian.net/rest/api/latest/issue/{0}?expand=changelog'.format(issue_key), auth=(jira_info['username'], jira_info['api_token'])).json()
 
 
 def parse_date(date: str) -> datetime:
@@ -22,8 +21,8 @@ def parse_date(date: str) -> datetime:
 def get_change_transition_date(change: dict, toStatus = None): # if toStatus is None return any status transition date
     for i in change['items']:
         if i['field'] == 'status': 
-            if toStatus is None:            return parse_date(change['created']) # datetime.strptime(change['created'], self.dtformat)
-            if i['toString'] == toStatus:   return parse_date(change['created']) # datetime.strptime(change['created'], self.dtformat)
+            if toStatus is None:            return parse_date(change['created']) 
+            if i['toString'] == toStatus:   return parse_date(change['created']) 
     return None
 
 
@@ -97,13 +96,24 @@ if __name__ == "__main__":
         duration = sheet.col_values(duration_column)
         estimation = sheet.col_values(estimation_column)
 
+        no_updated_rows = 0
+
         for issue_key in get_lastly_closed_issues(jira, spreadsheet):
             value = get_timespent_from_tempo(issue_key, tempo_token)
-            if estimation[jira_keys.index(issue_key)] != '' and (len(duration) < jira_keys.index(issue_key) or duration[jira_keys.index(issue_key)] == '' or not isclose(float(duration[jira_keys.index(issue_key)]), value, abs_tol=0.01)):
-                print('Updating:', issue_key, 'old value:', duration[jira_keys.index(issue_key)] if jira_keys.index(issue_key) < len(duration) else '', 'new value:', value)
-                
-                issue_CL = get_issue_changlog(jira_info, issue_key)
-                start = get_issue_first_transition_date(issue_CL, 'In Development').strftime("%b %d, %Y %H:%M:%S")
-                finish = get_issue_last_transition_date(issue_CL, 'Code Review').strftime("%b %d, %Y %H:%M:%S")
+            if issue_key not in ['PP-986', 'PP-984']:
+                if estimation[jira_keys.index(issue_key)] != '' and (len(duration) <= jira_keys.index(issue_key) or duration[jira_keys.index(issue_key)] == '' or not isclose(float(duration[jira_keys.index(issue_key)]), value, abs_tol=0.01)):
+                    print('Updating:', issue_key, 'old value:', duration[jira_keys.index(issue_key)] if jira_keys.index(issue_key) < len(duration) else '', 'new value:', value)
+                    
+                    issue_CL = get_issue_changelog(jira_info, issue_key)
+                    # start = get_issue_first_transition_date(issue_CL, 'In Development').strftime("%b %d, %Y %H:%M:%S")
+                    # finish = get_issue_last_transition_date(issue_CL, 'Code Review').strftime("%b %d, %Y %H:%M:%S")
 
-                sheet.update('J{0}:L{0}'.format(jira_keys.index(issue_key) + 1), [[start, finish, value]])
+                    # sheet.update('J{0}:L{0}'.format(jira_keys.index(issue_key) + 1), [[start, finish, value]])
+                    sheet.update('L{0}:L{0}'.format(jira_keys.index(issue_key) + 1), [[value]])
+
+                    no_updated_rows = no_updated_rows + 1
+        
+        sheet_description = workbook.worksheet('Description')
+        sheet_description.update('B21:B22', [[datetime.now().strftime("%b %d, %Y %H:%M:%S")], [no_updated_rows]])
+        # sheet_description.update('B22', no_updated_rows)
+

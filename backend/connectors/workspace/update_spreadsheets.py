@@ -105,15 +105,15 @@ if __name__ == "__main__":
                     print('Updating:', issue_key, 'old value:', duration[jira_keys.index(issue_key)] if jira_keys.index(issue_key) < len(duration) else '', 'new value:', value)
                     
                     issue_CL = get_issue_changelog(jira_info, issue_key)
-                    # start = get_issue_first_transition_date(issue_CL, 'In Development').strftime("%b %d, %Y %H:%M:%S")
-                    # finish = get_issue_last_transition_date(issue_CL, 'Code Review').strftime("%b %d, %Y %H:%M:%S")
+                    start = get_issue_first_transition_date(issue_CL, 'In Development').strftime("%b %d, %Y %H:%M:%S")
+                    finish = get_issue_last_transition_date(issue_CL, 'Code Review').strftime("%b %d, %Y %H:%M:%S")
 
-                    # sheet.update('J{0}:L{0}'.format(jira_keys.index(issue_key) + 1), [[start, finish, value]])
-                    sheet.update('L{0}:L{0}'.format(jira_keys.index(issue_key) + 1), [[value]])
+                    sheet.update('J{0}:L{0}'.format(jira_keys.index(issue_key) + 1), [[start, finish, value]])
+                    # sheet.update('L{0}:L{0}'.format(jira_keys.index(issue_key) + 1), [[value]])
 
                     no_updated_rows = no_updated_rows + 1
         
         sheet_description = workbook.worksheet('Description')
         sheet_description.update('B21:B22', [[datetime.now().strftime("%b %d, %Y %H:%M:%S")], [no_updated_rows]])
-        # sheet_description.update('B22', no_updated_rows)
+        sheet_description.update('B22', no_updated_rows)
 

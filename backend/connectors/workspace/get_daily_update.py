@@ -8,14 +8,11 @@ from bidict import bidict
 
 
 
-# def get_issues(jira_info: dict, label: str, assignee_id: str) -> dict:
-#     # example jql: project=pp and labels=p2_pipelines and status was "in development" after -10h and assignee was 557058:d34c4f6a-cba8-4519-be9d-cf727aeb6fbc
-#     return requests.get('''https://tangramcare.atlassian.net/rest/api/2/search?jql=project=pp%20and%20labels="{0}"%20and%20assignee%20was%20{1}%20and%20updatedDate%20%3E%20-{2}'''.format(label, assignee_id, '1w'), auth=(jira_info['username'], jira_info['api_token']))
 
 
 def get_issues(jira_info: dict) -> dict:
     # example jql: project=pp and labels=p2_pipelines and status was "in development" after -10h and assignee was 557058:d34c4f6a-cba8-4519-be9d-cf727aeb6fbc
-    
+
     max_results = 100
     start_at = 0
     response = requests.get('''https://tangramcare.atlassian.net/rest/api/2/search?jql=project=pp%20and%20updatedDate%20%3E%20-{0}&maxResults={1}&startAt={2}'''.format('2w', max_results, start_at), auth=(jira_info['username'], jira_info['api_token'])).json()
@@ -97,44 +94,56 @@ def getStatusPrevious(change):
 
 def gather_information_from_issue(issue: dict, daily_update: dict):
 
-    def add_update(issue, current_assignee):
+    def add_update(issue, current_assignee, current_status):
         if issue['fields']['assignee'] is not None and current_assignee is None:
             current_assignee = {
                 "id": issue['fields']['assignee']['accountId'],
                 "name": issue['fields']['assignee']['displayName']
             }
-        if current_assignee is None:
+        if not current_assignee:
             current_assignee = {'id': None, 'name': None}
         
-        print(str(current_assignee['name']) + ':', issue['key'], issue['fields']['summary'], "(status: {0})".format(issue['fields']['status']['name']))
+        print(str(current_assignee['name']) + ':', issue['key'], issue['fields']['summary'], "(actual status: {0})".format(issue['fields']['status']['name']), "(status: {0})".format(current_status))
 
         if current_assignee['id'] not in daily_update:
             daily_update[current_assignee['id']] = []
         daily_update[current_assignee['id']].append({
             'key': issue['key'],
             'summary': issue['fields']['summary'],
-            'status': issue['fields']['status']['name'],
+            'status': current_status,
+            'actual status': issue['fields']['status']['name'],
             'components': [i['name'] for i in issue['fields']['components']], #issue['fields']['components'],
             'labels': issue['fields']['labels'],
             'type': issue['fields']['issuetype']['name']
         })
 
-    current_assignee = None
-    current_status = None
+    is_added = False
+
+    current_assignee = {}
+    current_status = {}
 
     for change in reversed(issue['changelog']['histories']):
         current_status = current_status if getStatus(change) is None else getStatus(change)
         date_change = parse_date(change['created'])
         prev_status = getStatusPrevious(change)
-        if prev_status is not None and prev_status['name'] == 'In Development' and date_change > datetime.now().astimezone(pytz.UTC) - timedelta(hours=23):
-            add_update(issue, current_assignee)
+        if prev_status is not None and prev_status['name'] == 'In Progress' and date_change > datetime.now().astimezone(pytz.UTC) - timedelta(hours=71):
+            add_update(issue, current_assignee, prev_status.get('name'))
+            is_added = True
 
-        current_assignee = current_assignee if getAssignee(change) is None else getAssignee(change)
+        new_assignee = {} if getAssignee(change) is None else getAssignee(change)
+        if new_assignee.get('id') != current_assignee.get('id') and current_status.get('name') == 'In Progress' and date_change > datetime.now().astimezone(pytz.UTC) - timedelta(hours=71):
+            add_update(issue, current_assignee, current_status.get('name'))
+            is_added = True
+
+        current_assignee = current_assignee if new_assignee is None else new_assignee
 
     # print(i['key'], current_assignee, current_status, i['fields']['resolutiondate'])
-    if current_status is not None and current_status['name'] == 'In Development':
-        add_update(issue, current_assignee)
+    if current_status.get('name') == 'In Progress':
+        add_update(issue, current_assignee, current_status.get('name'))
+        is_added = True
 
+    if is_added:
+        print('')
 
     return daily_update
 
@@ -144,7 +153,7 @@ def format_output_v2(daily_update: dict, team: bidict):
         if team[member] in daily_update: 
             print(str(member) + ': ')
             for issue in daily_update[team[member]]:
-                print(('' if issue['type'] != 'Bug' else '[Bug] ') + issue['key'], issue['summary'], "(status: {0})".format(issue['status']))
+                print(('' if issue['type'] != 'Bug' else '[Bug] ') + issue['key'], issue['summary'], "(actual status: {0})".format(issue['actual status']), "(status: {0})".format(issue['status']))
 
 
 

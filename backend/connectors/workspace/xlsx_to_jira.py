@@ -366,7 +366,6 @@ def create_or_update_issues(jira, sheets, schema, project, label, schema_type):
 
 
 
-
 if __name__ == "__main__":
 
     jira = Jira(

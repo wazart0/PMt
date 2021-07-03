@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
         for issue_key in get_lastly_closed_issues(jira, spreadsheet):
             value = get_timespent_from_tempo(issue_key, tempo_token)
-            if issue_key not in ['PP-986', 'PP-984', 'PP-1114', 'PP-1441', 'PP-1442', 'PP-1443', 'PP-1444', 'PP-1447', 'PP-1446', 'PP-1445', 'PP-1446', 'PP-1447', 'PP-1448', 'PP-1449', 'PP-1450']:
+            if issue_key not in ['PP-986', 'PP-984', 'PP-1114', 'PP-1441', 'PP-1442', 'PP-1443', 'PP-1444', 'PP-1447', 'PP-1446', 'PP-1445', 'PP-1446', 'PP-1447', 'PP-1448', 'PP-1449', 'PP-1450', 'PP-1440']:
                 print(issue_key)
                 if estimation[jira_keys.index(issue_key)] != '' and (len(duration) <= jira_keys.index(issue_key) or duration[jira_keys.index(issue_key)] == '' or not isclose(float(duration[jira_keys.index(issue_key)]), value, abs_tol=0.01)):
                     print('Updating:', issue_key, 'old value:', duration[jira_keys.index(issue_key)] if jira_keys.index(issue_key) < len(duration) else '', 'new value:', value)

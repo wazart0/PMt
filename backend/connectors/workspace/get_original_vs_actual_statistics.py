@@ -114,6 +114,7 @@ def parse_issues(issues: dict, tempo_token: str) -> dict:
             "status": issue['fields']['status']['name'],
             "statusCategory": issue['fields']['status']['statusCategory']['name'],
             "origin": issue['fields']['customfield_11748']['value'] if issue['fields']['customfield_11748'] is not None else None,
+            "project": issue['fields']['project']['key']
         })
     return parsed_issues, timelog
 
@@ -164,8 +165,8 @@ def project_summary(df_issues: pd.DataFrame) -> list:
         ]
 
     
-    mvp_issues = df_issues[df_issues.version == 'MVP']
-    not_bugs = mvp_issues[mvp_issues.type != 'Bug']
+    # mvp_issues = df_issues[df_issues.version == 'MVP']
+    not_bugs = df_issues[df_issues.type != 'Bug']
 
     overall_project_summary = [
         sum_column_by_components(not_bugs, 'worktime_planned'),
@@ -178,7 +179,7 @@ def project_summary(df_issues: pd.DataFrame) -> list:
         sum_column_by_components(not_bugs[not_bugs.statusCategory == 'Done'], 'worktime_actual'),
     ]
     overall_team_performance.append([b/a*100. for a, b in zip(overall_team_performance[0], overall_team_performance[1])])
-    overall_team_performance.append(sum_column_by_components(mvp_issues, 'worktime_actual'))
+    overall_team_performance.append(sum_column_by_components(df_issues, 'worktime_actual'))
 
     for i in range(len(overall_project_summary)):
         for j in range(len(overall_project_summary[i])):
@@ -233,35 +234,7 @@ def get_bug_details(df_issues: pd.DataFrame) -> list:
 
 
 
-def 
-
-
-if __name__ == "__main__":
-
-    ## config
-
-    tempo_token = "HswBUrr4tVpvq1YXQjXt5X6ZN4uJvV"
-
-    jira_info = {
-        'url': 'https://tangramcare.atlassian.net/',
-        'username': 'awaz@ownedoutcomes.com',
-        'api_token': '6Pu9J7zSN4wBqwqgSREsAE08',
-    }
-
-
-    # issues = get_issues(jira_info, 'project=pp and originalEstimate is not EMPTY and status=closed')
-    # issues = get_issues(jira_info, 'project=pp and fixVersion=mvp and component=be')
-    # issues = get_issues(jira_info, 'project=pp and labels=P2_v3 and fixVersion=mvp and component=be and type!=bug')
-    issues = get_issues(jira_info, 'project=pp')
-    print('Issues acquired.')
-    
-    parsed_issues, timelog = parse_issues(issues, tempo_token)
-    print('Issues parsed.')
-
-    df_issues = pd.DataFrame(parsed_issues)
-    df_timelog = pd.DataFrame(timelog)
-
-
+def analyze_and_send_statistics_to_spreadsheet(df_issues, df_timelog, spreadsheet):
 
     total_worktime_per_person = get_team_performance_statistics(df_issues, df_timelog)
     overall_project_summary, overall_team_performance, overall_bug_summary = project_summary(df_issues)
@@ -269,9 +242,7 @@ if __name__ == "__main__":
     print('Issues aggregated.')
 
 
-
     gc = gspread.oauth()
-    spreadsheet = '1eJJiSHYLUl_GqYKONqfdHoloRDbZMhomok6pJT-7mb0'
     workbook = gc.open_by_key(spreadsheet)
 
     sheet_summary = workbook.worksheet('Summary')
@@ -291,6 +262,55 @@ if __name__ == "__main__":
 
 
 
+if __name__ == "__main__":
+
+    ## config
+
+    tempo_token = "HswBUrr4tVpvq1YXQjXt5X6ZN4uJvV"
+
+    jira_info = {
+        'url': 'https://tangramcare.atlassian.net/',
+        'username': 'awaz@ownedoutcomes.com',
+        'api_token': '6Pu9J7zSN4wBqwqgSREsAE08',
+    }
+
+    spreadsheets = [
+        {
+            "project": "PP",
+            "spreadsheet_id": "1eJJiSHYLUl_GqYKONqfdHoloRDbZMhomok6pJT-7mb0"
+        },
+        {
+            "project": "MC",
+            "spreadsheet_id": "1-jtj9rQY8mQJu4han3lRCsD2SB1206yVfsHUZz2cfT4"
+        },
+        {
+            "project": "PT",
+            "spreadsheet_id": "1-jtj9rQY8mQJu4han3lRCsD2SB1206yVfsHUZz2cfT4"
+        },
+        {
+            "project": "all",
+            "spreadsheet_id": "1HBAKCqiVI3DLRVDsBcT3J8CvdiL5C_PmVltSP-KbOgY"
+        }
+    ]
+
+
+    # issues = get_issues(jira_info, 'project=pp and originalEstimate is not EMPTY and status=closed')
+    # issues = get_issues(jira_info, 'project=pp and fixVersion=mvp and component=be')
+    # issues = get_issues(jira_info, 'project=pp and labels=P2_v3 and fixVersion=mvp and component=be and type!=bug')
+    issues = get_issues(jira_info, 'project in (pp, mc)')
+    print('Issues acquired.')
+    
+    parsed_issues, timelog = parse_issues(issues, tempo_token)
+    print('Issues parsed.')
+
+    df_issues = pd.DataFrame(parsed_issues)
+    df_timelog = pd.DataFrame(timelog)
+
+
+    analyze_and_send_statistics_to_spreadsheet(df_issues[(df_issues.project == spreadsheets[0]['project']) & ((df_issues.version == 'MVP') | (df_issues.type == 'Bug'))], df_timelog, spreadsheets[0]['spreadsheet_id'])
+    analyze_and_send_statistics_to_spreadsheet(df_issues[df_issues.project == spreadsheets[1]['project']], df_timelog, spreadsheets[1]['spreadsheet_id'])
+
+    analyze_and_send_statistics_to_spreadsheet(df_issues, df_timelog, spreadsheets[3]['spreadsheet_id'])
 
 
 

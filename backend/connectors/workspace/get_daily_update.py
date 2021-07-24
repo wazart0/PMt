@@ -198,6 +198,31 @@ if __name__ == "__main__":
     }
 
 
+    ## formatter v1
+    # format_data_v1(jira_info, team, backend_services)
+
+    # print("P2:")
+    # i = 1
+    # for service in backend_services:
+    #     print("\t", "{0}.".format(i), backend_services[service])
+    #     j = 1
+    #     for team_member in team:
+    #         j = format_output(get_issues(jira_info, service, team[team_member]), team_member, team[team_member], j, "\t\t")
+    #     i = i + 1
+
+
+    # print("\n\n")
+
+    # print("QA")
+    # j = 1
+    # for team_member in team:
+    #     j = format_output(get_issues(jira_info, 'Tests', team[team_member]), team_member, team[team_member], j)
+
+
+
+
+
+
     ## formatter v2
     daily_update = {}
 
@@ -218,27 +243,6 @@ if __name__ == "__main__":
     # daily_update = gather_information_from_issue(get_issue_changelog(jira_info, "PP-977"), daily_update)
 
     # print(daily_update)
-
-
-    ## formatter v1
-    # format_data_v1(jira_info, team, backend_services)
-
-    # print("P2:")
-    # i = 1
-    # for service in backend_services:
-    #     print("\t", "{0}.".format(i), backend_services[service])
-    #     j = 1
-    #     for team_member in team:
-    #         j = format_output(get_issues(jira_info, service, team[team_member]), team_member, team[team_member], j, "\t\t")
-    #     i = i + 1
-
-
-    # print("\n\n")
-
-    # print("QA")
-    # j = 1
-    # for team_member in team:
-    #     j = format_output(get_issues(jira_info, 'Tests', team[team_member]), team_member, team[team_member], j)
 
 
 

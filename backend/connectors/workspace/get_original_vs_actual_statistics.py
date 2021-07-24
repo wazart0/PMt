@@ -124,7 +124,7 @@ def get_team_performance_statistics(df_issues: pd.DataFrame, df_timelog: pd.Data
     merged = df_timelog.merge(df_issues[(df_issues.statusCategory == 'Done') & (df_issues.worktime_planned > 0.) & (df_issues.worktime_actual > 0.)][['key', 'worktime_planned', 'worktime_actual']], on='key')
     aggregated = merged.groupby(['user', 'key']).agg({'worktime': 'sum', 'worktime_planned': 'first', 'worktime_actual': 'last'})
 
-    total_worktime_per_person = aggregated[aggregated.worktime > (0.75 * aggregated.worktime_actual)].groupby('user').agg({'worktime': 'sum', 'worktime_planned': 'sum', 'worktime_actual': 'sum'})
+    total_worktime_per_person = aggregated[aggregated.worktime > (0.5 * aggregated.worktime_actual)].groupby('user').agg({'worktime': 'sum', 'worktime_planned': 'sum', 'worktime_actual': 'sum'})
     total_worktime_per_person['overtime'] = total_worktime_per_person.worktime_actual - total_worktime_per_person.worktime_planned
     total_worktime_per_person['overtime_%'] = total_worktime_per_person.worktime_actual / total_worktime_per_person.worktime_planned * 100.
     total_worktime_per_person['engagement_in_tasks_%'] = total_worktime_per_person.worktime / total_worktime_per_person.worktime_actual * 100.
@@ -246,7 +246,6 @@ def analyze_and_send_statistics_to_spreadsheet(df_issues, df_timelog, spreadshee
     workbook = gc.open_by_key(spreadsheet)
 
     sheet_summary = workbook.worksheet('Summary')
-    sheet_summary.update('C1', str(datetime.now()))
     sheet_summary.update('C5:H7', overall_project_summary)
     sheet_summary.update('C11:H14', overall_team_performance)
     sheet_summary.update('C18:H23', overall_bug_summary)
@@ -256,6 +255,7 @@ def analyze_and_send_statistics_to_spreadsheet(df_issues, df_timelog, spreadshee
 
     sheet_bug_details = workbook.worksheet('Finished bugs details')
     sheet_bug_details.update('B5:N' + str(len(bugs_details) + 5), bugs_details)
+    sheet_summary.update('C1', str(datetime.now()))
 
     print('Sent to spreadsheet.')
 
@@ -266,7 +266,7 @@ if __name__ == "__main__":
 
     ## config
 
-    tempo_token = "HswBUrr4tVpvq1YXQjXt5X6ZN4uJvV"
+    tempo_token = "x4u6Eq7jM99WGSZt4PBXOTePr2cgB6"
 
     jira_info = {
         'url': 'https://tangramcare.atlassian.net/',
